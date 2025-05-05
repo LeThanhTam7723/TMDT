@@ -6,7 +6,7 @@ const ProductCard = ({product}) => {
   const [isWishlisted, setIsWishlisted] = useState(false);
   const navigate = useNavigate(); // Khai báo hook này trước khi dùng
   const handleClick = () => {
-    navigate('/product_detail'); // Chuyển sang trang /about
+    navigate('/detail'); // Chuyển sang trang /about
   };
 
   return (
