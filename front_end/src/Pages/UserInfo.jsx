@@ -238,4 +238,4 @@ const  UserInformation =() => {
     </div>
   );
 }
-export default UserInfo;
+export default UserInformation;
