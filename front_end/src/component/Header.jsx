@@ -1,8 +1,9 @@
 import React, { useState, useEffect } from "react";
-import { FiSearch, FiShoppingCart, FiHeart, FiMenu, FiX , FiMic} from "react-icons/fi";
+import { FiSearch, FiShoppingCart, FiHeart, FiMenu, FiX, FiMic, FiBell, FiUser } from "react-icons/fi";
 import { FaFacebookF, FaTwitter, FaInstagram, FaLinkedinIn } from "react-icons/fa";
 import { MdEmail, MdPhone, MdKeyboardArrowDown } from "react-icons/md";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, Link } from "react-router-dom";
+import logo from "../assets/images/logo.jpg";
 
 
 const Header = () => {
@@ -51,24 +52,21 @@ const Header = () => {
     navigate('/cart'); // Chuyển sang trang /cart
   };
 
-
-
+  const [notificationCount, setNotificationCount] = useState(3); // Add notification count state
 
   const menuItems = [
     { name: "Home", link: "/" },
-    { name: "Shop", link: "/shop", hasDropdown: true },
-    { name: "Pages", link: "#", hasDropdown: true },
-    { name: "Blog", link: "#" },
-    { name: "Contact", link: "#" },
+    { name: "MyLearning", link: "/shop", hasDropdown: true },
+    { name: "Become teacher", link: "#", hasDropdown: true }
   ];
 
   return (
-     <header className="sticky top-0 z-50 bg-white dark:bg-gray-800 shadow-md">
+     <header className="sticky top-0 z-50 bg-gray-900 shadow-md">
     {/* <header className={`w-full ${isSticky ? "fixed top-0 shadow-lg bg-white" : ""}`}> */}
       {/* Top Bar */}
-      <div className="bg-gray-100 py-2 hidden md:block">
+      <div className="bg-gray-800 py-2 hidden md:block">
         <div className="container mx-auto px-4 flex justify-between items-center">
-          <div className="flex items-center space-x-4 text-sm text-gray-600">
+          <div className="flex items-center space-x-4 text-sm text-gray-300">
             <div className="flex items-center">
               <MdEmail className="mr-2" />
               <span>info@example.com</span>
@@ -80,44 +78,64 @@ const Header = () => {
           </div>
           <div className="flex items-center space-x-6">
             <div className="flex space-x-4">
-              <FaFacebookF className="text-gray-600 hover:text-blue-600 cursor-pointer" />
-              <FaTwitter className="text-gray-600 hover:text-blue-400 cursor-pointer" />
-              <FaInstagram className="text-gray-600 hover:text-pink-600 cursor-pointer" />
-              <FaLinkedinIn className="text-gray-600 hover:text-blue-800 cursor-pointer" />
+              <FaFacebookF className="text-gray-300 hover:text-blue-400 cursor-pointer" />
+              <FaTwitter className="text-gray-300 hover:text-blue-400 cursor-pointer" />
+              <FaInstagram className="text-gray-300 hover:text-pink-400 cursor-pointer" />
+              <FaLinkedinIn className="text-gray-300 hover:text-blue-400 cursor-pointer" />
             </div>
             <div className="flex items-center space-x-4">
-              <select className="bg-transparent text-sm text-gray-600 focus:outline-none">
+              <select className="bg-transparent text-sm text-gray-300 focus:outline-none">
                 <option value="en">English</option>
                 <option value="es">Spanish</option>
                 <option value="fr">French</option>
               </select>
-              <button className="text-sm text-gray-600 hover:text-red-600">Login</button>
+              <button className="text-sm text-gray-300 hover:text-blue-400">Login</button>
             </div>
           </div>
         </div>
       </div>
 
       {/* Main Navigation */}
-      <nav className="bg-white py-4">
+      <nav className="bg-gray-900 py-4">
         <div className="container mx-auto px-4">
           <div className="flex items-center justify-between">
             {/* Logo */}
-            <div className="w-40">
-              <img 
-                src="https://images.unsplash.com/photo-1614680376573-df3480f0c6ff" 
-                alt="Logo" 
-                className="h-12 object-contain"
-                
-              />
+            <div className="w-48">
+              <Link to="/">
+                <img 
+                  src={logo}
+                  alt="Logo" 
+                  className="h-14 w-auto object-contain cursor-pointer"
+                  style={{ maxWidth: '200px' }}
+                />
+              </Link>
             </div>
 
             {/* Desktop Menu */}
             <div className="hidden lg:flex items-center space-x-8">
-              {menuItems.map((item, index) => (
+              <a href="/" className="text-gray-300 hover:text-blue-400 flex items-center">Home</a>
+              
+              {/* Search Bar */}
+              <div className="relative">
+                <input
+                  type="text"
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  placeholder="Search..."
+                  className="w-60 px-4 py-2 rounded-full bg-gray-800 border border-gray-700 text-gray-300 focus:outline-none focus:border-blue-500"
+                />
+                <button onClick={handleVoiceSearch}
+                  className={`absolute right-2 top-1/2 transform -translate-y-1/2 p-2 rounded-full ${isListening ? "text-red-500" : "text-gray-400"} hover:bg-gray-800`}
+                >
+                  <FiMic className="w-5 h-5" />
+                </button>
+              </div>
+
+              {menuItems.slice(1).map((item, index) => (
                 <div key={index} className="relative group">
                   <a
                     href={item.link}
-                    className="text-gray-700 hover:text-red-600 flex items-center"
+                    className="text-gray-300 hover:text-blue-400 flex items-center"
                   >
                     {item.name}
                     {item.hasDropdown && (
@@ -125,10 +143,10 @@ const Header = () => {
                     )}
                   </a>
                   {item.hasDropdown && (
-                    <div className="absolute top-full left-0 w-48 bg-white shadow-lg rounded-md py-2 hidden group-hover:block">
-                      <a href="#" className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">Submenu 1</a>
-                      <a href="#" className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">Submenu 2</a>
-                      <a href="#" className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">Submenu 3</a>
+                    <div className="absolute top-full left-0 w-48 bg-gray-800 shadow-lg rounded-md py-2 hidden group-hover:block">
+                      <a href="#" className="block px-4 py-2 text-sm text-gray-300 hover:bg-gray-700">Submenu 1</a>
+                      <a href="#" className="block px-4 py-2 text-sm text-gray-300 hover:bg-gray-700">Submenu 2</a>
+                      <a href="#" className="block px-4 py-2 text-sm text-gray-300 hover:bg-gray-700">Submenu 3</a>
                     </div>
                   )}
                 </div>
@@ -137,43 +155,46 @@ const Header = () => {
 
             {/* Search and Cart */}
             <div className="flex items-center space-x-6">
-              <div className="relative">
-                <input
-                  type="text"
-                  value={searchQuery}
-                  onChange={(e) => setSearchQuery(e.target.value)}
-                  placeholder="Search..."
-                  className="w-40 lg:w-80 px-4 py-2 rounded-full border border-gray-300 focus:outline-none focus:border-red-500"
-                />
-                <button onClick={handleVoiceSearch}
-                  className={`absolute right-2 top-1/2 transform -translate-y-1/2 p-2 rounded-full ${isListening ? "text-red-500" : "text-gray-500"} hover:bg-gray-100`}
-                >
-                  <FiMic className="w-5 h-5" />
-                </button>
-                {/* <button
-                  className="absolute right-2 top-1/2 transform -translate-y-1/2 p-2 rounded-full text-gray-500 hover:bg-gray-100"
-                >
-                  <FiSearch className="w-5 h-5" />
-                </button> */}
-              </div>
               <div className="flex items-center space-x-4">
+                {/* Notification Icon */}
                 <div className="relative">
-                  <FiHeart className="text-2xl text-gray-700 hover:text-red-600 cursor-pointer" />
-                  <span className="absolute -top-2 -right-2 bg-red-600 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center">
+                  <FiBell className="text-2xl text-gray-300 hover:text-blue-400 cursor-pointer" />
+                  {notificationCount > 0 && (
+                    <span className="absolute -top-2 -right-2 bg-blue-600 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center">
+                      {notificationCount}
+                    </span>
+                  )}
+                </div>
+                {/* Wishlist Icon */}
+                <div className="relative">
+                  <FiHeart className="text-2xl text-gray-300 hover:text-blue-400 cursor-pointer" />
+                  <span className="absolute -top-2 -right-2 bg-blue-600 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center">
                     {wishlistCount}
                   </span>
                 </div>
-                <div className="relative" >
-                  <FiShoppingCart className="text-2xl text-gray-700 hover:text-red-600 cursor-pointer" onClick={cartClick}/>
-                  <span className="absolute -top-2 -right-2 bg-red-600 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center">
+                {/* Cart Icon */}
+                <div className="relative">
+                  <FiShoppingCart className="text-2xl text-gray-300 hover:text-blue-400 cursor-pointer" onClick={cartClick}/>
+                  <span className="absolute -top-2 -right-2 bg-blue-600 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center">
                     {cartCount}
                   </span>
+                </div>
+                {/* User Avatar */}
+                <div className="relative group">
+                  <div className="w-10 h-10 rounded-full bg-gray-800 flex items-center justify-center cursor-pointer hover:bg-gray-700">
+                    <FiUser className="text-xl text-gray-300" />
+                  </div>
+                  <div className="absolute top-full right-0 w-48 bg-gray-800 shadow-lg rounded-md py-2 hidden group-hover:block mt-2">
+                    <a href="#" className="block px-4 py-2 text-sm text-gray-300 hover:bg-gray-700">Profile</a>
+                    <a href="#" className="block px-4 py-2 text-sm text-gray-300 hover:bg-gray-700">Settings</a>
+                    <a href="#" className="block px-4 py-2 text-sm text-gray-300 hover:bg-gray-700">Logout</a>
+                  </div>
                 </div>
               </div>
 
               {/* Mobile Menu Button */}
               <button
-                className="lg:hidden text-gray-700"
+                className="lg:hidden text-gray-300"
                 onClick={() => setIsMenuOpen(!isMenuOpen)}
               >
                 {isMenuOpen ? <FiX size={24} /> : <FiMenu size={24} />}
@@ -186,10 +207,10 @@ const Header = () => {
         {isMenuOpen && (
           <div className="lg:hidden fixed inset-0 z-50">
             <div className="absolute inset-0 bg-black bg-opacity-50" onClick={() => setIsMenuOpen(false)} />
-            <div className="absolute top-0 right-0 w-64 h-full bg-white shadow-lg py-4 px-6">
+            <div className="absolute top-0 right-0 w-64 h-full bg-gray-900 shadow-lg py-4 px-6">
               <div className="flex justify-end">
                 <button onClick={() => setIsMenuOpen(false)}>
-                  <FiX size={24} className="text-gray-700" />
+                  <FiX size={24} className="text-gray-300" />
                 </button>
               </div>
               <div className="mt-8 space-y-4">
@@ -197,7 +218,7 @@ const Header = () => {
                   <div key={index}>
                     <a
                       href={item.link}
-                      className="block text-gray-700 hover:text-red-600 py-2"
+                      className="block text-gray-300 hover:text-blue-400 py-2"
                     >
                       {item.name}
                     </a>
