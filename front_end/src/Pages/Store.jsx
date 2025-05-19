@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { FiSearch, FiShoppingCart, FiUser, FiMenu, FiX, FiHeart, FiMail } from "react-icons/fi";
+import { FiSearch, FiShoppingCart, FiUser, FiMenu, FiX, FiHeart, FiMail, FiFilter } from "react-icons/fi";
 import { FaFacebookF, FaTwitter, FaInstagram } from "react-icons/fa";
 import { motion, AnimatePresence } from "framer-motion";
 import ProductCard from "../component/ProductCard";
@@ -25,41 +25,44 @@ const Shop = () => {
   const products = [
     { 
       id: 1,
-      name: "Classic T-Shirt",
-      price: 29.99,
-      image: "https://images.unsplash.com/photo-1521572163474-6864f9cf17ab",
-      category: "Áo",
-      gender: "Nam",
-      color: "Trắng",
-      size: ["S", "M", "L", "XL"],
-      material: "Cotton",
+      name: "Khóa học IELTS Foundation",
+      price: 2999000,
+      image: "https://images.unsplash.com/photo-1523050854058-8df90110c9f1",
+      category: "IELTS",
+      level: "Cơ bản",
+      duration: "3 tháng",
+      format: "Online",
+      instructor: "John Smith",
+      rating: 4.8,
+      students: 1200,
       discount: 10,
       bestSeller: true,
       new: true
     },
     {
-      id:2,
-      name: "Organic Bananas",
-      price: 4.99,
-      image: "https://images.unsplash.com/photo-1571771894821-ce9b6c11b08e",
-      category: "Áo",
-      gender: "Nam",
-      color: "Trắng",
-      size: ["S", "M", "L", "XL"],
-      material: "Cotton",
-      discount: 10,
+      id: 2,
+      name: "Khóa học TOEIC Speaking",
+      price: 1999000,
+      image: "https://images.unsplash.com/photo-1516321318423-f06f85e504b3",
+      category: "TOEIC",
+      level: "Trung cấp",
+      duration: "2 tháng",
+      format: "Online",
+      instructor: "Sarah Johnson",
+      rating: 4.7,
+      students: 850,
+      discount: 15,
       bestSeller: true,
-      new: true
+      new: false
     }
   ];
 
+  const [searchQuery, setSearchQuery] = useState("");
   const [filteredProducts, setFilteredProducts] = useState(products);
   const [filters, setFilters] = useState({
     category: "",
-    gender: "",
-    color: "",
-    size: "",
-    material: "",
+    level: "",
+    duration: "",
     priceRange: "",
     sortBy: ""
   });
@@ -68,58 +71,79 @@ const Shop = () => {
   const [currentPage, setCurrentPage] = useState(1);
   const [productsPerPage] = useState(8);
   const [direction, setDirection] = useState(0);
+  const [showFilters, setShowFilters] = useState(false);
 
-  const filterOptions = {
-    categories: ["Áo", "Quần", "Đầm", "Phụ kiện"],
-    genders: ["Nam", "Nữ", "Unisex"],
-    colors: ["Trắng", "Đen", "Xanh", "Đỏ"],
-    sizes: ["S", "M", "L", "XL"],
-    materials: ["Cotton", "Polyester", "Linen", "Denim"],
-    priceRanges: ["0-50", "51-100", "101-200", "201+"],
-    sortOptions: ["Mới nhất", "Bán chạy nhất", "Giá thấp đến cao", "Giá cao đến thấp", "Giảm giá"]
-  };
-
-  const handleFilterChange = (filterType, value) => {
-    setFilters(prev => ({
-      ...prev,
-      [filterType]: value
-    }));
-  };
+  // Filter categories
+  const categories = ["IELTS", "TOEIC", "TOEFL", "Giao tiếp", "Ngữ pháp", "Phát âm"];
+  const levels = ["Cơ bản", "Trung cấp", "Nâng cao"];
+  const durations = ["1 tháng", "2 tháng", "3 tháng", "6 tháng", "12 tháng"];
+  const priceRanges = [
+    "Dưới 1 triệu",
+    "1 - 2 triệu",
+    "2 - 5 triệu",
+    "Trên 5 triệu"
+  ];
+  const sortOptions = [
+    "Mới nhất",
+    "Đánh giá cao nhất",
+    "Học viên nhiều nhất",
+    "Giá thấp đến cao",
+    "Giá cao đến thấp",
+    "Giảm giá"
+  ];
 
   useEffect(() => {
-    let result = products;
+    let result = [...products];
 
+    // Search functionality
+    if (searchQuery) {
+      result = result.filter(product =>
+        product.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        product.category.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        product.instructor.toLowerCase().includes(searchQuery.toLowerCase())
+      );
+    }
+
+    // Apply filters
     if (filters.category) {
       result = result.filter(product => product.category === filters.category);
     }
-    if (filters.gender) {
-      result = result.filter(product => product.gender === filters.gender);
+    if (filters.level) {
+      result = result.filter(product => product.level === filters.level);
     }
-    if (filters.color) {
-      result = result.filter(product => product.color === filters.color);
-    }
-    if (filters.size) {
-      result = result.filter(product => product.size.includes(filters.size));
-    }
-    if (filters.material) {
-      result = result.filter(product => product.material === filters.material);
+    if (filters.duration) {
+      result = result.filter(product => product.duration === filters.duration);
     }
     if (filters.priceRange) {
-      const [min, max] = filters.priceRange.split("-").map(Number);
-      result = result.filter(product => {
-        if (max) {
-          return product.price >= min && product.price <= max;
-        }
-        return product.price >= min;
-      });
+      switch (filters.priceRange) {
+        case "Dưới 1 triệu":
+          result = result.filter(product => product.price < 1000000);
+          break;
+        case "1 - 2 triệu":
+          result = result.filter(product => product.price >= 1000000 && product.price <= 2000000);
+          break;
+        case "2 - 5 triệu":
+          result = result.filter(product => product.price > 2000000 && product.price <= 5000000);
+          break;
+        case "Trên 5 triệu":
+          result = result.filter(product => product.price > 5000000);
+          break;
+        default:
+          break;
+      }
     }
+
+    // Sort products
     if (filters.sortBy) {
       switch (filters.sortBy) {
         case "Mới nhất":
           result = [...result].sort((a, b) => b.new - a.new);
           break;
-        case "Bán chạy nhất":
-          result = [...result].sort((a, b) => b.bestSeller - a.bestSeller);
+        case "Đánh giá cao nhất":
+          result = [...result].sort((a, b) => b.rating - a.rating);
+          break;
+        case "Học viên nhiều nhất":
+          result = [...result].sort((a, b) => b.students - a.students);
           break;
         case "Giá thấp đến cao":
           result = [...result].sort((a, b) => a.price - b.price);
@@ -136,168 +160,165 @@ const Shop = () => {
     }
 
     setFilteredProducts(result);
-  }, [filters]);
+  }, [filters, searchQuery]);
+
+  const handleFilterChange = (filterType, value) => {
+    setFilters(prev => ({
+      ...prev,
+      [filterType]: value
+    }));
+  };
+
+  const clearFilters = () => {
+    setFilters({
+      category: "",
+      level: "",
+      duration: "",
+      priceRange: "",
+      sortBy: ""
+    });
+    setSearchQuery("");
+  };
 
   return (
     <div className={`min-h-screen ${isDarkMode ? "dark bg-gray-900 text-white" : "bg-white text-gray-900"}`}>
-      <div className="container mx-auto px-4 py-16">
-        <div className="flex gap-8">
-          <div className="w-64 bg-white dark:bg-gray-800 p-4 rounded-lg shadow-lg">
-            <h3 className="text-xl font-bold mb-4">Bộ lọc sản phẩm</h3>
-            
-            <div className="space-y-4">
-              <div>
-                <h4 className="font-semibold mb-2">Danh mục</h4>
-                <select 
-                  className="w-full p-2 border rounded dark:bg-gray-700"
-                  onChange={(e) => handleFilterChange("category", e.target.value)}
-                  value={filters.category}
-                >
-                  <option value="">Tất cả</option>
-                  {filterOptions.categories.map(cat => (
-                    <option key={cat} value={cat}>{cat}</option>
-                  ))}
-                </select>
-              </div>
-
-              <div>
-                <h4 className="font-semibold mb-2">Giới tính</h4>
-                <select 
-                  className="w-full p-2 border rounded dark:bg-gray-700"
-                  onChange={(e) => handleFilterChange("gender", e.target.value)}
-                  value={filters.gender}
-                >
-                  <option value="">Tất cả</option>
-                  {filterOptions.genders.map(gender => (
-                    <option key={gender} value={gender}>{gender}</option>
-                  ))}
-                </select>
-              </div>
-
-              <div>
-                <h4 className="font-semibold mb-2">Màu sắc</h4>
-                <select 
-                  className="w-full p-2 border rounded dark:bg-gray-700"
-                  onChange={(e) => handleFilterChange("color", e.target.value)}
-                  value={filters.color}
-                >
-                  <option value="">Tất cả</option>
-                  {filterOptions.colors.map(color => (
-                    <option key={color} value={color}>{color}</option>
-                  ))}
-                </select>
-              </div>
-
-              <div>
-                <h4 className="font-semibold mb-2">Kích thước</h4>
-                <select 
-                  className="w-full p-2 border rounded dark:bg-gray-700"
-                  onChange={(e) => handleFilterChange("size", e.target.value)}
-                  value={filters.size}
-                >
-                  <option value="">Tất cả</option>
-                  {filterOptions.sizes.map(size => (
-                    <option key={size} value={size}>{size}</option>
-                  ))}
-                </select>
-              </div>
-
-              <div>
-                <h4 className="font-semibold mb-2">Chất liệu</h4>
-                <select 
-                  className="w-full p-2 border rounded dark:bg-gray-700"
-                  onChange={(e) => handleFilterChange("material", e.target.value)}
-                  value={filters.material}
-                >
-                  <option value="">Tất cả</option>
-                  {filterOptions.materials.map(material => (
-                    <option key={material} value={material}>{material}</option>
-                  ))}
-                </select>
-              </div>
-
-              <div>
-                <h4 className="font-semibold mb-2">Khoảng giá</h4>
-                <select 
-                  className="w-full p-2 border rounded dark:bg-gray-700"
-                  onChange={(e) => handleFilterChange("priceRange", e.target.value)}
-                  value={filters.priceRange}
-                >
-                  <option value="">Tất cả</option>
-                  {filterOptions.priceRanges.map(range => (
-                    <option key={range} value={range}>{range}</option>
-                  ))}
-                </select>
-              </div>
-
-              <div>
-                <h4 className="font-semibold mb-2">Sắp xếp theo</h4>
-                <select 
-                  className="w-full p-2 border rounded dark:bg-gray-700"
-                  onChange={(e) => handleFilterChange("sortBy", e.target.value)}
-                  value={filters.sortBy}
-                >
-                  <option value="">Mặc định</option>
-                  {filterOptions.sortOptions.map(option => (
-                    <option key={option} value={option}>{option}</option>
-                  ))}
-                </select>
-              </div>
+      <div className="container mx-auto px-4 py-8">
+        {/* Search and Filter Header */}
+        <div className="mb-8">
+          <div className="flex flex-col md:flex-row gap-4 items-center justify-between">
+            <div className="relative w-full md:w-96">
+              <input
+                type="text"
+                placeholder="Tìm kiếm khóa học online..."
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500"
+              />
+              <FiSearch className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400" />
+            </div>
+            <div className="flex gap-4">
+              <button
+                onClick={() => setShowFilters(!showFilters)}
+                className="flex items-center gap-2 px-4 py-2 bg-green-500 text-white rounded-lg hover:bg-green-600"
+              >
+                <FiFilter />
+                {showFilters ? "Ẩn bộ lọc" : "Hiện bộ lọc"}
+              </button>
+              <button
+                onClick={clearFilters}
+                className="px-4 py-2 border rounded-lg hover:bg-gray-100"
+              >
+                Xóa bộ lọc
+              </button>
             </div>
           </div>
-          
-          <div className="flex-1">
-            <h2 className="text-3xl font-bold mb-8">Sản phẩm</h2>
-            <AnimatePresence initial={false} custom={direction}>
-              <motion.div
-                key={currentPage}
-                custom={direction}
-                variants={variants}
-                initial="enter"
-                animate="center"
-                exit="exit"
-                transition={{
-                  x: { type: "spring", stiffness: 300, damping: 30 },
-                  opacity: { duration: 0.2 }
-                }}
-                className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8"
-              >
-                {filteredProducts.map((product, index) => (
-                  <ProductCard key={index} product={product}/>
-                  // <motion.div
-                  //   key={index}
-                  //   initial={{ opacity: 0, y: 20 }}
-                  //   animate={{ opacity: 1, y: 0 }}
-                  //   transition={{ delay: index * 0.1 }}
-                  //   className="bg-white dark:bg-gray-700 rounded-lg overflow-hidden shadow-lg group"
-                  // >
-                  //   <div className="relative overflow-hidden">
-                  //     <img
-                  //       src={product.image}
-                  //       alt={product.name}
-                  //       className="w-full h-48 object-cover transform group-hover:scale-110 transition duration-500"
-                  //     />
-                  //     {product.discount > 0 && (
-                  //       <div className="absolute top-2 right-2 bg-red-500 text-white px-2 py-1 rounded">
-                  //         -{product.discount}%
-                  //       </div>
-                  //     )}
-                  //   </div>
-                  //   <div className="p-4">
-                  //     <h3 className="text-lg font-semibold mb-2">{product.name}</h3>
-                  //     <div className="flex items-center justify-between">
-                  //       <span className="text-green-500 font-bold">${product.price}</span>
-                  //       <button className="bg-green-500 text-white px-4 py-2 rounded-full hover:bg-green-600 transition duration-300">
-                  //         Thêm vào giỏ
-                  //       </button>
-                  //     </div>
-                  //   </div>
-                  // </motion.div>
-                ))}
-              </motion.div>
-            </AnimatePresence>
-          </div>
+
+          {/* Filter Panel */}
+          {showFilters && (
+            <div className="mt-4 p-4 border rounded-lg bg-white shadow-lg">
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                {/* Category Filter */}
+                <div>
+                  <h3 className="font-semibold mb-2">Loại khóa học</h3>
+                  <select
+                    value={filters.category}
+                    onChange={(e) => handleFilterChange("category", e.target.value)}
+                    className="w-full p-2 border rounded-lg"
+                  >
+                    <option value="">Tất cả</option>
+                    {categories.map((category) => (
+                      <option key={category} value={category}>
+                        {category}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+
+                {/* Level Filter */}
+                <div>
+                  <h3 className="font-semibold mb-2">Trình độ</h3>
+                  <select
+                    value={filters.level}
+                    onChange={(e) => handleFilterChange("level", e.target.value)}
+                    className="w-full p-2 border rounded-lg"
+                  >
+                    <option value="">Tất cả</option>
+                    {levels.map((level) => (
+                      <option key={level} value={level}>
+                        {level}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+
+                {/* Duration Filter */}
+                <div>
+                  <h3 className="font-semibold mb-2">Thời lượng</h3>
+                  <select
+                    value={filters.duration}
+                    onChange={(e) => handleFilterChange("duration", e.target.value)}
+                    className="w-full p-2 border rounded-lg"
+                  >
+                    <option value="">Tất cả</option>
+                    {durations.map((duration) => (
+                      <option key={duration} value={duration}>
+                        {duration}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+
+                {/* Price Range Filter */}
+                <div>
+                  <h3 className="font-semibold mb-2">Khoảng giá</h3>
+                  <select
+                    value={filters.priceRange}
+                    onChange={(e) => handleFilterChange("priceRange", e.target.value)}
+                    className="w-full p-2 border rounded-lg"
+                  >
+                    <option value="">Tất cả</option>
+                    {priceRanges.map((range) => (
+                      <option key={range} value={range}>
+                        {range}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+
+                {/* Sort Options */}
+                <div>
+                  <h3 className="font-semibold mb-2">Sắp xếp</h3>
+                  <select
+                    value={filters.sortBy}
+                    onChange={(e) => handleFilterChange("sortBy", e.target.value)}
+                    className="w-full p-2 border rounded-lg"
+                  >
+                    <option value="">Mặc định</option>
+                    {sortOptions.map((option) => (
+                      <option key={option} value={option}>
+                        {option}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+              </div>
+            </div>
+          )}
         </div>
+
+        {/* Products Grid */}
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
+          {filteredProducts.map((product, index) => (
+            <ProductCard key={index} product={product} />
+          ))}
+        </div>
+
+        {/* No Results Message */}
+        {filteredProducts.length === 0 && (
+          <div className="text-center py-8">
+            <p className="text-xl text-gray-500">Không tìm thấy khóa học online phù hợp</p>
+          </div>
+        )}
       </div>
     </div>
   );
