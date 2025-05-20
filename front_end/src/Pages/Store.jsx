@@ -54,6 +54,22 @@ const Shop = () => {
       discount: 15,
       bestSeller: true,
       new: false
+    },
+    {
+      id: 3,
+      name: "Khóa học TOEIC Reading",
+      price: 1999000,
+      image: "https://images.unsplash.com/photo-1516321318423-f06f85e504b3",
+      category: "TOEIC",
+      level: "Cao cấp",
+      duration: "4 tháng",
+      format: "Online",
+      instructor: "Sarah Johnson",
+      rating: 4.7,
+      students: 850,
+      discount: 15,
+      bestSeller: true,
+      new: false
     }
   ];
 
