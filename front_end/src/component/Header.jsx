@@ -56,8 +56,10 @@ const Header = () => {
 
   const menuItems = [
     { name: "Home", link: "/" },
-    { name: "MyLearning", link: "/shop", hasDropdown: true },
-    { name: "Become teacher", link: "#", hasDropdown: true }
+    { name: "Shop", link: "/shop", hasDropdown: true },
+    { name: "Pages", link: "#", hasDropdown: true },
+    { name: "Blog", link: "/info" },
+    { name: "Contact", link: "#" },
   ];
 
   return (
