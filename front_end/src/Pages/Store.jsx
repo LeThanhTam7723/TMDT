@@ -22,36 +22,36 @@ const Shop = () => {
     })
   };
 
-  const products = [
-    { 
-      id: 1,
-      name: "Classic T-Shirt",
-      price: 29.99,
-      image: "https://images.unsplash.com/photo-1521572163474-6864f9cf17ab",
-      category: "Áo",
-      gender: "Nam",
-      color: "Trắng",
-      size: ["S", "M", "L", "XL"],
-      material: "Cotton",
-      discount: 10,
-      bestSeller: true,
-      new: true
-    },
-    {
-      id:2,
-      name: "Organic Bananas",
-      price: 4.99,
-      image: "https://images.unsplash.com/photo-1571771894821-ce9b6c11b08e",
-      category: "Áo",
-      gender: "Nam",
-      color: "Trắng",
-      size: ["S", "M", "L", "XL"],
-      material: "Cotton",
-      discount: 10,
-      bestSeller: true,
-      new: true
-    }
-  ];
+  // const products = [
+  //   { 
+  //     id: 1,
+  //     name: "Classic T-Shirt",
+  //     price: 29.99,
+  //     image: "https://images.unsplash.com/photo-1521572163474-6864f9cf17ab",
+  //     category: "Áo",
+  //     gender: "Nam",
+  //     color: "Trắng",
+  //     size: ["S", "M", "L", "XL"],
+  //     material: "Cotton",
+  //     discount: 10,
+  //     bestSeller: true,
+  //     new: true
+  //   },
+  //   {
+  //     id:2,
+  //     name: "Organic Bananas",
+  //     price: 4.99,
+  //     image: "https://images.unsplash.com/photo-1571771894821-ce9b6c11b08e",
+  //     category: "Áo",
+  //     gender: "Nam",
+  //     color: "Trắng",
+  //     size: ["S", "M", "L", "XL"],
+  //     material: "Cotton",
+  //     discount: 10,
+  //     bestSeller: true,
+  //     new: true
+  //   }
+  // ];
 
   const [filteredProducts, setFilteredProducts] = useState(products);
   const [filters, setFilters] = useState({

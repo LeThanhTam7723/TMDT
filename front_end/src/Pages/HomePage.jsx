@@ -7,82 +7,97 @@ const HomePage = () => {
   const [isDarkMode, setIsDarkMode] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [currentCategoryIndex, setCurrentCategoryIndex] = useState(0);
+   const getFallbackProducts = () => {
+    return [
+      {
+        id: 1,
+        name: "English Course for kids",
+        description: "Learn English with our fun and interactive course designed for children",
+        image: "/api/placeholder/400/300",
+        price: 69.99,
+        originalPrice: 99.99,
+        discount: 30,
+        rating: 4.7,
+        reviews: 112,
+        author: "James Peterson",
+        level: "4-12 years old",
+        category: "English"
+      },
+      {
+        id: 2,
+        name: "Spanish for Beginners",
+        description: "Start your journey into Spanish language with our comprehensive course",
+        image: "/api/placeholder/400/300",
+        price: 59.99,
+        originalPrice: 89.99,
+        discount: 33,
+        rating: 4.5,
+        reviews: 98,
+        author: "Maria Rodriguez",
+        level: "Beginner",
+        category: "Spanish"
+      },
+      {
+        id: 3,
+        name: "Advanced Mathematics",
+        description: "Master complex mathematical concepts with our expert-led course",
+        image: "/api/placeholder/400/300",
+        price: 79.99,
+        originalPrice: 119.99,
+        discount: 33,
+        rating: 4.8,
+        reviews: 156,
+        author: "Dr. Robert Chen",
+        level: "Advanced",
+        category: "Mathematics"
+      },
+      {
+        id: 4,
+        name: "Introduction to Programming",
+        description: "Learn the fundamentals of coding in this beginner-friendly course",
+        image: "/api/placeholder/400/300",
+        price: 49.99,
+        originalPrice: 69.99,
+        discount: 28,
+        rating: 4.6,
+        reviews: 203,
+        author: "Alex Johnson",
+        level: "Beginner",
+        category: "Programming"
+      }
+    ];
+  };
   console.log(currentCategoryIndex);
-   const fetchProducts = async () => {
+   useEffect(() => {
+    const fetchCourses = async () => {
       setLoading(true);
       try {
-        // Try to fetch from API
-        try {
-          const response = await fetch('http://192.168.0.118:8080/api/courses');
-          const data = await response.json();
-          setProducts(data);
-        } catch (error) {
-          console.error('Error fetching from API, using sample data:', error);
-          // Sample data if API fetch fails
-          setProducts([
-            {
-              id: 1,
-              name: "English Course for kids",
-              description: "Learn English with our fun and interactive course designed for children",
-              image: "/api/placeholder/400/300",
-              price: 69.99,
-              originalPrice: 99.99,
-              discount: 30,
-              rating: 4.7,
-              reviews: 112,
-              author: "James Peterson",
-              level: "4-12 years old",
-              category: "English"
-            },
-            {
-              id: 2,
-              name: "Spanish for Beginners",
-              description: "Start your journey into Spanish language with our comprehensive course",
-              image: "/api/placeholder/400/300",
-              price: 59.99,
-              originalPrice: 89.99,
-              discount: 33,
-              rating: 4.5,
-              reviews: 98,
-              author: "Maria Rodriguez",
-              level: "Beginner",
-              category: "Spanish"
-            },
-            {
-              id: 3,
-              name: "Advanced Mathematics",
-              description: "Master complex mathematical concepts with our expert-led course",
-              image: "/api/placeholder/400/300",
-              price: 79.99,
-              originalPrice: 119.99,
-              discount: 33,
-              rating: 4.8,
-              reviews: 156,
-              author: "Dr. Robert Chen",
-              level: "Advanced",
-              category: "Mathematics"
-            },
-            {
-              id: 4,
-              name: "Introduction to Programming",
-              description: "Learn the fundamentals of coding in this beginner-friendly course",
-              image: "/api/placeholder/400/300",
-              price: 49.99,
-              originalPrice: 69.99,
-              discount: 28,
-              rating: 4.6,
-              reviews: 203,
-              author: "Alex Johnson",
-              level: "Beginner",
-              category: "Programming"
-            }
-          ]);
+        // Update the URL to match your Spring Boot API
+        const response = await fetch('http://localhost:8080/api/courses');
+        if (!response.ok) {
+          throw new Error('Network response was not ok');
         }
+        const data = await response.json();
+        
+        // Handle the API response structure
+        if (data && data.result) {
+          setProducts(data.result);
+        } else {
+          console.error('Unexpected API response format:', data);
+          // Use fallback data if API response is not in expected format
+          setProducts(getFallbackProducts());
+        }
+      } catch (error) {
+        console.error('Error fetching courses:', error);
+        // Use fallback data if API fetch fails
+        setProducts(getFallbackProducts());
       } finally {
         setLoading(false);
       }
     };
-    fetchProducts();
+
+    fetchCourses();
+  }, []);
   const categories = [
     { name: "Fresh Fruits", image: "https://images.unsplash.com/photo-1610832958506-aa56368176cf" },
     { name: "Vegetables", image: "https://images.unsplash.com/photo-1566385101042-1a0aa0c1268c" },
@@ -108,104 +123,6 @@ const HomePage = () => {
     console.log("currentCategoryIndex : left");
   };
   
-  const products = [
-    {
-      name: "Organic Bananas",
-      price: 4.99,
-      image: "https://images.unsplash.com/photo-1571771894821-ce9b6c11b08e",
-      discount: 10
-    },
-    {
-      name: "Fresh Strawberries",
-      price: 5.99,
-      image: "https://images.unsplash.com/photo-1464965911861-746a04b4bca6",
-      discount: 15
-    },
-    {
-      name: "Organic Tomatoes",
-      price: 3.99,
-      image: "https://images.unsplash.com/photo-1592924357228-91a4daadcfea",
-      discount: 20
-    },
-    {
-      name: "Fresh Bread",
-      price: 2.99,
-      image: "https://images.unsplash.com/photo-1509440159596-0249088772ff",
-      discount: 5
-    },
-    {
-      name: "Organic Bananas",
-      price: 4.99,
-      image: "https://images.unsplash.com/photo-1571771894821-ce9b6c11b08e",
-      discount: 10
-    },
-    {
-      name: "Fresh Strawberries",
-      price: 5.99,
-      image: "https://images.unsplash.com/photo-1464965911861-746a04b4bca6",
-      discount: 15
-    },
-    {
-      name: "Organic Tomatoes",
-      price: 3.99,
-      image: "https://images.unsplash.com/photo-1592924357228-91a4daadcfea",
-      discount: 20
-    },
-    {
-      name: "Fresh Bread",
-      price: 2.99,
-      image: "https://images.unsplash.com/photo-1509440159596-0249088772ff",
-      discount: 5
-    },
-    {
-      name: "Organic Bananas",
-      price: 4.99,
-      image: "https://images.unsplash.com/photo-1571771894821-ce9b6c11b08e",
-      discount: 10
-    },
-    {
-      name: "Fresh Strawberries",
-      price: 5.99,
-      image: "https://images.unsplash.com/photo-1464965911861-746a04b4bca6",
-      discount: 15
-    },
-    {
-      name: "Organic Tomatoes",
-      price: 3.99,
-      image: "https://images.unsplash.com/photo-1592924357228-91a4daadcfea",
-      discount: 20
-    },
-    {
-      name: "Fresh Bread",
-      price: 2.99,
-      image: "https://images.unsplash.com/photo-1509440159596-0249088772ff",
-      discount: 5
-    },
-    {
-      name: "Organic Bananas",
-      price: 4.99,
-      image: "https://images.unsplash.com/photo-1571771894821-ce9b6c11b08e",
-      discount: 10
-    },
-    {
-      name: "Fresh Strawberries",
-      price: 5.99,
-      image: "https://images.unsplash.com/photo-1464965911861-746a04b4bca6",
-      discount: 15
-    },
-    {
-      name: "Organic Tomatoes",
-      price: 3.99,
-      image: "https://images.unsplash.com/photo-1592924357228-91a4daadcfea",
-      discount: 20
-    },
-    {
-      name: "Fresh Bread",
-      price: 2.99,
-      image: "https://images.unsplash.com/photo-1509440159596-0249088772ff",
-      discount: 5
-    }
-  ];
 
   return (
     <div className={`min-h-screen ${isDarkMode ? "dark bg-gray-900 text-white" : "bg-white text-gray-900"}`}>

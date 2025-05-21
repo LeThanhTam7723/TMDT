@@ -3,6 +3,7 @@ package com.example.back_end.controller;
 import com.example.back_end.dto.response.ApiResponse;
 import com.example.back_end.entity.Course;
 
+import com.example.back_end.entity.CourseDetail;
 import com.example.back_end.service.CourseServiceImpl;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -42,4 +43,21 @@ public class CourseController {
                 .result(course)
                 .build();
     }
+    @GetMapping("/{id}/details")
+    public ApiResponse<List<CourseDetail>> getCourseDetailsByCourseId(@PathVariable Long id) {
+        List<CourseDetail> details = courseService.getCourseDetailsByCourseId(id);
+        if (details == null) {
+            return ApiResponse.<List<CourseDetail>>builder()
+                    .code(404)
+                    .message("Course not found")
+                    .build();
+        }
+
+        return ApiResponse.<List<CourseDetail>>builder()
+                .code(200)
+                .message("Fetched course details successfully.")
+                .result(details)
+                .build();
+    }
+
 }
