@@ -1,9 +1,13 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
+import { useParams, Link } from 'react-router-dom';
 import { Play, Clock, ChevronLeft, ChevronRight, Star, Users, BookOpen, Award, ChevronDown } from 'lucide-react';
 
-const Detail=() => {
+const Detail = () => {
   const [currentSlide, setCurrentSlide] = useState(0);
   const [showMoreInstructor, setShowMoreInstructor] = useState(false);
+  const { id } = useParams(); // Get the product ID from URL
+  const [course, setCourse] = useState(null);
+  const [loading, setLoading] = useState(true);
   
   const relatedCourses = [
     { 
@@ -14,7 +18,8 @@ const Detail=() => {
       price: 69.99, 
       originalPrice: 99.99,
       author: 'James',
-      level: '4-12 years old'
+      level: '4-12 years old',
+      image: '/api/placeholder/270/150'
     },
     { 
       id: 2, 
@@ -24,7 +29,8 @@ const Detail=() => {
       price: 69.99, 
       originalPrice: 99.99,
       author: 'James',
-      level: '4-12 years old'
+      level: '4-12 years old',
+      image: '/api/placeholder/270/150'
     },
     { 
       id: 3, 
@@ -34,7 +40,8 @@ const Detail=() => {
       price: 69.99, 
       originalPrice: 99.99,
       author: 'James',
-      level: '4-12 years old' 
+      level: '4-12 years old',
+      image: '/api/placeholder/270/150'
     },
     { 
       id: 4, 
@@ -44,7 +51,8 @@ const Detail=() => {
       price: 69.99, 
       originalPrice: 99.99,
       author: 'James',
-      level: '4-12 years old'
+      level: '4-12 years old',
+      image: '/api/placeholder/270/150'
     },
   ];
 
@@ -55,76 +63,111 @@ const Detail=() => {
   const handleNextSlide = () => {
     setCurrentSlide(prev => (prev === relatedCourses.length - 4 ? 0 : prev + 1));
   };
+  
+  useEffect(() => {
+    const fetchCourse = async () => {
+      setLoading(true);
+      try {
+        // Update with your API endpoint
+        // For development/testing, you can use a fallback object if API is not available
+        try {
+          const res = await fetch(`http://192.168.0.118:8080/api/courses/${id}`);
+          const data = await res.json();
+          setCourse(data);
+        } catch (error) {
+          console.error('Error fetching from API, using fallback data:', error);
+          // Fallback data when API is not available
+          setCourse({
+            id: id,
+            name: `Course #${id}`,
+            description: "A comprehensive course designed to help students master core concepts.",
+            rating: 4.5,
+            totalRatings: 1000,
+            learners: 10000,
+            certificatesEarned: 1000,
+            category: "English",
+            level: "Beginner",
+            totalCourses: 20,
+            thumbnail: "/api/placeholder/550/350"
+          });
+        }
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    if (id) {
+      fetchCourse();
+    }
+  }, [id]);
+  
+  if (loading) {
+    return <div className="text-center py-10 text-gray-600">Loading course...</div>;
+  }
+
+  if (!course) {
+    return <div className="text-center py-10 text-red-600">Course not found</div>;
+  }
 
   return (
-    <div className="max-w-6xl mx-auto bg-white">
+    <div className="max-w-6xl mx-auto px-4 bg-white">
       {/* Breadcrumb */}
-      <div className="p-4 text-sm">
-        <span className="text-gray-600">Courses</span> &gt; <span className="text-gray-600">English</span>
+      <div className="py-4 text-sm text-gray-500">
+        <Link to="/" className="hover:text-blue-600">Home</Link> &gt; 
+        <Link to="/courses" className="hover:text-blue-600 ml-1">Courses</Link> &gt; 
+        <span className="ml-1">{course.category || 'English'}</span>
       </div>
 
       {/* Course Header */}
-      <div className="flex flex-col md:flex-row px-4 pb-8 border-b border-gray-200">
-        <div className="md:w-1/2 pr-4">
-          <h1 className="text-3xl font-bold text-blue-600">Online English Course</h1>
-          <p className="text-gray-600 mt-2 mb-4">
-            Online English course helps you learn anytime, anywhere with personalization roadmap. Diverse content, easy to understand lessons, videos, exercises and support from lecturers. Suitable for beginners to improve, practice 4 comprehensive skills.
-          </p>
-          
-          <div className="flex items-center mb-2">
-            <div className="font-bold text-gray-800 mr-2">4.6</div>
+      <div className="flex flex-col md:flex-row border-b border-gray-200 pb-8">
+        <div className="md:w-1/2 md:pr-6">
+          <h1 className="text-3xl font-bold text-blue-600">{course.name}</h1>
+          <p className="text-gray-700 mt-3 mb-4">{course.description}</p>
+
+          <div className="flex items-center mb-3">
+            <span className="font-bold text-gray-800 mr-2">{course.rating?.toFixed(1) || '4.5'}</span>
             <div className="flex text-yellow-400">
-              {'★★★★★'.split('').map((star, i) => (
-                <span key={i} className={i === 4 ? 'opacity-50' : ''}>★</span>
+              {'★★★★★'.split('').map((_, i) => (
+                <span key={i} className={i >= Math.floor(course.rating || 4.5) ? 'opacity-30' : ''}>★</span>
               ))}
             </div>
-            <span className="text-gray-600 text-sm ml-2">(129,113 ratings)</span>
-            <span className="text-gray-600 text-sm ml-2">5,905,500 Learners</span>
-          </div>
-          
-          <div className="mb-4">
-            <span className="text-gray-600 text-sm">1,330,480 Certificates Earned</span>
-          </div>
-          
-          <div className="flex flex-wrap gap-2 mb-4">
-            <span className="bg-blue-100 text-blue-600 px-3 py-1 rounded-full flex items-center text-sm">
-              <div className="w-4 h-4 rounded-full bg-blue-500 mr-1"></div>
-              English
+            <span className="text-gray-600 text-sm ml-2">
+              ({course.totalRatings || 1000} ratings)
             </span>
-            <span className="bg-gray-100 text-gray-600 px-3 py-1 rounded-full flex items-center text-sm">
-              <span className="text-blue-600 font-bold mr-1">5</span>
-              50 courses
+            <span className="text-gray-600 text-sm ml-4">
+              {course.learners || '10,000'} learners
             </span>
-            <span className="bg-gray-100 text-gray-600 px-3 py-1 rounded-full flex items-center text-sm">
-              <span className="font-bold mr-1">≡</span>
-              Beginner
+          </div>
+
+          <div className="text-sm text-gray-500 mb-4">
+            {course.certificatesEarned || '1,000'} certificates earned
+          </div>
+
+          <div className="flex gap-2 flex-wrap text-sm">
+            <span className="bg-blue-100 text-blue-600 px-3 py-1 rounded-full">
+              {course.category || 'English'}
+            </span>
+            <span className="bg-gray-100 text-gray-600 px-3 py-1 rounded-full">
+              Level: {course.level || 'Beginner'}
+            </span>
+            <span className="bg-gray-100 text-gray-600 px-3 py-1 rounded-full">
+              {course.totalCourses || '20'} courses
             </span>
           </div>
         </div>
-        
+
         {/* Video Preview */}
-        <div className="md:w-1/2">
-          <div className="relative rounded-lg overflow-hidden bg-gray-100">
-            <img 
-              src="/api/placeholder/550/350" 
-              alt="Course preview" 
-              className="w-full h-64 object-cover"
+        <div className="md:w-1/2 mt-6 md:mt-0">
+          <div className="relative rounded-lg overflow-hidden bg-gray-100 h-64">
+            <img
+              src={course.thumbnail || '/api/placeholder/550/350'}
+              alt="Course preview"
+              className="w-full h-full object-cover"
             />
             <div className="absolute inset-0 flex items-center justify-center">
-              <div className="relative">
-                <div className="bg-white/30 backdrop-blur-sm p-6 rounded-lg text-center">
-                  <h3 className="text-blue-800 font-bold text-lg">Unlock Your</h3>
-                  <h2 className="text-blue-800 font-bold text-2xl">English Mastery</h2>
-                  <button className="mt-3 bg-blue-500 text-white px-4 py-2 rounded-full">
-                    Start now
-                  </button>
-                </div>
-                <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2">
-                  <button className="bg-white/80 hover:bg-white rounded-full w-16 h-16 flex items-center justify-center shadow-lg">
-                    <Play size={30} className="text-blue-600 ml-1" />
-                  </button>
-                </div>
-              </div>
+              <button className="bg-white/80 hover:bg-white rounded-full w-16 h-16 flex items-center justify-center shadow-lg">
+                <Play size={30} className="text-blue-600 ml-1" />
+              </button>
             </div>
           </div>
         </div>
@@ -177,6 +220,7 @@ const Detail=() => {
               </div>
             </div>
             
+            {/* Other modules... */}
             {/* Module 02 */}
             <div className="p-6 border-b md:border-r border-blue-200">
               <h3 className="text-5xl font-bold text-center mb-4">02</h3>
@@ -372,11 +416,11 @@ const Detail=() => {
         <div className="relative border border-blue-200 rounded-lg p-6">
           <div className="flex overflow-hidden">
             <div className="flex space-x-4 transition-transform duration-300" style={{ transform: `translateX(-${currentSlide * 25}%)` }}>
-              {relatedCourses.map((course, index) => (
+              {relatedCourses.map((course) => (
                 <div key={course.id} className="min-w-[270px] border border-gray-200 rounded-lg overflow-hidden">
                   <div className="relative">
                     <img 
-                      src={`/api/placeholder/270/150`} 
+                      src={course.image || `/api/placeholder/270/150`} 
                       alt={course.title}
                       className="w-full h-36 object-cover"
                     />
@@ -428,4 +472,5 @@ const Detail=() => {
     </div>
   );
 }
+
 export default Detail;

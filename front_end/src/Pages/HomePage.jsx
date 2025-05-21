@@ -8,7 +8,81 @@ const HomePage = () => {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [currentCategoryIndex, setCurrentCategoryIndex] = useState(0);
   console.log(currentCategoryIndex);
-
+   const fetchProducts = async () => {
+      setLoading(true);
+      try {
+        // Try to fetch from API
+        try {
+          const response = await fetch('http://192.168.0.118:8080/api/courses');
+          const data = await response.json();
+          setProducts(data);
+        } catch (error) {
+          console.error('Error fetching from API, using sample data:', error);
+          // Sample data if API fetch fails
+          setProducts([
+            {
+              id: 1,
+              name: "English Course for kids",
+              description: "Learn English with our fun and interactive course designed for children",
+              image: "/api/placeholder/400/300",
+              price: 69.99,
+              originalPrice: 99.99,
+              discount: 30,
+              rating: 4.7,
+              reviews: 112,
+              author: "James Peterson",
+              level: "4-12 years old",
+              category: "English"
+            },
+            {
+              id: 2,
+              name: "Spanish for Beginners",
+              description: "Start your journey into Spanish language with our comprehensive course",
+              image: "/api/placeholder/400/300",
+              price: 59.99,
+              originalPrice: 89.99,
+              discount: 33,
+              rating: 4.5,
+              reviews: 98,
+              author: "Maria Rodriguez",
+              level: "Beginner",
+              category: "Spanish"
+            },
+            {
+              id: 3,
+              name: "Advanced Mathematics",
+              description: "Master complex mathematical concepts with our expert-led course",
+              image: "/api/placeholder/400/300",
+              price: 79.99,
+              originalPrice: 119.99,
+              discount: 33,
+              rating: 4.8,
+              reviews: 156,
+              author: "Dr. Robert Chen",
+              level: "Advanced",
+              category: "Mathematics"
+            },
+            {
+              id: 4,
+              name: "Introduction to Programming",
+              description: "Learn the fundamentals of coding in this beginner-friendly course",
+              image: "/api/placeholder/400/300",
+              price: 49.99,
+              originalPrice: 69.99,
+              discount: 28,
+              rating: 4.6,
+              reviews: 203,
+              author: "Alex Johnson",
+              level: "Beginner",
+              category: "Programming"
+            }
+          ]);
+        }
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchProducts();
   const categories = [
     { name: "Fresh Fruits", image: "https://images.unsplash.com/photo-1610832958506-aa56368176cf" },
     { name: "Vegetables", image: "https://images.unsplash.com/photo-1566385101042-1a0aa0c1268c" },
@@ -33,7 +107,7 @@ const HomePage = () => {
     }
     console.log("currentCategoryIndex : left");
   };
-
+  
   const products = [
     {
       name: "Organic Bananas",
@@ -209,9 +283,9 @@ const HomePage = () => {
       {/* Featured Products */}
       <section className="container mx-auto px-4 py-16 bg-gray-50 dark:bg-gray-800">
         <h2 className="text-3xl font-bold text-center mb-12">Featured Products</h2>
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
-          {products.map((product, index) => (
-            <ProductCard key={index} product={product}/>
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+          {products.map(product => (
+            <ProductCard key={product.id} product={product} />
           ))}
         </div>
       </section>
