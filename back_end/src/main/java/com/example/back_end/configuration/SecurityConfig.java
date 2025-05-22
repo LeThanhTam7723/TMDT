@@ -33,7 +33,6 @@ public class SecurityConfig {
                 request.requestMatchers(HttpMethod.POST, PUBLIC_ENDPOINTS_POST).permitAll()
                         .requestMatchers(HttpMethod.GET, PUBLIC_ENDPOINTS_GET).hasAuthority("SCOPE_ADMIN")
                         .requestMatchers(HttpMethod.POST,PUBLIC_ENDPOINTS_LOGIN).authenticated()
-
                         .anyRequest().authenticated());
         httpSecurity.oauth2ResourceServer(oauth2 ->
                 oauth2.jwt(jwtConfigurer -> jwtConfigurer.decoder(jwtDecoder()))

@@ -1,6 +1,8 @@
 import React, { useState } from "react";
 import { FiHeart, FiShoppingCart, FiMinus, FiPlus } from "react-icons/fi";
 import { motion } from "framer-motion";
+import { useNavigate } from 'react-router-dom';
+
 
 const ProductDetail = () => {
   const [selectedSize, setSelectedSize] = useState("");
@@ -9,7 +11,7 @@ const ProductDetail = () => {
   const [currentImage, setCurrentImage] = useState(0);
   const [showSizeGuide, setShowSizeGuide] = useState(false);
   const [isWishlist, setIsWishlist] = useState(false);
-
+  const navigate = useNavigate();
   const product = {
     name: "Classic T-Shirt",
     sku: "TSH001",
@@ -41,6 +43,7 @@ const ProductDetail = () => {
       alert("Please select size and color");
       return;
     }
+    navigate('/detail'); 
   };
 
   const handleBuyNow = () => {
