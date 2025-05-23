@@ -23,6 +23,7 @@ public class SecurityConfig {
     private final String[] PUBLIC_ENDPOINTS_POST = {"users/createUser",
             "auth/login","auth/introspect",};
     private final String[] PUBLIC_ENDPOINTS_GET = {"/sendEmail","/users"};
+    private final String[] PUBLIC_ENDPOINTS_LOGIN = {"/logout"};
     @Value("${jwt.signer-key}")
     protected String SIGNER_KEY;
 
@@ -31,10 +32,19 @@ public class SecurityConfig {
         httpSecurity.authorizeHttpRequests(request ->
                 request.requestMatchers(HttpMethod.POST, PUBLIC_ENDPOINTS_POST).permitAll()
                         .requestMatchers(HttpMethod.GET, PUBLIC_ENDPOINTS_GET).hasAuthority("SCOPE_ADMIN")
-
+                        .requestMatchers(HttpMethod.POST,PUBLIC_ENDPOINTS_LOGIN).authenticated()
                         .anyRequest().authenticated());
         httpSecurity.oauth2ResourceServer(oauth2 ->
                 oauth2.jwt(jwtConfigurer -> jwtConfigurer.decoder(jwtDecoder()))
+        );
+        httpSecurity.exceptionHandling(exception -> exception
+                .authenticationEntryPoint((request, response, authException) -> {
+                    response.getWriter().write("You have not login yet");
+                })
+                .accessDeniedHandler((request, response, accessDeniedException) -> {
+                    response.getWriter().write("You do not have a permission");
+
+                })
         );
         httpSecurity.csrf(AbstractHttpConfigurer::disable);// tắt CSRF
         return httpSecurity.build();
