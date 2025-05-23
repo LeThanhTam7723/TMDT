@@ -7,6 +7,7 @@ import CheckoutPage from '../Pages/Payment'
 import AuthPage from '../Pages/Authentication'
 import Detail from '../Pages/Detail';
 import UserInfo from '../Pages/UserInfo';
+import CourseVideo from '../Pages/CourseVideo';
 
 
 function AppRoutes() {
@@ -15,12 +16,12 @@ function AppRoutes() {
     <Routes>
       <Route path="/" element={<Home />} />
       <Route path="/shop" element={<Store />} />
-      <Route path="/product_detail" element={<ProductDetail />} />
       <Route path="/cart" element={<Cart/>} />
       <Route path="/payment" element={<CheckoutPage/>} />
       <Route path="/login" element={<AuthPage/>} />
-       <Route path="/detail/:id" element={<Detail />} />
+       <Route path="/detail/" element={<Detail />} />
       <Route path="/info" element = {<UserInfo/>}/>
+      <Route path="/video" element = {<CourseVideo/>}/>
     </Routes>
   );
 }

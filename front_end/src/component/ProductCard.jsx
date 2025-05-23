@@ -53,7 +53,7 @@ const ProductCard = ({ product }) => {
             onClick={addToCart}
           >
             <FiShoppingCart className="mr-2" />
-            Add to Cart
+            Add to Cart new
           </button>
           <button onClick={toggleWishlist}>
             <FiHeart 

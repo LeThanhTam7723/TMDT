@@ -12,31 +12,6 @@ const ProductDetail = () => {
   const [showSizeGuide, setShowSizeGuide] = useState(false);
   const [isWishlist, setIsWishlist] = useState(false);
   const navigate = useNavigate();
-  // const product = {
-  //   name: "Classic T-Shirt",
-  //   sku: "TSH001",
-  //   price: 29.99,
-  //   salePrice: 24.99,
-  //   discount: 17,
-  //   colors: ["White", "Black", "Navy", "Gray"],
-  //   sizes: ["S", "M", "L", "XL"],
-  //   images: [
-  //     "https://images.unsplash.com/photo-1521572163474-6864f9cf17ab",
-  //     "https://images.unsplash.com/photo-1503341960582-b45751874cf0",
-  //     "https://images.unsplash.com/photo-1503342217505-b0a15ec3261c"
-  //   ],
-  //   stock: {
-  //     S: 5,
-  //     M: 10,
-  //     L: 0,
-  //     XL: 8
-  //   },
-  //   description: "Premium cotton t-shirt with classic fit",
-  //   details: "100% Cotton\nMachine washable\nClassic fit\nRound neck",
-  //   brand: "Fashion Brand",
-  //   rating: 4.5,
-  //   reviews: 128
-  // };
 
   const handleAddToCart = () => {
     if (!selectedSize || !selectedColor) {

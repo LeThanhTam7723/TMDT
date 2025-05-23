@@ -71,7 +71,7 @@ const Detail = () => {
         // Update with your API endpoint
         // For development/testing, you can use a fallback object if API is not available
         try {
-          const res = await fetch(`http://192.168.0.118:8080/api/courses/${id}`);
+          const res = await fetch(`http://192.168.0.118:8080/api/courses/1`);
           const data = await res.json();
           setCourse(data);
         } catch (error) {
