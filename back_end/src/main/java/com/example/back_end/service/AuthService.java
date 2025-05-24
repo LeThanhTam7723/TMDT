@@ -1,7 +1,9 @@
 package com.example.back_end.service;
 
 import com.example.back_end.constant.PredefinedRole;
+import com.example.back_end.dto.UserDto;
 import com.example.back_end.dto.request.IntrospectRequest;
+import com.example.back_end.dto.request.LoginRequest;
 import com.example.back_end.dto.request.UserCreationRequest;
 import com.example.back_end.dto.response.AuthenticationResponse;
 import com.example.back_end.dto.response.IntrospectResponse;
@@ -19,8 +21,10 @@ import com.nimbusds.jose.crypto.MACSigner;
 import com.nimbusds.jose.crypto.MACVerifier;
 import com.nimbusds.jwt.JWTClaimsSet;
 import com.nimbusds.jwt.SignedJWT;
+import lombok.RequiredArgsConstructor;
 import lombok.experimental.NonFinal;
 import lombok.extern.slf4j.Slf4j;
+import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -36,6 +40,7 @@ import java.util.*;
 
 @Service
 @Slf4j
+@RequiredArgsConstructor
 public class AuthService {
     @Autowired
     private UserRepository userRepository;
@@ -44,6 +49,7 @@ public class AuthService {
     @Autowired
     private RoleRepository roleRepository;
     private final PasswordEncoder passwordEncoder = new BCryptPasswordEncoder(10);
+    private final ModelMapper modelMapper;
     @Autowired
     private UserMapper userMapper;
     @NonFinal
@@ -53,23 +59,33 @@ public class AuthService {
     public IntrospectResponse introspect(IntrospectRequest request) throws JOSEException, ParseException {
         var token = request.getToken();
         boolean isValue = true;
+        String email="";
         try {
             verifyToken(token);
+            email = verifyToken(token).getJWTClaimsSet().getSubject();
         } catch (AppException e){
             isValue = false;
         }
-        return IntrospectResponse.builder().valid(isValue).build();
+        return IntrospectResponse.builder().valid(isValue).email(email).build();
     }
 
-    public AuthenticationResponse login (String email, String password){
-        var user = userRepository.findByEmail(email)
-                .orElseThrow(() -> new AppException(ErrorCode.USER_EXISTED));
-        boolean authenticated =passwordEncoder.matches(password,user.getPassword());
+    public AuthenticationResponse login (LoginRequest request){
+        var user = userRepository.findByEmail(request.getEmail())
+                .orElseThrow(() -> new AppException(ErrorCode.USER_NOT_EXISTED));
+        UserDto userDto = modelMapper.map(user,UserDto.class);
+
+        if(!user.getActive()){
+            throw new AppException(ErrorCode.INACTIVE_ACC);
+        }
+        System.out.println(user.getEmail());
+        System.out.println(user.getPassword());
+        boolean authenticated =passwordEncoder.matches(request.getPassword(), user.getPassword());
+        System.out.println(authenticated);
         if(!authenticated){
-            throw new AppException(ErrorCode.UNAUTHENTICATED);
+            throw new AppException(ErrorCode.INVALID_PASSWORD);
         }
         var token = generateToken(user);
-        return AuthenticationResponse.builder().token(token).authenticated(true).build();
+        return AuthenticationResponse.builder().token(token).currentUser(userDto).authenticated(true).build();
     }
 
     public void logout(IntrospectRequest request) throws ParseException, JOSEException {
@@ -124,6 +140,33 @@ public class AuthService {
             System.out.println("Can't get toten"+e);
             throw new RuntimeException(e);
         }
+    }
+
+    public String createVerifyToken(String email) {
+        JWSHeader header = new JWSHeader(JWSAlgorithm.HS512);
+        JWTClaimsSet claimsSet = new JWTClaimsSet.Builder()
+                .subject(email)
+                .issuer("CDWED.com")
+                .issueTime(new Date())
+                .expirationTime(new Date(
+                        Instant.now().plus(1, ChronoUnit.HOURS).toEpochMilli()
+                ))
+                .jwtID(UUID.randomUUID().toString())
+                .claim("custorClaim","Custom")
+                .build();
+
+        Payload payload = new Payload(claimsSet.toJSONObject());
+
+        JWSObject jwsObject = new JWSObject(header,payload);
+
+        try {
+            jwsObject.sign(new MACSigner(SIGNER_KEY.getBytes()));
+            return jwsObject.serialize();
+        } catch (JOSEException e) {
+            log.error("Cannot get token",e);
+            throw new RuntimeException(e);
+        }
+
     }
 
     private String buildScope(User user){

@@ -27,10 +27,10 @@ import java.util.List;
 public class SecurityConfig {
     //Xác thực yêu cầu
     private final String[] PUBLIC_ENDPOINTS_POST_PERMITALL = {"users/createUser",
-            "auth/login","auth/introspect",};
-    private final String[] PUBLIC_ENDPOINTS_GET_PERMITALL = {};
+            "auth/login","auth/introspect","/verifyRegister/**","users/existUser"};
+    private final String[] PUBLIC_ENDPOINTS_GET_PERMITALL = {"/auth/verifyAccount"};
     private final String[] PUBLIC_ENDPOINTS_GET = {"/sendEmail","/users"};
-    private final String[] PUBLIC_ENDPOINTS_LOGIN = {"/logout"};
+    private final String[] PUBLIC_ENDPOINTS_LOGIN = {"/auth/logout"};
     @Value("${jwt.signer-key}")
     protected String SIGNER_KEY;
     @Autowired
