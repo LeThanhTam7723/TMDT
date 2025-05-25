@@ -3,16 +3,24 @@ import { Mail, ChevronDown, User } from 'lucide-react';
 
 const  UserInformation =() => {
   const [isEditing, setIsEditing] = useState(false);
+  const session = JSON.parse(localStorage.getItem("session"));
+  
   const [userInfo, setUserInfo] = useState({
-    fullName: 'Lê Thành Tâm',
-    nickName: '',
-    gender: '',
-    country: '',
-    language: '',
-    timeZone: '',
-    emails: [
-      { address: 'tamLV@gmail.com', isPrimary: true },
-      { address: 'alexarowles@gmail.com', addedDate: '1 month ago' }
+    id: 1,
+    username: session.currentUser.username,
+    // password: "$2a$10$QhzTLfBSf2TFN44/I3uXTeI8RVzUShC0XTzG.FfpqdSHiMJDJ6rBW",
+    fullname: session.currentUser.fullname,
+    email: session.currentUser.email,
+    gender:session.currentUser.gender,
+    introduce: session.currentUser.introduce,
+    certificate:"http://st.ielts-fighter.com/src/ielts-fighter/2019/05/31/bang-ielts-la-gi-2.jpg",
+    phone: session.currentUser.phone,
+    active: true,
+    roles: [
+        {
+            "name": "ADMIN",
+            "description": "Admin role"
+        }
     ]
   });
 
@@ -34,6 +42,9 @@ const  UserInformation =() => {
   const handleSave = () => {
     setUserInfo({...formData});
     setIsEditing(false);
+
+
+    
   };
 
   const handleCancel = () => {
@@ -41,11 +52,23 @@ const  UserInformation =() => {
     setIsEditing(false);
   };
 
+  const handleFileChange = (e) => {
+    const file = e.target.files[0];
+    if (file) {
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        setFormData({
+          ...formData,
+          certificate: reader.result
+        });
+      };
+      reader.readAsDataURL(file);
+    }
+  };
+
   return (
     <div className="bg-gray-100 min-h-screen p-6">
       <div className="max-w-4xl mx-auto">
-        <h1 className="text-xl text-gray-500 mb-4">Chỉnh sửa thông tin cá nhân</h1>
-        
         {/* Profile Card */}
         <div className="bg-gray-200 h-32 rounded-t-lg"></div>
         
@@ -61,8 +84,8 @@ const  UserInformation =() => {
             <div className="ml-4 flex-grow">
               <div className="flex justify-between items-center">
                 <div>
-                  <h2 className="text-lg font-semibold">{userInfo.fullName}</h2>
-                  <p className="text-gray-500 text-sm">{userInfo.emails[0].address}</p>
+                  <h2 className="text-lg font-semibold">{userInfo.fullname}</h2>
+                  <p className="text-gray-500 text-sm">{userInfo.email}</p>
                 </div>
                 <button 
                   onClick={() => setIsEditing(true)} 
@@ -79,13 +102,13 @@ const  UserInformation =() => {
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               {/* Full Name */}
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Full Name</label>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Họ và tên</label>
                 <div className="relative">
                   <input 
                     type="text" 
-                    name="fullName"
+                    name="fullname"
                     disabled={!isEditing}
-                    value={isEditing ? formData.fullName : userInfo.fullName}
+                    value={isEditing ? formData.fullname : userInfo.fullname}
                     onChange={handleInputChange}
                     placeholder="Your Full Name" 
                     className="w-full p-2 border border-gray-300 rounded-md pr-8 focus:outline-none focus:ring-2 focus:ring-blue-500"
@@ -96,12 +119,12 @@ const  UserInformation =() => {
               
               {/* Nick Name */}
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Nick Name</label>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Tên tài khoản</label>
                 <input 
                   type="text" 
-                  name="nickName"
+                  name="username"
                   disabled={!isEditing}
-                  value={isEditing ? formData.nickName : userInfo.nickName}
+                  value={isEditing ? formData.username : userInfo.username}
                   onChange={handleInputChange}
                   placeholder="Your Nick Name" 
                   className="w-full p-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
@@ -130,55 +153,59 @@ const  UserInformation =() => {
               
               {/* Country */}
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Country</label>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Phone</label>
                 <input 
                   type="text" 
-                  name="country"
+                  name="phone"
                   disabled={!isEditing}
-                  value={isEditing ? formData.country : userInfo.country}
+                  value={isEditing ? formData.phone : userInfo.phone}
                   onChange={handleInputChange}
-                  placeholder="Your Country" 
+                  placeholder="Số điện thoại" 
                   className="w-full p-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
                 />
               </div>
               
-              {/* Language */}
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Language</label>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Mô tả</label>
                 <div className="relative">
-                  <select 
-                    name="language"
+                <input 
+                    type="text" 
+                    name="introduce"
                     disabled={!isEditing}
-                    value={isEditing ? formData.language : userInfo.language}
+                    value={isEditing ? formData.introduce : userInfo.introduce}
                     onChange={handleInputChange}
-                    className="w-full p-2 border border-gray-300 rounded-md pr-8 focus:outline-none focus:ring-2 focus:ring-blue-500 appearance-none"
-                  >
-                    <option value="">Select Language</option>
-                    <option value="vi">Tiếng Việt</option>
-                    <option value="en">English</option>
-                    <option value="fr">Français</option>
-                  </select>
+                    placeholder="Mô tả về bản thân" 
+                    className="w-full p-2 border border-gray-300 rounded-md pr-8 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  />
                   <ChevronDown className="absolute right-2 top-3 text-gray-400" size={16} />
                 </div>
               </div>
               
               {/* Time Zone */}
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Time Zone</label>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Thành tựu</label>
                 <div className="relative">
-                  <select 
-                    name="timeZone"
-                    disabled={!isEditing}
-                    value={isEditing ? formData.timeZone : userInfo.timeZone}
-                    onChange={handleInputChange}
-                    className="w-full p-2 border border-gray-300 rounded-md pr-8 focus:outline-none focus:ring-2 focus:ring-blue-500 appearance-none"
-                  >
-                    <option value="">Select Time Zone</option>
-                    <option value="UTC+7">(UTC+07:00) Bangkok, Hanoi, Jakarta</option>
-                    <option value="UTC+8">(UTC+08:00) Beijing, Hong Kong, Singapore</option>
-                    <option value="UTC+0">(UTC+00:00) London, Dublin, Lisbon</option>
-                  </select>
-                  <ChevronDown className="absolute right-2 top-3 text-gray-400" size={16} />
+                  <label className="cursor-pointer inline-block">
+                    <span className="bg-white px-4 py-2 border border-gray-300 rounded-md hover:bg-gray-50 text-gray-700 text-sm">Choose File</span>
+                    <input 
+                      type="file" 
+                      name="certificate" 
+                      disabled={!isEditing} 
+                      onChange={handleFileChange} 
+                      accept="image/*" 
+                      className="hidden" 
+                    />
+                  </label>
+                  {(isEditing ? formData.certificate : userInfo.certificate) && (
+                    <div className="mt-2">
+                      <img 
+                        src={isEditing ? formData.certificate : userInfo.certificate} 
+                        alt="Certificate" 
+                        className="max-w-full h-auto rounded-md border border-gray-200" 
+                      />
+                    </div>
+                  )}
+                  <p className="text-sm text-gray-500 mt-1">Upload your English certificate or other achievements</p>
                 </div>
               </div>
             </div>
@@ -187,21 +214,18 @@ const  UserInformation =() => {
             <div className="mt-8">
               <h3 className="text-md font-medium mb-4">My email Address</h3>
               
-              {userInfo.emails.map((email, index) => (
-                <div key={index} className="flex items-center mb-3 p-2 bg-gray-50 rounded-lg">
+                <div className="flex items-center mb-3 p-2 bg-gray-50 rounded-lg">
                   <div className="bg-blue-100 p-2 rounded-md">
                     <Mail size={20} className="text-blue-500" />
                   </div>
                   <div className="ml-3 flex-grow">
-                    <p className="text-sm font-medium">{email.address}</p>
-                    {email.addedDate && <p className="text-xs text-gray-500">{email.addedDate}</p>}
+                    <p className="text-sm font-medium">{userInfo.email}</p>
+                    {userInfo.email && <p className="text-xs text-gray-500">{userInfo.email}</p>}
                   </div>
-                  {isEditing && index > 0 && (
+                  {isEditing  && (
                     <button type="button" className="text-red-500 text-sm">Remove</button>
                   )}
                 </div>
-              ))}
-              
               {isEditing && (
                 <button 
                   type="button" 

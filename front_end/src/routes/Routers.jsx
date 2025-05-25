@@ -28,7 +28,7 @@ const routes = [
   },
   {
     path: '/profile',
-    component: ('../Pages/Profile'),
+    component: lazy(()=> import('../Pages/UserInfo.jsx'))  ,
   }
 ];
 

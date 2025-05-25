@@ -146,21 +146,7 @@ const Header = () => {
             <div className="hidden lg:flex items-center space-x-8">
               <a href="/" className="text-gray-300 hover:text-blue-400 flex items-center">Home</a>
               
-              {/* Search Bar */}
-              <div className="relative">
-                <input
-                  type="text"
-                  value={searchQuery}
-                  onChange={(e) => setSearchQuery(e.target.value)}
-                  placeholder="Search..."
-                  className="w-60 px-4 py-2 rounded-full bg-gray-800 border border-gray-700 text-gray-300 focus:outline-none focus:border-blue-500"
-                />
-                <button onClick={handleVoiceSearch}
-                  className={`absolute right-2 top-1/2 transform -translate-y-1/2 p-2 rounded-full ${isListening ? "text-red-500" : "text-gray-400"} hover:bg-gray-800`}
-                >
-                  <FiMic className="w-5 h-5" />
-                </button>
-              </div>
+              
 
               {menuItems.slice(1).map((item, index) => (
                 <div key={index} className="relative group">
@@ -182,6 +168,21 @@ const Header = () => {
                   )}
                 </div>
               ))}
+              {/* Search Bar */}
+              <div className="relative">
+                <input
+                  type="text"
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  placeholder="Search..."
+                  className="w-60 px-4 py-2 rounded-full bg-gray-800 border border-gray-700 text-gray-300 focus:outline-none focus:border-blue-500"
+                />
+                <button onClick={handleVoiceSearch}
+                  className={`absolute right-2 top-1/2 transform -translate-y-1/2 p-2 rounded-full ${isListening ? "text-red-500" : "text-gray-400"} hover:bg-gray-800`}
+                >
+                  <FiMic className="w-5 h-5" />
+                </button>
+              </div>
             </div>
 
             {/* Search and Cart */}
@@ -219,7 +220,7 @@ const Header = () => {
                   </div>
                   {isOpen && (
                     <div className="absolute top-full right-0 w-48 bg-gray-800 shadow-lg rounded-md py-2 mt-2">
-                      <a href="#" className="block px-4 py-2 text-sm text-gray-300 hover:bg-gray-700">Profile</a>
+                      <a href="/profile" className="block px-4 py-2 text-sm text-gray-300 hover:bg-gray-700">Profile</a>
                       <a href="#" className="block px-4 py-2 text-sm text-gray-300 hover:bg-gray-700">Settings</a>
                       <a onClick={async() => {
                         console.log(isToken);
