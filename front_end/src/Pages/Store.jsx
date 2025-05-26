@@ -22,66 +22,111 @@ const Shop = () => {
     })
   };
 
+  // Danh sách khóa học tiếng Anh đa dạng
   const products = [
-    { 
+    {
       id: 1,
-      name: "Khóa học IELTS Foundation",
-      price: 2999000,
-      image: "https://images.unsplash.com/photo-1523050854058-8df90110c9f1",
+      name: "IELTS Intensive",
+      price: 79.99,
+      image: "https://images.unsplash.com/photo-1513258496099-48168024aec0?auto=format&fit=crop&w=600&q=80",
       category: "IELTS",
-      level: "Cơ bản",
-      duration: "3 tháng",
-      format: "Online",
-      instructor: "John Smith",
+      age: "13-18 year old",
       rating: 4.8,
-      students: 1200,
-      discount: 10,
-      bestSeller: true,
-      new: true
+      ratingCount: 320,
+      owner: "Ms. Emma",
+      description: "Boost your IELTS score with intensive practice and expert tips.",
+      totalHour: 30,
+      lessons: 20
     },
     {
       id: 2,
-      name: "Khóa học TOEIC Speaking",
-      price: 1999000,
-      image: "https://images.unsplash.com/photo-1516321318423-f06f85e504b3",
-      category: "TOEIC",
-      level: "Trung cấp",
-      duration: "2 tháng",
-      format: "Online",
-      instructor: "Sarah Johnson",
+      name: "Business English Pro",
+      price: 89.99,
+      image: "https://images.unsplash.com/photo-1503676382389-4809596d5290?auto=format&fit=crop&w=600&q=80",
+      category: "Business English",
+      age: "18+ year old",
       rating: 4.7,
-      students: 850,
-      discount: 15,
-      bestSeller: true,
-      new: false
+      ratingCount: 210,
+      owner: "Mr. John",
+      description: "Master business communication and professional English skills.",
+      totalHour: 28,
+      lessons: 18
     },
     {
       id: 3,
-      name: "Khóa học TOEIC Reading",
-      price: 1999000,
-      image: "https://images.unsplash.com/photo-1516321318423-f06f85e504b3",
-      category: "TOEIC",
-      level: "Cao cấp",
-      duration: "4 tháng",
-      format: "Online",
-      instructor: "Sarah Johnson",
+      name: "English for Kids",
+      price: 59.99,
+      image: "https://images.unsplash.com/photo-1522075469751-3a6694fb2f61?auto=format&fit=crop&w=600&q=80",
+      category: "Kids English",
+      age: "4-12 year old",
+      rating: 4.9,
+      ratingCount: 400,
+      owner: "Ms. Linda",
+      description: "Fun and interactive English lessons for children.",
+      totalHour: 22,
+      lessons: 15
+    },
+    {
+      id: 4,
+      name: "Conversation Mastery",
+      price: 69.99,
+      image: "https://images.unsplash.com/photo-1464983953574-0892a716854b?auto=format&fit=crop&w=600&q=80",
+      category: "Conversation",
+      age: "18+ year old",
+      rating: 4.6,
+      ratingCount: 180,
+      owner: "Mr. David",
+      description: "Speak English confidently in daily and travel situations.",
+      totalHour: 20,
+      lessons: 12
+    },
+    {
+      id: 5,
+      name: "Grammar Essentials",
+      price: 49.99,
+      image: "https://images.unsplash.com/photo-1519125323398-675f0ddb6308?auto=format&fit=crop&w=600&q=80",
+      category: "Grammar",
+      age: "13-18 year old",
+      rating: 4.5,
+      ratingCount: 150,
+      owner: "Ms. Sarah",
+      description: "Solidify your English grammar foundation with easy explanations.",
+      totalHour: 18,
+      lessons: 10
+    },
+    {
+      id: 6,
+      name: "General English Skills",
+      price: 64.99,
+      image: "https://images.unsplash.com/photo-1503676382389-4809596d5290?auto=format&fit=crop&w=600&q=80",
+      category: "General English",
+      age: "18+ year old",
       rating: 4.7,
-      students: 850,
-      discount: 15,
-      bestSeller: true,
-      new: false
+      ratingCount: 220,
+      owner: "Mr. Alex",
+      description: "Improve your overall English for work, study, and life.",
+      totalHour: 25,
+      lessons: 14
     }
   ];
 
-  const [searchQuery, setSearchQuery] = useState("");
+  // Danh sách category mới với ảnh ví dụ
+  const categoryOptions = [
+    { name: "General English", img: "https://img.icons8.com/color/48/000000/english.png" },
+    { name: "IELTS", img: "https://img.icons8.com/color/48/000000/ielts.png" },
+    { name: "Business English", img: "https://img.icons8.com/color/48/000000/business.png" },
+    { name: "Kids English", img: "https://img.icons8.com/color/48/000000/children.png" },
+    { name: "Conversation", img: "https://img.icons8.com/color/48/000000/conference-call.png" },
+    { name: "Grammar", img: "https://img.icons8.com/color/48/000000/grammar.png" }
+  ];
+
   const [filteredProducts, setFilteredProducts] = useState(products);
   const [filters, setFilters] = useState({
     category: "",
-    level: "",
-    duration: "",
-    priceRange: "",
+    age: "",
     sortBy: ""
   });
+  const [searchTerm, setSearchTerm] = useState("");
   const [isDarkMode, setIsDarkMode] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [currentPage, setCurrentPage] = useState(1);
@@ -89,94 +134,12 @@ const Shop = () => {
   const [direction, setDirection] = useState(0);
   const [showFilters, setShowFilters] = useState(false);
 
-  // Filter categories
-  const categories = ["IELTS", "TOEIC", "TOEFL", "Giao tiếp", "Ngữ pháp", "Phát âm"];
-  const levels = ["Cơ bản", "Trung cấp", "Nâng cao"];
-  const durations = ["1 tháng", "2 tháng", "3 tháng", "6 tháng", "12 tháng"];
-  const priceRanges = [
-    "Dưới 1 triệu",
-    "1 - 2 triệu",
-    "2 - 5 triệu",
-    "Trên 5 triệu"
-  ];
-  const sortOptions = [
-    "Mới nhất",
-    "Đánh giá cao nhất",
-    "Học viên nhiều nhất",
-    "Giá thấp đến cao",
-    "Giá cao đến thấp",
-    "Giảm giá"
-  ];
-
-  useEffect(() => {
-    let result = [...products];
-
-    // Search functionality
-    if (searchQuery) {
-      result = result.filter(product =>
-        product.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        product.category.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        product.instructor.toLowerCase().includes(searchQuery.toLowerCase())
-      );
-    }
-
-    // Apply filters
-    if (filters.category) {
-      result = result.filter(product => product.category === filters.category);
-    }
-    if (filters.level) {
-      result = result.filter(product => product.level === filters.level);
-    }
-    if (filters.duration) {
-      result = result.filter(product => product.duration === filters.duration);
-    }
-    if (filters.priceRange) {
-      switch (filters.priceRange) {
-        case "Dưới 1 triệu":
-          result = result.filter(product => product.price < 1000000);
-          break;
-        case "1 - 2 triệu":
-          result = result.filter(product => product.price >= 1000000 && product.price <= 2000000);
-          break;
-        case "2 - 5 triệu":
-          result = result.filter(product => product.price > 2000000 && product.price <= 5000000);
-          break;
-        case "Trên 5 triệu":
-          result = result.filter(product => product.price > 5000000);
-          break;
-        default:
-          break;
-      }
-    }
-
-    // Sort products
-    if (filters.sortBy) {
-      switch (filters.sortBy) {
-        case "Mới nhất":
-          result = [...result].sort((a, b) => b.new - a.new);
-          break;
-        case "Đánh giá cao nhất":
-          result = [...result].sort((a, b) => b.rating - a.rating);
-          break;
-        case "Học viên nhiều nhất":
-          result = [...result].sort((a, b) => b.students - a.students);
-          break;
-        case "Giá thấp đến cao":
-          result = [...result].sort((a, b) => a.price - b.price);
-          break;
-        case "Giá cao đến thấp":
-          result = [...result].sort((a, b) => b.price - a.price);
-          break;
-        case "Giảm giá":
-          result = [...result].sort((a, b) => b.discount - a.discount);
-          break;
-        default:
-          break;
-      }
-    }
-
-    setFilteredProducts(result);
-  }, [filters, searchQuery]);
+  // Filter options cho khóa học
+  const filterOptions = {
+    categories: categoryOptions.map(c => c.name),
+    ages: ["4-12 year old", "13-18 year old", "18+ year old"],
+    sortOptions: ["Most Popular", "New", "Trending"]
+  };
 
   const handleFilterChange = (filterType, value) => {
     setFilters(prev => ({
@@ -185,141 +148,127 @@ const Shop = () => {
     }));
   };
 
-  const clearFilters = () => {
-    setFilters({
-      category: "",
-      level: "",
-      duration: "",
-      priceRange: "",
-      sortBy: ""
-    });
-    setSearchQuery("");
-  };
+  // Lọc theo filter và search
+  useEffect(() => {
+
+    let result = products;
+    if (filters.category) {
+      result = result.filter(product => product.category === filters.category);
+    }
+    if (filters.age) {
+      result = result.filter(product => product.age === filters.age);
+    }
+    if (searchTerm) {
+      const lower = searchTerm.toLowerCase();
+      result = result.filter(product =>
+        product.name.toLowerCase().includes(lower) ||
+        product.description.toLowerCase().includes(lower)
+      );
+    }
+    setFilteredProducts(result);
+  }, [filters, searchTerm]);
 
   return (
     <div className={`min-h-screen ${isDarkMode ? "dark bg-gray-900 text-white" : "bg-white text-gray-900"}`}>
-      <div className="container mx-auto px-4 py-8">
-        {/* Search and Filter Header */}
-        <div className="mb-8">
-          <div className="flex flex-col md:flex-row gap-4 items-center justify-between">
-            <div className="relative w-full md:w-96">
-              <input
-                type="text"
-                placeholder="Tìm kiếm khóa học online..."
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500"
-              />
-              <FiSearch className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400" />
-            </div>
-            <div className="flex gap-4">
-              <button
-                onClick={() => setShowFilters(!showFilters)}
-                className="flex items-center gap-2 px-4 py-2 bg-green-500 text-white rounded-lg hover:bg-green-600"
-              >
-                <FiFilter />
-                {showFilters ? "Ẩn bộ lọc" : "Hiện bộ lọc"}
-              </button>
-              <button
-                onClick={clearFilters}
-                className="px-4 py-2 border rounded-lg hover:bg-gray-100"
-              >
-                Xóa bộ lọc
-              </button>
-            </div>
-          </div>
-
-          {/* Filter Panel */}
-          {showFilters && (
-            <div className="mt-4 p-4 border rounded-lg bg-white shadow-lg">
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                {/* Category Filter */}
-                <div>
-                  <h3 className="font-semibold mb-2">Loại khóa học</h3>
-                  <select
-                    value={filters.category}
+      <div className="container mx-auto px-4 py-16">
+        <div className="flex gap-8">
+          <div className="w-64 bg-gray-800 p-4 rounded-lg shadow-lg">
+            <h3 className="text-xl font-bold mb-4 text-white">Filter by</h3>
+            <div className="space-y-4">
+              <div>
+                <h4 className="font-semibold mb-2 text-gray-100">Category</h4>
+                <div className="relative">
+                  <select 
+                    className="w-full p-2 border rounded dark:bg-gray-700 text-gray-100 bg-gray-900"
                     onChange={(e) => handleFilterChange("category", e.target.value)}
-                    className="w-full p-2 border rounded-lg"
+                    value={filters.category}
                   >
-                    <option value="">Tất cả</option>
-                    {categories.map((category) => (
-                      <option key={category} value={category}>
-                        {category}
-                      </option>
+                    <option value="">All</option>
+                    {categoryOptions.map(cat => (
+                      <option key={cat.name} value={cat.name}>{cat.name}</option>
                     ))}
                   </select>
-                </div>
-
-                {/* Level Filter */}
-                <div>
-                  <h3 className="font-semibold mb-2">Trình độ</h3>
-                  <select
-                    value={filters.level}
-                    onChange={(e) => handleFilterChange("level", e.target.value)}
-                    className="w-full p-2 border rounded-lg"
-                  >
-                    <option value="">Tất cả</option>
-                    {levels.map((level) => (
-                      <option key={level} value={level}>
-                        {level}
-                      </option>
-                    ))}
-                  </select>
-                </div>
-
-                {/* Duration Filter */}
-                <div>
-                  <h3 className="font-semibold mb-2">Thời lượng</h3>
-                  <select
-                    value={filters.duration}
-                    onChange={(e) => handleFilterChange("duration", e.target.value)}
-                    className="w-full p-2 border rounded-lg"
-                  >
-                    <option value="">Tất cả</option>
-                    {durations.map((duration) => (
-                      <option key={duration} value={duration}>
-                        {duration}
-                      </option>
-                    ))}
-                  </select>
-                </div>
-
-                {/* Price Range Filter */}
-                <div>
-                  <h3 className="font-semibold mb-2">Khoảng giá</h3>
-                  <select
-                    value={filters.priceRange}
-                    onChange={(e) => handleFilterChange("priceRange", e.target.value)}
-                    className="w-full p-2 border rounded-lg"
-                  >
-                    <option value="">Tất cả</option>
-                    {priceRanges.map((range) => (
-                      <option key={range} value={range}>
-                        {range}
-                      </option>
-                    ))}
-                  </select>
-                </div>
-
-                {/* Sort Options */}
-                <div>
-                  <h3 className="font-semibold mb-2">Sắp xếp</h3>
-                  <select
-                    value={filters.sortBy}
-                    onChange={(e) => handleFilterChange("sortBy", e.target.value)}
-                    className="w-full p-2 border rounded-lg"
-                  >
-                    <option value="">Mặc định</option>
-                    {sortOptions.map((option) => (
-                      <option key={option} value={option}>
-                        {option}
-                      </option>
-                    ))}
-                  </select>
+                  {/* Hiển thị ảnh ví dụ cho category đã chọn */}
+                  {filters.category && (
+                    <div className="flex items-center mt-2">
+                      <img src={categoryOptions.find(c => c.name === filters.category)?.img} alt="icon" className="w-6 h-6 mr-2" />
+                      <span className="text-gray-100">{filters.category}</span>
+                    </div>
+                  )}
                 </div>
               </div>
+              <div>
+                <h4 className="font-semibold mb-2 text-gray-100">Age</h4>
+                <select 
+                  className="w-full p-2 border rounded dark:bg-gray-700 text-gray-100 bg-gray-900"
+                  onChange={(e) => handleFilterChange("age", e.target.value)}
+                  value={filters.age}
+                >
+                  <option value="">All</option>
+                  {filterOptions.ages.map(age => (
+                    <option key={age} value={age}>{age}</option>
+                  ))}
+                </select>
+              </div>
             </div>
-          )}
+          </div>
+          <div className="flex-1">
+            <div className="flex items-center justify-between mb-6">
+              <h2 className="text-3xl font-bold">Find Our Favorite Course</h2>
+              {/* Đã bỏ thanh tìm kiếm */}
+            </div>
+            {/* Category tags giống ảnh */}
+            <div className="flex gap-2 mb-4 flex-wrap">
+              <button className={`px-4 py-1 rounded-full font-semibold ${!filters.category ? 'bg-blue-100 text-blue-600' : 'bg-gray-100 text-gray-600'}`} onClick={() => handleFilterChange('category', '')}>All Category</button>
+              {categoryOptions.map(cat => (
+                <button
+                  key={cat.name}
+                  className={`px-4 py-1 rounded-full font-semibold flex items-center gap-2 ${filters.category === cat.name ? 'bg-blue-600 text-white' : 'bg-gray-100 text-gray-600'}`}
+                  onClick={() => handleFilterChange('category', cat.name)}
+                >
+                  <img src={cat.img} alt={cat.name} className="w-5 h-5" />
+                  {cat.name}
+                </button>
+              ))}
+            </div>
+            {/* Danh sách khóa học */}
+            <AnimatePresence initial={false} custom={direction}>
+              <motion.div
+                key={currentPage}
+                custom={direction}
+                variants={variants}
+                initial="enter"
+                animate="center"
+                exit="exit"
+                transition={{
+                  x: { type: "spring", stiffness: 300, damping: 30 },
+                  opacity: { duration: 0.2 }
+                }}
+                className="flex flex-col gap-4"
+              >
+                {filteredProducts.map((product, index) => (
+                  <div key={index} className="flex bg-white rounded-lg shadow p-4 items-center gap-4 border border-gray-200">
+                    <img src={product.image} alt={product.name} className="w-40 h-28 object-cover rounded-lg border" />
+                    <div className="flex-1">
+                      <div className="flex items-center gap-2 mb-1">
+                        <span className="bg-blue-100 text-blue-600 text-xs font-bold px-2 py-1 rounded">{product.rating}★ ({product.ratingCount})</span>
+                        <span className="bg-yellow-100 text-yellow-700 text-xs font-bold px-2 py-1 rounded">{product.age}</span>
+                        <span className="bg-gray-200 text-gray-700 text-xs font-bold px-2 py-1 rounded">{product.category}</span>
+                      </div>
+                      <h3 className="text-lg font-bold text-gray-900 mb-1">{product.name}</h3>
+                      <div className="text-sm text-gray-500 mb-1">{product.owner}</div>
+                      <div className="text-sm text-gray-700 mb-1 line-clamp-2">{product.description}</div>
+                      <div className="text-xs text-gray-400">{product.totalHour} total hour | {product.lessons} lessons</div>
+                    </div>
+                    <div className="flex flex-col items-end min-w-[80px]">
+                      <div className="text-xl font-bold text-blue-600 mb-2">${product.price.toFixed(2)}</div>
+                      <button className="bg-blue-500 text-white px-4 py-2 rounded-full font-semibold hover:bg-blue-600 transition">Add to cart</button>
+                    </div>
+                  </div>
+                ))}
+              </motion.div>
+            </AnimatePresence>
+          </div>
         </div>
 
         {/* Products Grid */}
