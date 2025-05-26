@@ -4,15 +4,19 @@ import { FaFacebookF, FaTwitter, FaInstagram, FaLinkedinIn } from "react-icons/f
 import { MdEmail, MdPhone, MdKeyboardArrowDown } from "react-icons/md";
 import { useNavigate, Link } from "react-router-dom";
 import logo from "../assets/images/logo.jpg";
+import { introspect, logOutApi } from "../API/AuthService";
 
 
 const Header = () => {
+  const [isToken, setIsToken] = useState("");
   const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const [isOpen, setIsOpen] = useState(false);
   const [cartCount, setCartCount] = useState(0);
   const [wishlistCount, setWishlistCount] = useState(0);
   //Tìm kiếm giọng nói
   const [isListening, setIsListening] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
+  const [isLogin,setIsLogin] = useState(false);
   const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
   const recognition = SpeechRecognition ? new SpeechRecognition() : null;
   if (recognition) {
@@ -51,7 +55,33 @@ const Header = () => {
   const cartClick = () => {
     navigate('/cart'); // Chuyển sang trang /cart
   };
-
+  const checkToken = async (token) => {
+    try {
+      const response = await introspect({token});
+      console.log(response.data.result.valid);
+      return response.data.result.valid;
+    } catch (error) {
+      console.error("Lỗi kiểm tra token:", error);
+      return false; // Nếu có lỗi thì coi token không hợp lệ
+    }
+  };
+  useEffect(() => {
+    const check = async () => {
+      const session = JSON.parse(localStorage.getItem("session"));
+      if (session && session !== "undefined") {
+        const isValid = await checkToken(session.token);
+        console.log("Token valid:", isValid);
+        if (isValid) {
+          setIsLogin(true);
+          setIsToken(session.token);
+        } else {
+          setIsLogin(false);
+          setCartCount(0);
+        }
+      }
+    };
+    check();
+  }, [isLogin]);
   const [notificationCount, setNotificationCount] = useState(3); // Add notification count state
 
   const menuItems = [
@@ -91,7 +121,6 @@ const Header = () => {
                 <option value="es">Spanish</option>
                 <option value="fr">French</option>
               </select>
-              <button className="text-sm text-gray-300 hover:text-blue-400">Login</button>
             </div>
           </div>
         </div>
@@ -117,21 +146,7 @@ const Header = () => {
             <div className="hidden lg:flex items-center space-x-8">
               <a href="/" className="text-gray-300 hover:text-blue-400 flex items-center">Home</a>
               
-              {/* Search Bar */}
-              <div className="relative">
-                <input
-                  type="text"
-                  value={searchQuery}
-                  onChange={(e) => setSearchQuery(e.target.value)}
-                  placeholder="Search..."
-                  className="w-60 px-4 py-2 rounded-full bg-gray-800 border border-gray-700 text-gray-300 focus:outline-none focus:border-blue-500"
-                />
-                <button onClick={handleVoiceSearch}
-                  className={`absolute right-2 top-1/2 transform -translate-y-1/2 p-2 rounded-full ${isListening ? "text-red-500" : "text-gray-400"} hover:bg-gray-800`}
-                >
-                  <FiMic className="w-5 h-5" />
-                </button>
-              </div>
+              
 
               {menuItems.slice(1).map((item, index) => (
                 <div key={index} className="relative group">
@@ -153,6 +168,21 @@ const Header = () => {
                   )}
                 </div>
               ))}
+              {/* Search Bar */}
+              <div className="relative">
+                <input
+                  type="text"
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  placeholder="Search..."
+                  className="w-60 px-4 py-2 rounded-full bg-gray-800 border border-gray-700 text-gray-300 focus:outline-none focus:border-blue-500"
+                />
+                <button onClick={handleVoiceSearch}
+                  className={`absolute right-2 top-1/2 transform -translate-y-1/2 p-2 rounded-full ${isListening ? "text-red-500" : "text-gray-400"} hover:bg-gray-800`}
+                >
+                  <FiMic className="w-5 h-5" />
+                </button>
+              </div>
             </div>
 
             {/* Search and Cart */}
@@ -183,14 +213,23 @@ const Header = () => {
                 </div>
                 {/* User Avatar */}
                 <div className="relative group">
-                  <div className="w-10 h-10 rounded-full bg-gray-800 flex items-center justify-center cursor-pointer hover:bg-gray-700">
+                  <div className="w-10 h-10 rounded-full bg-gray-800 flex items-center justify-center cursor-pointer hover:bg-gray-700" 
+                  onClick={()=> {console.log("isLogin"+isLogin);isLogin ? setIsOpen(!isOpen) : navigate('/auth/login');}}
+                  >
                     <FiUser className="text-xl text-gray-300" />
                   </div>
-                  <div className="absolute top-full right-0 w-48 bg-gray-800 shadow-lg rounded-md py-2 hidden group-hover:block mt-2">
-                    <a href="#" className="block px-4 py-2 text-sm text-gray-300 hover:bg-gray-700">Profile</a>
-                    <a href="#" className="block px-4 py-2 text-sm text-gray-300 hover:bg-gray-700">Settings</a>
-                    <a href="#" className="block px-4 py-2 text-sm text-gray-300 hover:bg-gray-700">Logout</a>
-                  </div>
+                  {isOpen && (
+                    <div className="absolute top-full right-0 w-48 bg-gray-800 shadow-lg rounded-md py-2 mt-2">
+                      <a href="/profile" className="block px-4 py-2 text-sm text-gray-300 hover:bg-gray-700">Profile</a>
+                      <a href="#" className="block px-4 py-2 text-sm text-gray-300 hover:bg-gray-700">Settings</a>
+                      <a onClick={async() => {
+                        console.log(isToken);
+                        await logOutApi({token:isToken});localStorage.clear();
+                        setIsLogin(false);
+                        setIsOpen(false);
+                      }} className="block px-4 py-2 text-sm text-gray-300 hover:bg-gray-700">Logout</a>
+                    </div>
+                  )}
                 </div>
               </div>
 
