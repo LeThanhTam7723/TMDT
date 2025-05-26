@@ -1,30 +1,33 @@
 import { useState } from 'react';
 import { Mail, ChevronDown, User } from 'lucide-react';
+import { getUserById } from '../API/AuthService';
+import { useEffect } from 'react';
 
 const  UserInformation =() => {
   const [isEditing, setIsEditing] = useState(false);
   const session = JSON.parse(localStorage.getItem("session"));
-  
-  const [userInfo, setUserInfo] = useState({
-    id: 1,
-    username: session.currentUser.username,
-    // password: "$2a$10$QhzTLfBSf2TFN44/I3uXTeI8RVzUShC0XTzG.FfpqdSHiMJDJ6rBW",
-    fullname: session.currentUser.fullname,
-    email: session.currentUser.email,
-    gender:session.currentUser.gender,
-    introduce: session.currentUser.introduce,
-    certificate:"http://st.ielts-fighter.com/src/ielts-fighter/2019/05/31/bang-ielts-la-gi-2.jpg",
-    phone: session.currentUser.phone,
-    active: true,
-    roles: [
-        {
-            "name": "ADMIN",
-            "description": "Admin role"
-        }
-    ]
-  });
+  const [userInfo, setUserInfo] = useState({});
+  const [formData, setFormData] = useState({});
+  const fetchUser = async(id) => {
+    try {
+      const rs = await getUserById(id);
+      const {code,result,message} = rs.data;
+      setUserInfo(result);
+      setFormData(result);
 
-  const [formData, setFormData] = useState({...userInfo});
+    } catch (error){
+      toast.error('Có lỗi khi tải dữ liệu');
+      setUserInfo({});
+      setFormData({});
+    }
+  }
+  useEffect(() => {
+    if (session.currentUser.id) {
+        fetchUser(session.currentUser.id);
+    }
+  }, []);
+
+  
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
@@ -43,8 +46,6 @@ const  UserInformation =() => {
     setUserInfo({...formData});
     setIsEditing(false);
 
-
-    
   };
 
   const handleCancel = () => {
@@ -56,6 +57,8 @@ const  UserInformation =() => {
     const file = e.target.files[0];
     if (file) {
       const reader = new FileReader();
+      const imageUrl = URL.createObjectURL(file);
+      console.log(file);
       reader.onloadend = () => {
         setFormData({
           ...formData,

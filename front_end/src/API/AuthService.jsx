@@ -38,4 +38,12 @@ const introspect = async (body) => {
     return await axiosClient.post('/auth/introspect', body);
 }
 
-export { signIn ,register,checkEmailExists,logOutApi,verifyRegister,introspect };
+const getUserById = async (userId) => {
+    return await axiosClient.get(`/users/id/${userId}`, {
+        timeout: 15000
+    });
+};
+
+
+
+export { signIn ,register,checkEmailExists,logOutApi,verifyRegister,introspect,getUserById };
