@@ -37,6 +37,15 @@ public class User {
     @Column(name = "avatar", length = 45)
     private String avatar;
 
+    @Column(name = "introduce", length = 225)
+    private String introduce;
+
+    @Column(name = "gender", length = 45)
+    private String gender;
+
+    @Column(name = "certificate", length = 45)
+    private String certificate;
+
     @Column(name = "active", nullable = false)
     private Boolean active = false;
 

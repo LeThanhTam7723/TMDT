@@ -1,3 +1,5 @@
+// src/routes/AppRoutes.jsx
+import React, { Suspense } from 'react';
 import { Routes, Route } from 'react-router-dom';
 import Home from '../Pages/HomePage';
 import Store from '../Pages/Store';
@@ -11,7 +13,6 @@ import CourseVideo from '../Pages/CourseVideo';
 
 
 function AppRoutes() {
-  
   return (
     <Routes>
       <Route path="/" element={<Home />} />
