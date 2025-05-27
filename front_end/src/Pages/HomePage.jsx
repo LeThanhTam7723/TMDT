@@ -97,7 +97,7 @@ const HomePage = () => {
   };
 
   const handleProductClick = () => {
-    navigate(`/detail/`);
+    navigate(`/detail`);
   };
 
   const renderStars = (rating) => {

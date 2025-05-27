@@ -1,13 +1,14 @@
 import React, { useState, useEffect } from 'react';
-import { useParams, Link } from 'react-router-dom';
 import { Play, Clock, ChevronLeft, ChevronRight, Star, Users, BookOpen, Award, ChevronDown } from 'lucide-react';
 
 const Detail = () => {
   const [currentSlide, setCurrentSlide] = useState(0);
   const [showMoreInstructor, setShowMoreInstructor] = useState(false);
-  const { id } = useParams(); // Get the product ID from URL
+  // Simulate getting ID from URL params - replace with actual useParams() in your app
+  const id = "1"; // For demo purposes
   const [course, setCourse] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
   
   const relatedCourses = [
     { 
@@ -23,98 +24,144 @@ const Detail = () => {
     },
     { 
       id: 2, 
-      title: 'English Course for kids', 
-      rating: 4.7, 
-      reviews: 112, 
-      price: 69.99, 
-      originalPrice: 99.99,
-      author: 'James',
-      level: '4-12 years old',
+      title: 'Advanced English Grammar', 
+      rating: 4.8, 
+      reviews: 89, 
+      price: 79.99, 
+      originalPrice: 119.99,
+      author: 'Sarah',
+      level: '13+ years old',
       image: '/api/placeholder/270/150'
     },
     { 
       id: 3, 
-      title: 'English Course for kids', 
-      rating: 4.7, 
-      reviews: 112, 
-      price: 69.99, 
-      originalPrice: 99.99,
-      author: 'James',
-      level: '4-12 years old',
+      title: 'Business English', 
+      rating: 4.6, 
+      reviews: 156, 
+      price: 99.99, 
+      originalPrice: 149.99,
+      author: 'Michael',
+      level: 'Professional',
       image: '/api/placeholder/270/150'
     },
     { 
       id: 4, 
-      title: 'English Course for kids', 
-      rating: 4.7, 
-      reviews: 112, 
-      price: 69.99, 
-      originalPrice: 99.99,
-      author: 'James',
-      level: '4-12 years old',
+      title: 'English Pronunciation', 
+      rating: 4.9, 
+      reviews: 203, 
+      price: 59.99, 
+      originalPrice: 89.99,
+      author: 'Emma',
+      level: 'All levels',
       image: '/api/placeholder/270/150'
     },
   ];
 
   const handlePrevSlide = () => {
-    setCurrentSlide(prev => (prev === 0 ? relatedCourses.length - 4 : prev - 1));
+    setCurrentSlide(prev => (prev === 0 ? Math.max(0, relatedCourses.length - 4) : prev - 1));
   };
 
   const handleNextSlide = () => {
-    setCurrentSlide(prev => (prev === relatedCourses.length - 4 ? 0 : prev + 1));
+    setCurrentSlide(prev => (prev >= relatedCourses.length - 4 ? 0 : prev + 1));
   };
   
   useEffect(() => {
     const fetchCourse = async () => {
+      if (!id) {
+        setError("No course ID provided");
+        setLoading(false);
+        return;
+      }
+
       setLoading(true);
+      setError(null);
+      
       try {
-        // Update with your API endpoint
-        // For development/testing, you can use a fallback object if API is not available
-        try {
-          const res = await fetch(`http://192.168.0.118:8080/api/courses/1`);
-          const data = await res.json();
-          setCourse(data);
-        } catch (error) {
-          console.error('Error fetching from API, using fallback data:', error);
-          // Fallback data when API is not available
-          setCourse({
-            id: id,
-            name: `Course #${id}`,
-            description: "A comprehensive course designed to help students master core concepts.",
-            rating: 4.5,
-            totalRatings: 1000,
-            learners: 10000,
-            certificatesEarned: 1000,
-            category: "English",
-            level: "Beginner",
-            totalCourses: 20,
-            thumbnail: "/api/placeholder/550/350"
-          });
+        // Try to fetch from API with proper error handling
+        const response = await fetch(`http://192.168.0.118:8080/api/courses/${id}`, {
+          method: 'GET',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+        });
+
+        if (!response.ok) {
+          throw new Error(`HTTP error! status: ${response.status}`);
         }
+
+        const data = await response.json();
+        setCourse(data);
+      } catch (error) {
+        console.warn('API fetch failed, using fallback data:', error.message);
+        
+        // Fallback data when API is not available
+        setCourse({
+          id: id,
+          name: `Advanced English Course #${id}`,
+          description: "A comprehensive English course designed to help students master grammar, vocabulary, and communication skills. Perfect for learners looking to improve their English proficiency.",
+          rating: 4.5,
+          totalRatings: 1247,
+          learners: 12500,
+          certificatesEarned: 1156,
+          category: "English",
+          level: "Intermediate",
+          totalCourses: 24,
+          thumbnail: "/api/placeholder/550/350"
+        });
       } finally {
         setLoading(false);
       }
     };
 
-    if (id) {
-      fetchCourse();
-    }
+    fetchCourse();
   }, [id]);
   
   if (loading) {
-    return <div className="text-center py-10 text-gray-600">Loading course...</div>;
+    return (
+      <div className="max-w-6xl mx-auto px-4 bg-white">
+        <div className="flex items-center justify-center py-20">
+          <div className="text-center">
+            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
+            <p className="text-gray-600">Loading course details...</p>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="max-w-6xl mx-auto px-4 bg-white">
+        <div className="text-center py-20">
+          <div className="text-red-600 text-lg font-semibold mb-2">Error Loading Course</div>
+          <p className="text-gray-600">{error}</p>
+          <button 
+            onClick={() => window.location.reload()} 
+            className="mt-4 px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700"
+          >
+            Try Again
+          </button>
+        </div>
+      </div>
+    );
   }
 
   if (!course) {
-    return <div className="text-center py-10 text-red-600">Course not found</div>;
+    return (
+      <div className="max-w-6xl mx-auto px-4 bg-white">
+        <div className="text-center py-20 text-gray-600">
+          <p className="text-lg">Course not found</p>
+        </div>
+      </div>
+    );
   }
 
   return (
     <div className="max-w-6xl mx-auto px-4 bg-white">
       {/* Breadcrumb */}
       <div className="py-4 text-sm text-gray-500">
-        <Link to="/" className="hover:text-blue-600">Home</Link> &gt; 
-        <Link to="/courses" className="hover:text-blue-600 ml-1">Courses</Link> &gt; 
+        
+     
         <span className="ml-1">{course.category || 'English'}</span>
       </div>
 

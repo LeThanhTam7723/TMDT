@@ -8,10 +8,12 @@ import com.example.back_end.service.CourseServiceImpl;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.CrossOrigin;
 
 import java.util.List;
 
 @Slf4j
+@CrossOrigin(origins = "http://localhost:8080")
 @RestController
 @RequestMapping("/courses")
 public class CourseController {
