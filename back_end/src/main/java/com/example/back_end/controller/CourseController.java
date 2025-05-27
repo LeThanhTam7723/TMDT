@@ -13,7 +13,7 @@ import org.springframework.web.bind.annotation.CrossOrigin;
 import java.util.List;
 
 @Slf4j
-@CrossOrigin(origins = "http://localhost:8080")
+@CrossOrigin(origins = "http://localhost:5173")
 @RestController
 @RequestMapping("/courses")
 public class CourseController {

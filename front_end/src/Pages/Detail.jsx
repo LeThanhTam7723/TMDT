@@ -78,12 +78,16 @@ const Detail = () => {
       
       try {
         // Try to fetch from API with proper error handling
-        const response = await fetch(`http://192.168.0.118:8080/api/courses/${id}`, {
+        const response = await fetch(`http://192.168.0.118:8080/api/courses/1`, {
           method: 'GET',
           headers: {
-            'Content-Type': 'application/json',
+            "Content-Type": "application/json",
+            "Authorization": "eyJhbGciOiJIUzUxMiJ9.eyJpc3MiOiJDRFdFRC5jb20iLCJzdWIiOiJhZG1pbiIsImV4cCI6MTc0ODMyNzYxNSwiaWF0IjoxNzQ4MzI0MDE1LCJzY29wZSI6IkFETUlOIn0.hRkkM8_P3h_r7Tcrg-sF6ncKHciAAqa-EL_qyLtZNqGogQ0-zeFjZ34QZElhXohn4q2XPVF8IWxVawI8WFIh5Q"
           },
-        });
+        })
+        .then(res => res.json())
+        .then(data => console.log(data))
+        .catch(err => console.error(err));;
 
         if (!response.ok) {
           throw new Error(`HTTP error! status: ${response.status}`);
