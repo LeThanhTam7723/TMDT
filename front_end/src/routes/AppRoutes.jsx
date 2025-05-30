@@ -20,7 +20,7 @@ function AppRoutes() {
       <Route path="/cart" element={<Cart/>} />
       <Route path="/payment" element={<CheckoutPage/>} />
       <Route path="/login" element={<AuthPage/>} />
-       <Route path="/detail" element={<Detail />} />
+       <Route path="/detail/:id" element={<Detail />} />
       <Route path="/info" element = {<UserInfo/>}/>
       <Route path="/video" element = {<CourseVideo/>}/>
     </Routes>

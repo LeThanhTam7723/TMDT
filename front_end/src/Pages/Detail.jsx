@@ -1,11 +1,15 @@
 import React, { useState, useEffect } from 'react';
 import { Play, Clock, ChevronLeft, ChevronRight, Star, Users, BookOpen, Award, ChevronDown } from 'lucide-react';
+import { useParams } from 'react-router-dom'; // Import useParams
+import axiosClient from '../API/axiosClient'; // Adjust the path as needed
 
 const Detail = () => {
   const [currentSlide, setCurrentSlide] = useState(0);
   const [showMoreInstructor, setShowMoreInstructor] = useState(false);
-  // Simulate getting ID from URL params - replace with actual useParams() in your app
-  const id = "1"; // For demo purposes
+  
+  // Get ID from URL params
+  const { id } = useParams(); // This will get the ID from the URL
+  
   const [course, setCourse] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -64,6 +68,20 @@ const Detail = () => {
   const handleNextSlide = () => {
     setCurrentSlide(prev => (prev >= relatedCourses.length - 4 ? 0 : prev + 1));
   };
+
+  // Helper function to calculate total course duration
+  const calculateTotalDuration = (courseDetails) => {
+    if (!courseDetails || !Array.isArray(courseDetails)) return 0;
+    return courseDetails.reduce((total, episode) => total + (episode.duration || 0), 0);
+  };
+
+  // Helper function to format duration
+  const formatDuration = (minutes) => {
+    if (minutes < 60) return `${minutes}m`;
+    const hours = Math.floor(minutes / 60);
+    const remainingMinutes = minutes % 60;
+    return remainingMinutes > 0 ? `${hours}h ${remainingMinutes}m` : `${hours}h`;
+  };
   
   useEffect(() => {
     const fetchCourse = async () => {
@@ -75,42 +93,38 @@ const Detail = () => {
 
       setLoading(true);
       setError(null);
-      
+
       try {
-        // Try to fetch from API with proper error handling
-        const response = await fetch(`http://192.168.0.118:8080/api/courses/1`, {
-          method: 'GET',
+        // Fixed: Use 'id' instead of 'product.id'
+        const response = await axiosClient.get(`/courses/${id}`, {
           headers: {
-            "Content-Type": "application/json",
-            "Authorization": "eyJhbGciOiJIUzUxMiJ9.eyJpc3MiOiJDRFdFRC5jb20iLCJzdWIiOiJhZG1pbiIsImV4cCI6MTc0ODMyNzYxNSwiaWF0IjoxNzQ4MzI0MDE1LCJzY29wZSI6IkFETUlOIn0.hRkkM8_P3h_r7Tcrg-sF6ncKHciAAqa-EL_qyLtZNqGogQ0-zeFjZ34QZElhXohn4q2XPVF8IWxVawI8WFIh5Q"
-          },
-        })
-        .then(res => res.json())
-        .then(data => console.log(data))
-        .catch(err => console.error(err));;
+            Authorization: `Bearer eyJhbGciOiJIUzUxMiJ9.eyJpc3MiOiJDRFdFRC5jb20iLCJzdWIiOiJhZG1pbiIsImV4cCI6MTc0ODYwOTU0OSwiaWF0IjoxNzQ4NjA1OTQ5LCJqdGkiOiJkZGNhYjA2OC0zYWQ4LTRjY2ItODk0ZC05M2I5ZTFiZmY5YjkiLCJzY29wZSI6IkFETUlOIn0.DoD0ShphS5MS7qZjxSOhpHLLmzULim1_9b51k1dcyF0sK01PdOto-LvspRtbs6p5uw0DFDAl5T9lpXOHClCDFA` // Replace with actual token logic
+          }
+        });
 
-        if (!response.ok) {
-          throw new Error(`HTTP error! status: ${response.status}`);
+        // Check if response has the expected structure
+        if (response.data && response.data.code === 200 && response.data.result) {
+          setCourse(response.data.result);
+        } else {
+          throw new Error('Invalid response format');
         }
-
-        const data = await response.json();
-        setCourse(data);
       } catch (error) {
-        console.warn('API fetch failed, using fallback data:', error.message);
+        console.error('API fetch failed:', error);
+        setError(error.message || 'Failed to load course');
         
-        // Fallback data when API is not available
+        // Optional: Set fallback data for development
         setCourse({
-          id: id,
+          id: parseInt(id),
           name: `Advanced English Course #${id}`,
-          description: "A comprehensive English course designed to help students master grammar, vocabulary, and communication skills. Perfect for learners looking to improve their English proficiency.",
+          description: "Master advanced English skills with our comprehensive course program.",
           rating: 4.5,
-          totalRatings: 1247,
-          learners: 12500,
-          certificatesEarned: 1156,
-          category: "English",
-          level: "Intermediate",
-          totalCourses: 24,
-          thumbnail: "/api/placeholder/550/350"
+          price: 199.99,
+          status: true,
+          courseDetails: [
+            { id: 1, episodeNumber: 1, duration: 15, isPreview: true },
+            { id: 2, episodeNumber: 2, duration: 22, isPreview: false },
+            { id: 3, episodeNumber: 3, duration: 19, isPreview: false }
+          ]
         });
       } finally {
         setLoading(false);
@@ -118,7 +132,7 @@ const Detail = () => {
     };
 
     fetchCourse();
-  }, [id]);
+  }, [id]); // Make sure to include 'id' in dependencies
   
   if (loading) {
     return (
@@ -160,13 +174,15 @@ const Detail = () => {
     );
   }
 
+  const totalDuration = calculateTotalDuration(course.courseDetails);
+  const totalEpisodes = course.courseDetails ? course.courseDetails.length : 0;
+  const previewEpisodes = course.courseDetails ? course.courseDetails.filter(ep => ep.isPreview).length : 0;
+
   return (
     <div className="max-w-6xl mx-auto px-4 bg-white">
       {/* Breadcrumb */}
       <div className="py-4 text-sm text-gray-500">
-        
-     
-        <span className="ml-1">{course.category || 'English'}</span>
+        <span className="ml-1">English Course</span>
       </div>
 
       {/* Course Header */}
@@ -176,352 +192,136 @@ const Detail = () => {
           <p className="text-gray-700 mt-3 mb-4">{course.description}</p>
 
           <div className="flex items-center mb-3">
-            <span className="font-bold text-gray-800 mr-2">{course.rating?.toFixed(1) || '4.5'}</span>
+            <span className="font-bold text-gray-800 mr-2">{course.rating?.toFixed(1) || 'N/A'}</span>
             <div className="flex text-yellow-400">
               {'★★★★★'.split('').map((_, i) => (
-                <span key={i} className={i >= Math.floor(course.rating || 4.5) ? 'opacity-30' : ''}>★</span>
+                <span key={i} className={i >= Math.floor(course.rating || 0) ? 'opacity-30' : ''}>★</span>
               ))}
             </div>
             <span className="text-gray-600 text-sm ml-2">
-              ({course.totalRatings || 1000} ratings)
-            </span>
-            <span className="text-gray-600 text-sm ml-4">
-              {course.learners || '10,000'} learners
+              ({course.rating ? 'Based on reviews' : 'No ratings yet'})
             </span>
           </div>
 
-          <div className="text-sm text-gray-500 mb-4">
-            {course.certificatesEarned || '1,000'} certificates earned
-          </div>
-
-          <div className="flex gap-2 flex-wrap text-sm">
+          <div className="flex gap-2 flex-wrap text-sm mb-4">
             <span className="bg-blue-100 text-blue-600 px-3 py-1 rounded-full">
-              {course.category || 'English'}
+              English
             </span>
             <span className="bg-gray-100 text-gray-600 px-3 py-1 rounded-full">
-              Level: {course.level || 'Beginner'}
+              {totalEpisodes} episodes
             </span>
             <span className="bg-gray-100 text-gray-600 px-3 py-1 rounded-full">
-              {course.totalCourses || '20'} courses
+              {formatDuration(totalDuration)} total
             </span>
+            {previewEpisodes > 0 && (
+              <span className="bg-green-100 text-green-600 px-3 py-1 rounded-full">
+                {previewEpisodes} free preview{previewEpisodes > 1 ? 's' : ''}
+              </span>
+            )}
+          </div>
+
+          {/* Price Section */}
+          <div className="mb-6">
+            <span className="text-3xl font-bold text-blue-600">${course.price}</span>
+            <button className="ml-4 bg-blue-600 hover:bg-blue-700 text-white px-6 py-3 rounded-lg font-semibold transition-colors">
+              Enroll Now
+            </button>
           </div>
         </div>
 
-        {/* Video Preview */}
-        <div className="md:w-1/2 mt-6 md:mt-0">
-          <div className="relative rounded-lg overflow-hidden bg-gray-100 h-64">
-            <img
-              src={course.thumbnail || '/api/placeholder/550/350'}
-              alt="Course preview"
-              className="w-full h-full object-cover"
-            />
-            <div className="absolute inset-0 flex items-center justify-center">
-              <button className="bg-white/80 hover:bg-white rounded-full w-16 h-16 flex items-center justify-center shadow-lg">
-                <Play size={30} className="text-blue-600 ml-1" />
-              </button>
+        {/* Course Image/Video Preview */}
+        <div className="md:w-1/2">
+          <div className="bg-gray-100 rounded-lg overflow-hidden">
+            <div className="aspect-video bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center">
+              <Play className="w-16 h-16 text-white opacity-80" />
             </div>
           </div>
         </div>
       </div>
 
-      {/* Study Schedule */}
-      <div className="px-4 py-8">
-        <h2 className="text-2xl font-bold text-blue-600 mb-6">Study schedule</h2>
-        
-        <div className="border border-blue-200 rounded-lg overflow-hidden">
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4">
-            {/* Module 01 */}
-            <div className="p-6 border-b md:border-r border-blue-200">
-              <h3 className="text-5xl font-bold text-center mb-4">01</h3>
-              <h4 className="text-xl font-semibold text-center mb-6">Simple Present</h4>
-              
-              <div className="space-y-6">
-                <div className="flex justify-between items-start">
-                  <div>
-                    <h5 className="font-semibold">Introduction</h5>
-                    <div className="text-sm text-gray-600">Lesson 01</div>
-                  </div>
-                  <div className="flex items-center text-gray-600 text-sm">
-                    <Clock size={14} className="mr-1" />
-                    45 Minutes
-                  </div>
-                </div>
-                
-                <div className="flex justify-between items-start">
-                  <div>
-                    <h5 className="font-semibold">Identity</h5>
-                    <div className="text-sm text-gray-600">Lesson 02</div>
-                  </div>
-                  <div className="flex items-center bg-blue-500 text-white px-2 py-1 rounded text-sm">
-                    <Clock size={14} className="mr-1" />
-                    1 Hour
-                  </div>
-                </div>
-                
-                <div className="flex justify-between items-start">
-                  <div>
-                    <h5 className="font-semibold">Exercise</h5>
-                    <div className="text-sm text-gray-600">Lesson 03</div>
-                  </div>
-                  <div className="flex items-center text-gray-600 text-sm">
-                    <Clock size={14} className="mr-1" />
-                    45 Minutes
-                  </div>
-                </div>
-              </div>
-            </div>
-            
-            {/* Other modules... */}
-            {/* Module 02 */}
-            <div className="p-6 border-b md:border-r border-blue-200">
-              <h3 className="text-5xl font-bold text-center mb-4">02</h3>
-              <h4 className="text-xl font-semibold text-center mb-6">Past Present</h4>
-              
-              <div className="space-y-6">
-                <div className="flex justify-between items-start">
-                  <div>
-                    <h5 className="font-semibold">Introduction</h5>
-                    <div className="text-sm text-gray-600">Lesson 01</div>
-                  </div>
-                  <div className="flex items-center text-gray-600 text-sm">
-                    <Clock size={14} className="mr-1" />
-                    1 Hour
-                  </div>
-                </div>
-                
-                <div className="flex justify-between items-start">
-                  <div>
-                    <h5 className="font-semibold">Identity</h5>
-                    <div className="text-sm text-gray-600">Lesson 02</div>
-                  </div>
-                  <div className="flex items-center text-gray-600 text-sm">
-                    <Clock size={14} className="mr-1" />
-                    1 Hour
-                  </div>
-                </div>
-                
-                <div className="flex justify-between items-start">
-                  <div>
-                    <h5 className="font-semibold">Exercise</h5>
-                    <div className="text-sm text-gray-600">Lesson 03</div>
-                  </div>
-                  <div className="flex items-center text-gray-600 text-sm">
-                    <Clock size={14} className="mr-1" />
-                    45 Minutes
-                  </div>
-                </div>
-              </div>
-            </div>
-            
-            {/* Module 03 */}
-            <div className="p-6 border-b lg:border-b-0 lg:border-r border-blue-200">
-              <h3 className="text-5xl font-bold text-center mb-4">03</h3>
-              <h4 className="text-xl font-semibold text-center mb-6">Present Perfect Tense</h4>
-              
-              <div className="space-y-6">
-                <div className="flex justify-between items-start">
-                  <div>
-                    <h5 className="font-semibold">Introduction</h5>
-                    <div className="text-sm text-gray-600">Lesson 01</div>
-                  </div>
-                  <div className="flex items-center text-gray-600 text-sm">
-                    <Clock size={14} className="mr-1" />
-                    1 Hour
-                  </div>
-                </div>
-                
-                <div className="flex justify-between items-start">
-                  <div>
-                    <h5 className="font-semibold">Identity</h5>
-                    <div className="text-sm text-gray-600">Lesson 02</div>
-                  </div>
-                  <div className="flex items-center text-gray-600 text-sm">
-                    <Clock size={14} className="mr-1" />
-                    1 Hour
-                  </div>
-                </div>
-                
-                <div className="flex justify-between items-start">
-                  <div>
-                    <h5 className="font-semibold">Exercise</h5>
-                    <div className="text-sm text-gray-600">Lesson 03</div>
-                  </div>
-                  <div className="flex items-center text-gray-600 text-sm">
-                    <Clock size={14} className="mr-1" />
-                    1 Hour
-                  </div>
-                </div>
-              </div>
-            </div>
-            
-            {/* Module 04 */}
-            <div className="p-6 border-blue-200">
-              <h3 className="text-5xl font-bold text-center mb-4">04</h3>
-              <h4 className="text-xl font-semibold text-center mb-6">Past Perfect Tense</h4>
-              
-              <div className="space-y-6">
-                <div className="flex justify-between items-start">
-                  <div>
-                    <h5 className="font-semibold">Introduction</h5>
-                    <div className="text-sm text-gray-600">Lesson 01</div>
-                  </div>
-                  <div className="flex items-center text-gray-600 text-sm">
-                    <Clock size={14} className="mr-1" />
-                    1 Hour
-                  </div>
-                </div>
-                
-                <div className="flex justify-between items-start">
-                  <div>
-                    <h5 className="font-semibold">Identity</h5>
-                    <div className="text-sm text-gray-600">Lesson 02</div>
-                  </div>
-                  <div className="flex items-center text-gray-600 text-sm">
-                    <Clock size={14} className="mr-1" />
-                    1 Hour
-                  </div>
-                </div>
-                
-                <div className="flex justify-between items-start">
-                  <div>
-                    <h5 className="font-semibold">Exercise</h5>
-                    <div className="text-sm text-gray-600">Lesson 03</div>
-                  </div>
-                  <div className="flex items-center text-gray-600 text-sm">
-                    <Clock size={14} className="mr-1" />
-                    45 Minutes
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      {/* Instructor Section */}
-      <div className="px-4 py-8 border-t border-gray-200">
-        <div className="flex flex-col md:flex-row">
-          <div className="md:w-1/4 mb-4 md:mb-0">
-            <div className="relative">
-              <img 
-                src="/api/placeholder/200/200" 
-                alt="Julian Melanson"
-                className="w-32 h-32 rounded-full object-cover border-2 border-purple-500"
-              />
-              <div className="absolute bottom-0 right-6 bg-yellow-400 rounded-full p-1">
-                <Award size={16} className="text-white" />
-              </div>
-            </div>
+      {/* Course Content Section */}
+      <div className="py-8">
+        <h2 className="text-2xl font-bold mb-6">Course Content</h2>
+        <div className="bg-gray-50 rounded-lg p-6">
+          <div className="mb-4 text-sm text-gray-600">
+            {totalEpisodes} episodes • {formatDuration(totalDuration)} total length
           </div>
           
-          <div className="md:w-3/4">
-            <h2 className="text-2xl font-bold text-purple-600">Julian Melanson</h2>
-            <p className="text-gray-600 mb-4">AI Expert & Bestselling Instructor</p>
-            
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
-              <div className="flex items-center">
-                <Star size={16} className="text-gray-700 mr-2" />
-                <span>4.5 Instructor Rating</span>
+          <div className="space-y-3">
+            {course.courseDetails && course.courseDetails.map((episode) => (
+              <div key={episode.id} className="flex items-center justify-between p-3 bg-white rounded border hover:shadow-sm transition-shadow">
+                <div className="flex items-center">
+                  <Play className="w-4 h-4 text-gray-400 mr-3" />
+                  <span className="font-medium">Episode {episode.episodeNumber}</span>
+                  {episode.isPreview && (
+                    <span className="ml-2 bg-green-100 text-green-800 text-xs px-2 py-1 rounded-full">
+                      Free Preview
+                    </span>
+                  )}
+                </div>
+                <div className="flex items-center text-gray-500 text-sm">
+                  <Clock className="w-4 h-4 mr-1" />
+                  {episode.duration}m
+                </div>
               </div>
-              <div className="flex items-center">
-                <Users size={16} className="text-gray-700 mr-2" />
-                <span>58,284 Reviews</span>
-              </div>
-              <div className="flex items-center">
-                <Users size={16} className="text-gray-700 mr-2" />
-                <span>478,120 Students</span>
-              </div>
-              <div className="flex items-center">
-                <BookOpen size={16} className="text-gray-700 mr-2" />
-                <span>7 Courses</span>
-              </div>
-            </div>
-            
-            <div className="space-y-4">
-              <p>
-                My name is Julian, and I am a full-time teacher and bestselling instructor who is truly dedicated to helping students realize their <strong>full potential</strong>. With the honor of teaching over <strong>450,000</strong> students from <strong>130+</strong> countries across the globe, I have honed my skills and become an expert in my field.
-              </p>
-              
-              {showMoreInstructor && (
-                <p>
-                  My focus is on unlocking your potential to <em>10x your creativity and productivity</em> with <strong>AI tools and filmmaking techniques</strong> I've learned over the years creating countless amounts of content for clients from many industries.
-                </p>
-              )}
-              
-              <button 
-                onClick={() => setShowMoreInstructor(!showMoreInstructor)}
-                className="flex items-center text-purple-600 font-medium"
-              >
-                {showMoreInstructor ? 'Show less' : 'Show more'} 
-                <ChevronDown size={16} className={`ml-1 transform ${showMoreInstructor ? 'rotate-180' : ''}`} />
-              </button>
-            </div>
+            ))}
           </div>
         </div>
       </div>
 
       {/* Related Courses */}
-      <div className="px-4 py-8 border-t border-gray-200">
-        <h2 className="text-2xl font-bold mb-6">Related Course</h2>
-        
-        <div className="relative border border-blue-200 rounded-lg p-6">
-          <div className="flex overflow-hidden">
-            <div className="flex space-x-4 transition-transform duration-300" style={{ transform: `translateX(-${currentSlide * 25}%)` }}>
-              {relatedCourses.map((course) => (
-                <div key={course.id} className="min-w-[270px] border border-gray-200 rounded-lg overflow-hidden">
-                  <div className="relative">
-                    <img 
-                      src={course.image || `/api/placeholder/270/150`} 
-                      alt={course.title}
-                      className="w-full h-36 object-cover"
-                    />
-                    <div className="absolute top-2 left-2 bg-red-500 text-white px-1 py-0.5 text-xs">HOT</div>
-                    <div className="absolute top-2 right-2 bg-yellow-400 text-white px-1 py-0.5 text-xs rounded">✓</div>
-                    <div className="absolute bottom-2 right-2 bg-blue-600 text-white text-xs px-2 py-1 rounded-full">
-                      {course.level}
-                    </div>
-                  </div>
-                  
-                  <div className="p-3">
-                    <div className="flex items-center mb-1">
-                      <div className="flex text-yellow-400 text-sm">
-                        <span>★</span>
-                        <span className="text-gray-600 ml-1">{course.rating} ({course.reviews})</span>
-                      </div>
-                    </div>
-                    
-                    <h3 className="font-bold text-lg mb-1">{course.title}</h3>
-                    <p className="text-gray-500 text-sm mb-2">{course.author}</p>
-                    
-                    <div className="flex justify-between items-center">
-                      <div>
-                        <span className="font-bold text-lg">${course.price}</span>
-                        <span className="text-gray-400 text-sm line-through ml-2">${course.originalPrice}</span>
-                      </div>
-                    </div>
+      <div className="py-8 border-t border-gray-200">
+        <div className="flex items-center justify-between mb-6">
+          <h2 className="text-2xl font-bold">Related Courses</h2>
+          <div className="flex gap-2">
+            <button 
+              onClick={handlePrevSlide}
+              className="p-2 rounded-full border hover:bg-gray-50 transition-colors"
+              disabled={currentSlide === 0}
+            >
+              <ChevronLeft className="w-5 h-5" />
+            </button>
+            <button 
+              onClick={handleNextSlide}
+              className="p-2 rounded-full border hover:bg-gray-50 transition-colors"
+              disabled={currentSlide >= relatedCourses.length - 4}
+            >
+              <ChevronRight className="w-5 h-5" />
+            </button>
+          </div>
+        </div>
+
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+          {relatedCourses.slice(currentSlide, currentSlide + 4).map((relatedCourse) => (
+            <div key={relatedCourse.id} className="bg-white border rounded-lg overflow-hidden hover:shadow-lg transition-shadow">
+              <div className="aspect-video bg-gray-200">
+                <img 
+                  src={relatedCourse.image} 
+                  alt={relatedCourse.title}
+                  className="w-full h-full object-cover"
+                />
+              </div>
+              <div className="p-4">
+                <h3 className="font-semibold mb-2">{relatedCourse.title}</h3>
+                <div className="flex items-center mb-2 text-sm">
+                  <Star className="w-4 h-4 text-yellow-400 mr-1" />
+                  <span>{relatedCourse.rating}</span>
+                  <span className="text-gray-500 ml-1">({relatedCourse.reviews})</span>
+                </div>
+                <div className="text-sm text-gray-600 mb-2">by {relatedCourse.author}</div>
+                <div className="flex items-center justify-between">
+                  <div>
+                    <span className="font-bold text-blue-600">${relatedCourse.price}</span>
+                    <span className="text-gray-400 line-through ml-2 text-sm">${relatedCourse.originalPrice}</span>
                   </div>
                 </div>
-              ))}
+              </div>
             </div>
-          </div>
-          
-          <button 
-            onClick={handlePrevSlide}
-            className="absolute top-1/2 left-2 transform -translate-y-1/2 bg-white rounded-full w-8 h-8 flex items-center justify-center shadow-md text-blue-600"
-          >
-            <ChevronLeft size={20} />
-          </button>
-          
-          <button 
-            onClick={handleNextSlide}
-            className="absolute top-1/2 right-2 transform -translate-y-1/2 bg-blue-600 rounded-full w-8 h-8 flex items-center justify-center shadow-md text-white"
-          >
-            <ChevronRight size={20} />
-          </button>
+          ))}
         </div>
       </div>
     </div>
   );
-}
+};
 
 export default Detail;
