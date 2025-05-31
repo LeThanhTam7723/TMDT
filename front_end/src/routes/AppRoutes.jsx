@@ -11,7 +11,6 @@ import Detail from '../Pages/Detail';
 import UserInfo from '../Pages/UserInfo';
 import CourseVideo from '../Pages/CourseVideo';
 
-
 function AppRoutes() {
    return (
     <Suspense fallback={<div>Đang tải trang...</div>}>
