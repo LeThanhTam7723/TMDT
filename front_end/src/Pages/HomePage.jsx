@@ -81,7 +81,7 @@ const HomePage = () => {
   const fetchAllCourses = async () => {
     try {
       const response = await axiosClient.get('/courses', 
-       
+      
       );
 
       if (response.data && response.data.code === 200 && Array.isArray(response.data.result)) {
