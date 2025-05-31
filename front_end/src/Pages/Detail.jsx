@@ -96,11 +96,8 @@ const Detail = () => {
 
       try {
         // Fixed: Use 'id' instead of 'product.id'
-        const response = await axiosClient.get(`/courses/${id}`, {
-          headers: {
-            Authorization: `Bearer eyJhbGciOiJIUzUxMiJ9.eyJpc3MiOiJDRFdFRC5jb20iLCJzdWIiOiJhZG1pbiIsImV4cCI6MTc0ODYwOTU0OSwiaWF0IjoxNzQ4NjA1OTQ5LCJqdGkiOiJkZGNhYjA2OC0zYWQ4LTRjY2ItODk0ZC05M2I5ZTFiZmY5YjkiLCJzY29wZSI6IkFETUlOIn0.DoD0ShphS5MS7qZjxSOhpHLLmzULim1_9b51k1dcyF0sK01PdOto-LvspRtbs6p5uw0DFDAl5T9lpXOHClCDFA` // Replace with actual token logic
-          }
-        });
+        const response = await axiosClient.get(`/courses/${id}`, 
+         );
 
         // Check if response has the expected structure
         if (response.data && response.data.code === 200 && response.data.result) {

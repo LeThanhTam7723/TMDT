@@ -80,11 +80,9 @@ const HomePage = () => {
   useEffect(() => {
   const fetchAllCourses = async () => {
     try {
-      const response = await axiosClient.get('/courses', {
-        headers: {
-          Authorization: `Bearer eyJhbGciOiJIUzUxMiJ9.eyJpc3MiOiJDRFdFRC5jb20iLCJzdWIiOiJhZG1pbiIsImV4cCI6MTc0ODYwOTU0OSwiaWF0IjoxNzQ4NjA1OTQ5LCJqdGkiOiJkZGNhYjA2OC0zYWQ4LTRjY2ItODk0ZC05M2I5ZTFiZmY5YjkiLCJzY29wZSI6IkFETUlOIn0.DoD0ShphS5MS7qZjxSOhpHLLmzULim1_9b51k1dcyF0sK01PdOto-LvspRtbs6p5uw0DFDAl5T9lpXOHClCDFA`
-        }
-      });
+      const response = await axiosClient.get('/courses', 
+       
+      );
 
       if (response.data && response.data.code === 200 && Array.isArray(response.data.result)) {
         console.log("Fetched courses:", response.data.result);
