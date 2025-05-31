@@ -2,64 +2,92 @@ import React, { useState } from "react";
 import { FiShoppingCart, FiHeart } from "react-icons/fi";
 import { useNavigate } from "react-router-dom";
 
+// Dummy star renderer
+const renderStars = (rating) => {
+  const stars = [];
+  for (let i = 0; i < 5; i++) {
+    stars.push(
+      <svg
+        key={i}
+        className={`w-4 h-4 fill-current ${i < rating ? 'text-yellow-400' : 'text-gray-600'}`}
+        viewBox="0 0 20 20"
+      >
+        <path d="M10 15l-5.878 3.09L5.4 12.18.4 7.91l6.09-.89L10 2l2.51 5.02 6.09.89-4.999 4.27 1.279 5.91z" />
+      </svg>
+    );
+  }
+  return <div className="flex">{stars}</div>;
+};
+
 const ProductCard = ({ product }) => {
   const [isWishlisted, setIsWishlisted] = useState(false);
   const navigate = useNavigate();
-  
+
   const handleClick = () => {
-    // Navigate to the detail page with the product id
     navigate(`/detail/${product.id}`);
   };
 
   const toggleWishlist = (e) => {
-    e.stopPropagation(); // Prevent card click event
+    e.stopPropagation();
     setIsWishlisted(!isWishlisted);
   };
 
   const addToCart = (e) => {
-    e.stopPropagation(); // Prevent card click event
-    // Add to cart logic here
+    e.stopPropagation();
     console.log("Added to cart:", product.name);
   };
 
   return (
     <div
-      className="bg-white dark:bg-gray-700 rounded-lg overflow-hidden shadow-lg group cursor-pointer"
+      className="bg-gradient-to-b from-gray-800 to-gray-900 rounded-xl overflow-hidden shadow-lg hover:shadow-2xl transition-all duration-300 border border-gray-700 cursor-pointer"
       onClick={handleClick}
     >
-      <div className="relative overflow-hidden">
+      <div className="relative">
         <img
           src={product.image || `/api/placeholder/400/300`}
           alt={product.name}
-          className="w-full h-48 object-cover transform group-hover:scale-110 transition duration-500"
+          className="w-full h-48 object-cover"
         />
+        <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black to-transparent h-20"></div>
         {product.discount > 0 && (
-          <div className="absolute top-2 right-2 bg-red-500 text-white px-2 py-1 rounded">
+          <div className="absolute top-2 right-2 bg-red-500 text-white px-2 py-1 rounded text-xs">
             -{product.discount}%
           </div>
         )}
       </div>
-      <div className="p-4">
-        <h3 className="text-lg font-semibold mb-2">{product.name}</h3>
-        <div className="flex items-center space-x-2">
-          <span className="text-red-500 font-bold">${product.price}</span>
-          {product.originalPrice && (
-            <span className="text-gray-400 line-through text-sm">${product.originalPrice}</span>
-          )}
+      <div className="p-5 text-white">
+        <h3 className="font-semibold text-lg mb-2">{product.name}</h3>
+        <p className="text-gray-300 mb-2 flex items-center">
+          <span className="inline-block w-2 h-2 rounded-full bg-green-500 mr-2"></span>
+          {product.seller || "By Admin"}
+        </p>
+        <div className="flex items-center mb-3">
+          {renderStars(product.rating || 4)}
+          <span className="ml-2 text-gray-400 text-sm">({product.rating || 4}.0)</span>
         </div>
-        <div className="flex items-center justify-between mt-2">
-          <button 
-            className="flex items-center bg-red-500 text-white px-4 py-2 rounded-full hover:bg-red-600 transition duration-300"
-            onClick={addToCart}
-          >
-            <FiShoppingCart className="mr-2" />
-            Add to Cart
-          </button>
-          <button onClick={toggleWishlist}>
-            <FiHeart 
-              className={`w-5 h-5 ${isWishlisted ? 'text-red-500 fill-current' : ''}`} 
-            />
-          </button>
+        <div className="flex justify-between items-center">
+          <p className="font-bold text-red-400">
+            ${product.price}
+            {product.originalPrice && (
+              <span className="ml-2 text-sm line-through text-gray-400">
+                ${product.originalPrice}
+              </span>
+            )}
+          </p>
+          <div className="flex items-center gap-2">
+            <button
+              onClick={addToCart}
+              className="bg-gradient-to-r from-blue-600 to-blue-700 text-white px-4 py-2 rounded-lg hover:from-blue-700 hover:to-blue-800 transition-all duration-300 shadow-md"
+            >
+              <FiShoppingCart className="inline mr-1" />
+              Add
+            </button>
+            <button onClick={toggleWishlist}>
+              <FiHeart
+                className={`w-5 h-5 ${isWishlisted ? 'text-red-500 fill-current' : 'text-white'}`}
+              />
+            </button>
+          </div>
         </div>
       </div>
     </div>

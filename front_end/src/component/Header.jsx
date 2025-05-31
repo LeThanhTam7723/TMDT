@@ -89,7 +89,7 @@ const Header = () => {
     { name: "Shop", link: "/shop", hasDropdown: true },
     { name: "Pages", link: "#", hasDropdown: true },
     { name: "Blog", link: "/info" },
-    { name: "Contact", link: "#" },
+    { name: "Contact", link: "/video" },
   ];
 
   return (

@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-
+import ProductCard from "../component/ProductCard"; 
+import axiosClient from '../API/axiosClient'; // Adjust the path as needed
 // Using our own arrow icon components instead of FiChevron icons
 const ChevronLeft = () => (
   <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
@@ -17,6 +18,7 @@ const ChevronRight = () => (
 const HomePage = () => {
   const [currentSlide, setCurrentSlide] = useState(0);
   const [isAnimating, setIsAnimating] = useState(false);
+  const [products, setProducts] = useState([]);
   const navigate = useNavigate();
 
   // Better banner images with different gradients and themes
@@ -75,6 +77,27 @@ const HomePage = () => {
       image: "https://images.unsplash.com/photo-1522202176988-66273c2fd55f?ixlib=rb-4.0.3"
     }
   ];
+  useEffect(() => {
+  const fetchAllCourses = async () => {
+    try {
+      const response = await axiosClient.get('/courses', 
+       
+      );
+
+      if (response.data && response.data.code === 200 && Array.isArray(response.data.result)) {
+        console.log("Fetched courses:", response.data.result);
+        // Nếu bạn muốn lưu vào state thì tạo state setCourses và gọi nó ở đây
+        setProducts(response.data.result);
+      } else {
+        throw new Error("Invalid response format");
+      }
+    } catch (error) {
+      console.error("Failed to fetch all courses:", error.message || error);
+    }
+  };
+
+  fetchAllCourses();
+}, []);
 
   // Auto-rotate banners
   useEffect(() => {
@@ -96,8 +119,8 @@ const HomePage = () => {
     setTimeout(() => setIsAnimating(false), 500);
   };
 
-  const handleProductClick = (courseId) => {
-    navigate(`/product-detail/${courseId}`);
+  const handleProductClick = () => {
+    navigate(`/detail`);
   };
 
   const renderStars = (rating) => {
@@ -182,50 +205,16 @@ const HomePage = () => {
 
       {/* Recommend Section with Enhanced Cards */}
       <section className="container mx-auto px-4 py-12">
-        <div className="flex justify-between items-center mb-8">
-          <h2 className="text-3xl font-bold">Recommend for you</h2>
-          <a href="#" className="text-blue-400 hover:text-blue-300 transition">View all</a>
-        </div>
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-          {courses.map((course) => (
-            <div 
-              key={course.id} 
-              className="bg-gradient-to-b from-gray-800 to-gray-900 rounded-xl overflow-hidden shadow-lg hover:shadow-2xl transition-all duration-300 border border-gray-700"
-            >
-              <div className="relative">
-                <img
-                  src={course.image}
-                  alt={course.name}
-                  className="w-full h-48 object-cover"
-                />
-                <div className="absolute top-2 right-2 bg-red-500 text-white text-xs font-bold px-2 py-1 rounded-lg">
-                  HOT
-                </div>
-              </div>
-              <div className="p-5">
-                <h3 className="font-semibold text-lg mb-2 text-white">{course.name}</h3>
-                <p className="text-gray-300 mb-2 flex items-center">
-                  <span className="inline-block w-2 h-2 rounded-full bg-green-500 mr-2"></span>
-                  {course.teacher}
-                </p>
-                <div className="flex items-center mb-3">
-                  {renderStars(course.rating)}
-                  <span className="ml-2 text-gray-400 text-sm">({course.rating}.0)</span>
-                </div>
-                <div className="flex justify-between items-center">
-                  <p className="font-bold text-red-400">{course.price}</p>
-                  <button 
-                    onClick={() => handleProductClick(course.id)}
-                    className="bg-gradient-to-r from-blue-600 to-blue-700 text-white px-4 py-2 rounded-lg hover:from-blue-700 hover:to-blue-800 transition-all duration-300 shadow-md"
-                  >
-                    Add to Cart
-                  </button>
-                </div>
-              </div>
-            </div>
-          ))}
-        </div>
-      </section>
+  <div className="flex justify-between items-center mb-8">
+    <h2 className="text-3xl font-bold">Recommend for you</h2>
+    <a href="#" className="text-blue-400 hover:text-blue-300 transition">View all</a>
+  </div>
+  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+    {products.map((product) => (
+      <ProductCard key={product.id} product={product} />
+    ))}
+  </div>
+</section>
 
       {/* Popular for Beginner Section with Enhanced Cards */}
       <section className="container mx-auto px-4 py-12 bg-black/30 rounded-lg my-8">

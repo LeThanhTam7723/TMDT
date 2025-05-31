@@ -29,7 +29,20 @@ const routes = [
   {
     path: '/profile',
     component: lazy(()=> import('../Pages/UserInfo.jsx'))  ,
+  },
+  {
+    path: '/detail/:id',
+    component: lazy(()=> import('../Pages/Detail.jsx'))  ,
+  },
+  {
+    path: '/info',
+    component: lazy(()=> import('../Pages/UserInfo.jsx'))  ,
+  },
+   {
+    path: '/video',
+    component: lazy(()=> import('../Pages/CourseVideo.jsx'))  ,
   }
+
 ];
 
 export default routes;
