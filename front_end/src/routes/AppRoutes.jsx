@@ -10,8 +10,6 @@ import AuthPage from '../Pages/Authentication'
 import Detail from '../Pages/Detail';
 import UserInfo from '../Pages/UserInfo';
 import CourseVideo from '../Pages/CourseVideo';
-import 
-
 
 function AppRoutes() {
    return (
