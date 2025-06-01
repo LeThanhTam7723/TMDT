@@ -37,6 +37,9 @@ const ProductCard = ({ product }) => {
     console.log("Added to cart:", product.name);
   };
 
+  const addToWishlist = () => {
+  }
+
   return (
     <div
       className="bg-gradient-to-b from-gray-800 to-gray-900 rounded-xl overflow-hidden shadow-lg hover:shadow-2xl transition-all duration-300 border border-gray-700 cursor-pointer"
