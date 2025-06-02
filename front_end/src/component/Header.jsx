@@ -5,6 +5,7 @@ import { MdEmail, MdPhone, MdKeyboardArrowDown } from "react-icons/md";
 import { useNavigate, Link } from "react-router-dom";
 import logo from "../assets/images/logo.jpg";
 import { introspect, logOutApi } from "../API/AuthService";
+import { useProduct } from '../context/ProductContext';
 
 
 const Header = () => {
@@ -12,7 +13,10 @@ const Header = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isOpen, setIsOpen] = useState(false);
   const [cartCount, setCartCount] = useState(0);
-  const [wishlistCount, setWishlistCount] = useState(0);
+  const [wishlistCount, setWishlistCount] = useState(() => {
+    const savedWishlist = localStorage.getItem('wishlist');
+    return savedWishlist ? JSON.parse(savedWishlist).length : 0;
+  });
   //Tìm kiếm giọng nói
   const [isListening, setIsListening] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
@@ -91,6 +95,55 @@ const Header = () => {
     { name: "Blog", link: "/info" },
     { name: "Contact", link: "/video" },
   ];
+
+  useEffect(() => {
+    const updateWishlistCount = () => {
+      const savedWishlist = localStorage.getItem('wishlist');
+      setWishlistCount(savedWishlist ? JSON.parse(savedWishlist).length : 0);
+    };
+
+    // Update count when localStorage changes
+    window.addEventListener('storage', updateWishlistCount);
+    
+    // Initial count
+    updateWishlistCount();
+
+    return () => {
+      window.removeEventListener('storage', updateWishlistCount);
+    };
+  }, []);
+
+  const { cart } = useProduct ? useProduct() : { cart: [] };
+
+  useEffect(() => {
+    // Update cart count when cart changes
+    if (cart && Array.isArray(cart)) {
+      setCartCount(cart.reduce((sum, item) => sum + (item.quantity || 1), 0));
+    } else {
+      // Fallback: get from localStorage
+      const savedCart = localStorage.getItem('cart');
+      if (savedCart) {
+        const cartArr = JSON.parse(savedCart);
+        setCartCount(cartArr.reduce((sum, item) => sum + (item.quantity || 1), 0));
+      } else {
+        setCartCount(0);
+      }
+    }
+  }, [cart]);
+
+  useEffect(() => {
+    const updateCartCount = () => {
+      const savedCart = localStorage.getItem('cart');
+      if (savedCart) {
+        const cartArr = JSON.parse(savedCart);
+        setCartCount(cartArr.reduce((sum, item) => sum + (item.quantity || 1), 0));
+      } else {
+        setCartCount(0);
+      }
+    };
+    window.addEventListener('storage', updateCartCount);
+    return () => window.removeEventListener('storage', updateCartCount);
+  }, []);
 
   return (
      <header className="sticky top-0 z-50 bg-gray-900 shadow-md">
@@ -199,7 +252,10 @@ const Header = () => {
                 </div>
                 {/* Wishlist Icon */}
                 <div className="relative">
-                  <FiHeart className="text-2xl text-gray-300 hover:text-blue-400 cursor-pointer" />
+                  <FiHeart 
+                    className="text-2xl text-gray-300 hover:text-blue-400 cursor-pointer" 
+                    onClick={() => navigate('/wishlist')}
+                  />
                   <span className="absolute -top-2 -right-2 bg-blue-600 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center">
                     {wishlistCount}
                   </span>
