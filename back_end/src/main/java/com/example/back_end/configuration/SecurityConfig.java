@@ -29,8 +29,9 @@ public class SecurityConfig {
     private final String[] PUBLIC_ENDPOINTS_POST_PERMITALL = {"users/createUser",
             "auth/login","auth/introspect","/verifyRegister/**","users/existUser"};
     private final String[] PUBLIC_ENDPOINTS_GET_PERMITALL = {"/auth/verifyAccount","users/id/**","/courses/**"};
-    private final String[] PUBLIC_ENDPOINTS_GET = {"/sendEmail","/users/all"};
-    private final String[] PUBLIC_ENDPOINTS_LOGIN = {"/auth/logout"};
+    private final String[] PUBLIC_ENDPOINTS_GET = {"/sendEmail","/users/all","/favorites/idUser/**"};
+    private final String[] PUBLIC_ENDPOINTS_LOGIN = {"/auth/logout","/favorites/add"};
+    private final String[] PUBLIC_ENDPOINTS_DELETE = {"/favorites/remove"};
     @Value("${jwt.signer-key}")
     protected String SIGNER_KEY;
     @Autowired
@@ -52,8 +53,9 @@ public class SecurityConfig {
                 .authorizeHttpRequests(request -> request
                         .requestMatchers(HttpMethod.POST, PUBLIC_ENDPOINTS_POST_PERMITALL).permitAll()
                         .requestMatchers(HttpMethod.GET, PUBLIC_ENDPOINTS_GET_PERMITALL).permitAll()
-                        .requestMatchers(HttpMethod.GET, PUBLIC_ENDPOINTS_GET).permitAll()
-                        .requestMatchers(HttpMethod.POST, PUBLIC_ENDPOINTS_LOGIN).permitAll()
+                        .requestMatchers(HttpMethod.GET, PUBLIC_ENDPOINTS_GET).authenticated()
+                        .requestMatchers(HttpMethod.POST, PUBLIC_ENDPOINTS_LOGIN).authenticated()
+                        .requestMatchers(HttpMethod.DELETE, PUBLIC_ENDPOINTS_DELETE).authenticated()
                         .anyRequest().authenticated()
                 )
                 .oauth2ResourceServer(oauth2 -> oauth2.jwt(jwtConfigurer -> jwtConfigurer.decoder(jwtDecoder())))

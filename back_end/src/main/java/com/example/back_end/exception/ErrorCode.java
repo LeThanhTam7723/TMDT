@@ -18,6 +18,7 @@ public enum ErrorCode {
     UNAUTHORIZED(1007, "You do not have permission", HttpStatus.FORBIDDEN),
     INVALID_DOB(1008, "Your age must be at least {min}", HttpStatus.BAD_REQUEST),
     INACTIVE_ACC(1009,"Your account had been clock", HttpStatus.LOCKED),
+    COURSE_NOT_FOUND(1010, "Can not find the course", HttpStatus.NOT_FOUND),
     ;
 
     private final int code;
