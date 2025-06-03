@@ -1,276 +1,440 @@
 import React, { useState, useEffect } from "react";
-import { FiSearch, FiShoppingCart, FiUser, FiMenu, FiX, FiHeart, FiMail } from "react-icons/fi";
-import { FaFacebookF, FaTwitter, FaInstagram } from "react-icons/fa";
-import { motion, AnimatePresence } from "framer-motion";
-import ProductCard from "../component/ProductCard";
+import { FiHeart, FiSearch, FiFilter, FiX, FiClock, FiUsers, FiBook, FiDollarSign, FiShoppingCart } from "react-icons/fi";
+import { motion } from "framer-motion";
+import { useNavigate } from "react-router-dom";
+import { useProduct } from "../context/ProductContext";
 
-const Shop = () => {
-  const variants = {
-    enter: (direction) => ({
-      x: direction > 0 ? 1000 : -1000,
-      opacity: 0
-    }),
-    center: {
-      zIndex: 1,
-      x: 0,
-      opacity: 1
-    },
-    exit: (direction) => ({
-      zIndex: 0,
-      x: direction < 0 ? 1000 : -1000,
-      opacity: 0
-    })
-  };
-
-  // Danh sách khóa học tiếng Anh đa dạng
-  const products = [
-    {
-      id: 1,
-      name: "IELTS Intensive",
-      price: 79.99,
-      image: "https://images.unsplash.com/photo-1513258496099-48168024aec0?auto=format&fit=crop&w=600&q=80",
-      category: "IELTS",
-      age: "13-18 year old",
-      rating: 4.8,
-      ratingCount: 320,
-      owner: "Ms. Emma",
-      description: "Boost your IELTS score with intensive practice and expert tips.",
-      totalHour: 30,
-      lessons: 20
-    },
-    {
-      id: 2,
-      name: "Business English Pro",
-      price: 89.99,
-      image: "https://images.unsplash.com/photo-1503676382389-4809596d5290?auto=format&fit=crop&w=600&q=80",
-      category: "Business English",
-      age: "18+ year old",
-      rating: 4.7,
-      ratingCount: 210,
-      owner: "Mr. John",
-      description: "Master business communication and professional English skills.",
-      totalHour: 28,
-      lessons: 18
-    },
-    {
-      id: 3,
-      name: "English for Kids",
-      price: 59.99,
-      image: "https://images.unsplash.com/photo-1522075469751-3a6694fb2f61?auto=format&fit=crop&w=600&q=80",
-      category: "Kids English",
-      age: "4-12 year old",
-      rating: 4.9,
-      ratingCount: 400,
-      owner: "Ms. Linda",
-      description: "Fun and interactive English lessons for children.",
-      totalHour: 22,
-      lessons: 15
-    },
-    {
-      id: 4,
-      name: "Conversation Mastery",
-      price: 69.99,
-      image: "https://images.unsplash.com/photo-1464983953574-0892a716854b?auto=format&fit=crop&w=600&q=80",
-      category: "Conversation",
-      age: "18+ year old",
-      rating: 4.6,
-      ratingCount: 180,
-      owner: "Mr. David",
-      description: "Speak English confidently in daily and travel situations.",
-      totalHour: 20,
-      lessons: 12
-    },
-    {
-      id: 5,
-      name: "Grammar Essentials",
-      price: 49.99,
-      image: "https://images.unsplash.com/photo-1519125323398-675f0ddb6308?auto=format&fit=crop&w=600&q=80",
-      category: "Grammar",
-      age: "13-18 year old",
-      rating: 4.5,
-      ratingCount: 150,
-      owner: "Ms. Sarah",
-      description: "Solidify your English grammar foundation with easy explanations.",
-      totalHour: 18,
-      lessons: 10
-    },
-    {
-      id: 6,
-      name: "General English Skills",
-      price: 64.99,
-      image: "https://images.unsplash.com/photo-1503676382389-4809596d5290?auto=format&fit=crop&w=600&q=80",
-      category: "General English",
-      age: "18+ year old",
-      rating: 4.7,
-      ratingCount: 220,
-      owner: "Mr. Alex",
-      description: "Improve your overall English for work, study, and life.",
-      totalHour: 25,
-      lessons: 14
-    }
-  ];
-
-  // Danh sách category mới với ảnh ví dụ
-  const categoryOptions = [
-    { name: "General English", img: "https://img.icons8.com/color/48/000000/english.png" },
-    { name: "IELTS", img: "https://img.icons8.com/color/48/000000/ielts.png" },
-    { name: "Business English", img: "https://img.icons8.com/color/48/000000/business.png" },
-    { name: "Kids English", img: "https://img.icons8.com/color/48/000000/children.png" },
-    { name: "Conversation", img: "https://img.icons8.com/color/48/000000/conference-call.png" },
-    { name: "Grammar", img: "https://img.icons8.com/color/48/000000/grammar.png" }
-  ];
-
-  const [filteredProducts, setFilteredProducts] = useState(products);
-  const [filters, setFilters] = useState({
-    category: "",
-    age: "",
-    sortBy: ""
-  });
+const Store = () => {
+  const { products, toggleWishlist, getWishlistProducts, addToCart } = useProduct();
   const [searchTerm, setSearchTerm] = useState("");
-  const [isDarkMode, setIsDarkMode] = useState(false);
-  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
-  const [currentPage, setCurrentPage] = useState(1);
-  const [productsPerPage] = useState(8);
-  const [direction, setDirection] = useState(0);
+  const [notification, setNotification] = useState({ show: false, message: '', type: '' });
+  const [showFilters, setShowFilters] = useState(false);
+  const [selectedCategories, setSelectedCategories] = useState([]);
+  const [selectedLevels, setSelectedLevels] = useState([]);
+  const [selectedAges, setSelectedAges] = useState([]);
+  const [selectedDurations, setSelectedDurations] = useState([]);
+  const [selectedPrices, setSelectedPrices] = useState([]);
+  const [selectedFeatures, setSelectedFeatures] = useState([]);
+  const [selectedRatings, setSelectedRatings] = useState([]);
+  const navigate = useNavigate();
 
-  // Filter options cho khóa học
-  const filterOptions = {
-    categories: categoryOptions.map(c => c.name),
-    ages: ["4-12 year old", "13-18 year old", "18+ year old"],
-    sortOptions: ["Most Popular", "New", "Trending"]
+  const showNotification = (message, type) => {
+    setNotification({ show: true, message, type });
+    setTimeout(() => {
+      setNotification({ show: false, message: '', type: '' });
+    }, 2000);
   };
 
-  const handleFilterChange = (filterType, value) => {
-    setFilters(prev => ({
-      ...prev,
-      [filterType]: value
-    }));
-  };
-
-  // Lọc theo filter và search
-  useEffect(() => {
-    let result = products;
-    if (filters.category) {
-      result = result.filter(product => product.category === filters.category);
-    }
-    if (filters.age) {
-      result = result.filter(product => product.age === filters.age);
-    }
-    if (searchTerm) {
-      const lower = searchTerm.toLowerCase();
-      result = result.filter(product =>
-        product.name.toLowerCase().includes(lower) ||
-        product.description.toLowerCase().includes(lower)
+  const handleToggleWishlist = (productId, event) => {
+    event.preventDefault();
+    event.stopPropagation();
+    
+    toggleWishlist(productId);
+    const product = products.find(p => p.id === productId);
+    if (product) {
+      const isInWishlist = getWishlistProducts().some(p => p.id === productId);
+      showNotification(
+        isInWishlist 
+          ? `Added "${product.name}" to wishlist`
+          : `Removed "${product.name}" from wishlist`,
+        isInWishlist ? 'add' : 'remove'
       );
     }
-    setFilteredProducts(result);
-  }, [filters, searchTerm]);
+  };
+
+  const handleAddToCart = (productId, event) => {
+    event.preventDefault();
+    event.stopPropagation();
+    
+    const product = products.find(p => p.id === productId);
+    if (product) {
+      addToCart(product);
+      showNotification(`Added "${product.name}" to cart`, 'add');
+    }
+  };
+
+  const toggleCategory = (category) => {
+    setSelectedCategories(prev => 
+      prev.includes(category)
+        ? prev.filter(c => c !== category)
+        : [...prev, category]
+    );
+  };
+
+  const toggleLevel = (level) => {
+    setSelectedLevels(prev => 
+      prev.includes(level)
+        ? prev.filter(l => l !== level)
+        : [...prev, level]
+    );
+  };
+
+  const toggleAge = (age) => {
+    setSelectedAges(prev => 
+      prev.includes(age)
+        ? prev.filter(a => a !== age)
+        : [...prev, age]
+    );
+  };
+
+  const toggleDuration = (duration) => {
+    setSelectedDurations(prev => 
+      prev.includes(duration)
+        ? prev.filter(d => d !== duration)
+        : [...prev, duration]
+    );
+  };
+
+  const togglePrice = (price) => {
+    setSelectedPrices(prev => 
+      prev.includes(price)
+        ? prev.filter(p => p !== price)
+        : [...prev, price]
+    );
+  };
+
+  const toggleFeature = (feature) => {
+    setSelectedFeatures(prev => 
+      prev.includes(feature)
+        ? prev.filter(f => f !== feature)
+        : [...prev, feature]
+    );
+  };
+
+  const toggleRating = (rating) => {
+    setSelectedRatings(prev => 
+      prev.includes(rating)
+        ? prev.filter(r => r !== rating)
+        : [...prev, rating]
+    );
+  };
+
+  const clearFilters = () => {
+    setSelectedCategories([]);
+    setSelectedLevels([]);
+    setSelectedAges([]);
+    setSelectedDurations([]);
+    setSelectedPrices([]);
+    setSelectedFeatures([]);
+    setSelectedRatings([]);
+  };
+
+  const filteredProducts = products.filter(product => {
+    const matchesSearch = product.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                         product.description.toLowerCase().includes(searchTerm.toLowerCase());
+    const matchesCategory = selectedCategories.length === 0 || selectedCategories.includes(product.category);
+    const matchesLevel = selectedLevels.length === 0 || selectedLevels.includes(product.level);
+    const matchesAge = selectedAges.length === 0 || selectedAges.includes(product.age);
+    const matchesDuration = selectedDurations.length === 0 || selectedDurations.includes(product.duration);
+    const matchesPrice = selectedPrices.length === 0 || selectedPrices.some(price => {
+      const [min, max] = price.split('-').map(Number);
+      return product.price >= min && product.price <= max;
+    });
+    const matchesFeatures = selectedFeatures.length === 0 || 
+      selectedFeatures.every(feature => product.features.includes(feature));
+    const matchesRating = selectedRatings.length === 0 || 
+      selectedRatings.some(rating => product.rating >= Number(rating));
+
+    return matchesSearch && matchesCategory && matchesLevel && matchesAge && 
+           matchesDuration && matchesPrice && matchesFeatures && matchesRating;
+  });
+
+  const categories = [...new Set(products.map(p => p.category))];
+  const levels = [...new Set(products.map(p => p.level))];
+  const ages = [...new Set(products.map(p => p.age))];
+  const durations = [...new Set(products.map(p => p.duration))];
+  const allFeatures = [...new Set(products.flatMap(p => p.features))];
+  const priceRanges = [
+    { label: 'Under $20', value: '0-20' },
+    { label: '$20 - $50', value: '20-50' },
+    { label: '$50 - $100', value: '50-100' },
+    { label: 'Over $100', value: '100-1000' }
+  ];
+  const ratingOptions = ['4.5', '4.0', '3.5', '3.0'];
 
   return (
-    <div className={`min-h-screen ${isDarkMode ? "dark bg-gray-900 text-white" : "bg-white text-gray-900"}`}>
+    <div className="min-h-screen bg-white">
+      {/* Notification */}
+      {notification.show && (
+        <motion.div
+          initial={{ opacity: 0, y: -50 }}
+          animate={{ opacity: 1, y: 0 }}
+          exit={{ opacity: 0, y: -50 }}
+          className={`fixed top-4 right-4 px-4 py-2 rounded-lg shadow-lg z-50 ${
+            notification.type === 'add' ? 'bg-green-500' : 'bg-red-500'
+          } text-white`}
+        >
+          {notification.message}
+        </motion.div>
+      )}
+
       <div className="container mx-auto px-4 py-16">
-        <div className="flex gap-8">
-          <div className="w-64 bg-gray-800 p-4 rounded-lg shadow-lg">
-            <h3 className="text-xl font-bold mb-4 text-white">Filter by</h3>
-            <div className="space-y-4">
+        <div className="flex items-center justify-between mb-8">
+          <div className="flex items-center gap-4">
+            <h1 className="text-3xl font-bold text-gray-900">English Courses</h1>
+            <span className="px-3 py-1 bg-blue-100 text-blue-600 rounded-full text-sm font-medium">
+              {filteredProducts.length} {filteredProducts.length === 1 ? 'course' : 'courses'}
+            </span>
+          </div>
+          <div className="flex items-center gap-4">
+            <div className="relative">
+              <input
+                type="text"
+                placeholder="Search courses..."
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+                className="w-64 px-4 py-2 rounded-full border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              />
+              <FiSearch className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400" />
+            </div>
+            <button
+              onClick={() => setShowFilters(!showFilters)}
+              className="flex items-center gap-2 px-4 py-2 rounded-full border border-gray-300 hover:bg-gray-50 transition"
+            >
+              <FiFilter />
+              Filters
+            </button>
+          </div>
+        </div>
+
+        {/* Filters */}
+        {showFilters && (
+          <motion.div
+            initial={{ opacity: 0, height: 0 }}
+            animate={{ opacity: 1, height: 'auto' }}
+            exit={{ opacity: 0, height: 0 }}
+            className="mb-8 p-4 bg-white rounded-lg shadow border border-gray-200"
+          >
+            <div className="flex justify-between items-center mb-4">
+              <h3 className="text-lg font-semibold text-gray-900">Filters</h3>
+              <button
+                onClick={clearFilters}
+                className="text-sm text-gray-500 hover:text-gray-700 flex items-center gap-1"
+              >
+                <FiX className="w-4 h-4" />
+                Clear all
+              </button>
+            </div>
+            <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
               <div>
-                <h4 className="font-semibold mb-2 text-gray-100">Category</h4>
-                <div className="relative">
-                  <select 
-                    className="w-full p-2 border rounded dark:bg-gray-700 text-gray-100 bg-gray-900"
-                    onChange={(e) => handleFilterChange("category", e.target.value)}
-                    value={filters.category}
-                  >
-                    <option value="">All</option>
-                    {categoryOptions.map(cat => (
-                      <option key={cat.name} value={cat.name}>{cat.name}</option>
-                    ))}
-                  </select>
-                  {/* Hiển thị ảnh ví dụ cho category đã chọn */}
-                  {filters.category && (
-                    <div className="flex items-center mt-2">
-                      <img src={categoryOptions.find(c => c.name === filters.category)?.img} alt="icon" className="w-6 h-6 mr-2" />
-                      <span className="text-gray-100">{filters.category}</span>
-                    </div>
-                  )}
+                <h4 className="font-medium text-gray-900 mb-3 flex items-center gap-2">
+                  <FiBook className="w-4 h-4" />
+                  Course Type
+                </h4>
+                <div className="space-y-2">
+                  {categories.map(category => (
+                    <label key={category} className="flex items-center gap-2 cursor-pointer">
+                      <input
+                        type="checkbox"
+                        checked={selectedCategories.includes(category)}
+                        onChange={() => toggleCategory(category)}
+                        className="w-4 h-4 text-blue-600 rounded border-gray-300 focus:ring-blue-500"
+                      />
+                      <span className="text-sm text-gray-700">{category}</span>
+                    </label>
+                  ))}
                 </div>
               </div>
               <div>
-                <h4 className="font-semibold mb-2 text-gray-100">Age</h4>
-                <select 
-                  className="w-full p-2 border rounded dark:bg-gray-700 text-gray-100 bg-gray-900"
-                  onChange={(e) => handleFilterChange("age", e.target.value)}
-                  value={filters.age}
-                >
-                  <option value="">All</option>
-                  {filterOptions.ages.map(age => (
-                    <option key={age} value={age}>{age}</option>
-                  ))}
-                </select>
+                <h4 className="font-medium text-gray-900 mb-3 flex items-center gap-2">
+                  <FiUsers className="w-4 h-4" />
+                  Level & Age
+                </h4>
+                <div className="space-y-4">
+                  <div>
+                    <h5 className="text-sm font-medium text-gray-700 mb-2">Level</h5>
+                    <div className="space-y-2">
+                      {levels.map(level => (
+                        <label key={level} className="flex items-center gap-2 cursor-pointer">
+                          <input
+                            type="checkbox"
+                            checked={selectedLevels.includes(level)}
+                            onChange={() => toggleLevel(level)}
+                            className="w-4 h-4 text-blue-600 rounded border-gray-300 focus:ring-blue-500"
+                          />
+                          <span className="text-sm text-gray-700">{level}</span>
+                        </label>
+                      ))}
+                    </div>
+                  </div>
+                  <div>
+                    <h5 className="text-sm font-medium text-gray-700 mb-2">Age Group</h5>
+                    <div className="space-y-2">
+                      {ages.map(age => (
+                        <label key={age} className="flex items-center gap-2 cursor-pointer">
+                          <input
+                            type="checkbox"
+                            checked={selectedAges.includes(age)}
+                            onChange={() => toggleAge(age)}
+                            className="w-4 h-4 text-blue-600 rounded border-gray-300 focus:ring-blue-500"
+                          />
+                          <span className="text-sm text-gray-700">{age}</span>
+                        </label>
+                      ))}
+                    </div>
+                  </div>
+                </div>
+              </div>
+              <div>
+                <h4 className="font-medium text-gray-900 mb-3 flex items-center gap-2">
+                  <FiClock className="w-4 h-4" />
+                  Duration & Price
+                </h4>
+                <div className="space-y-4">
+                  <div>
+                    <h5 className="text-sm font-medium text-gray-700 mb-2">Duration</h5>
+                    <div className="space-y-2">
+                      {durations.map(duration => (
+                        <label key={duration} className="flex items-center gap-2 cursor-pointer">
+                          <input
+                            type="checkbox"
+                            checked={selectedDurations.includes(duration)}
+                            onChange={() => toggleDuration(duration)}
+                            className="w-4 h-4 text-blue-600 rounded border-gray-300 focus:ring-blue-500"
+                          />
+                          <span className="text-sm text-gray-700">{duration}</span>
+                        </label>
+                      ))}
+                    </div>
+                  </div>
+                  <div>
+                    <h5 className="text-sm font-medium text-gray-700 mb-2">Price Range</h5>
+                    <div className="space-y-2">
+                      {priceRanges.map(range => (
+                        <label key={range.value} className="flex items-center gap-2 cursor-pointer">
+                          <input
+                            type="checkbox"
+                            checked={selectedPrices.includes(range.value)}
+                            onChange={() => togglePrice(range.value)}
+                            className="w-4 h-4 text-blue-600 rounded border-gray-300 focus:ring-blue-500"
+                          />
+                          <span className="text-sm text-gray-700">{range.label}</span>
+                        </label>
+                      ))}
+                    </div>
+                  </div>
+                </div>
+              </div>
+              <div>
+                <h4 className="font-medium text-gray-900 mb-3 flex items-center gap-2">
+                  <FiDollarSign className="w-4 h-4" />
+                  Features & Rating
+                </h4>
+                <div className="space-y-4">
+                  <div>
+                    <h5 className="text-sm font-medium text-gray-700 mb-2">Course Features</h5>
+                    <div className="space-y-2">
+                      {allFeatures.map(feature => (
+                        <label key={feature} className="flex items-center gap-2 cursor-pointer">
+                          <input
+                            type="checkbox"
+                            checked={selectedFeatures.includes(feature)}
+                            onChange={() => toggleFeature(feature)}
+                            className="w-4 h-4 text-blue-600 rounded border-gray-300 focus:ring-blue-500"
+                          />
+                          <span className="text-sm text-gray-700">{feature}</span>
+                        </label>
+                      ))}
+                    </div>
+                  </div>
+                  <div>
+                    <h5 className="text-sm font-medium text-gray-700 mb-2">Minimum Rating</h5>
+                    <div className="space-y-2">
+                      {ratingOptions.map(rating => (
+                        <label key={rating} className="flex items-center gap-2 cursor-pointer">
+                          <input
+                            type="checkbox"
+                            checked={selectedRatings.includes(rating)}
+                            onChange={() => toggleRating(rating)}
+                            className="w-4 h-4 text-blue-600 rounded border-gray-300 focus:ring-blue-500"
+                          />
+                          <span className="text-sm text-gray-700">{rating}★ & Up</span>
+                        </label>
+                      ))}
               </div>
             </div>
           </div>
-          <div className="flex-1">
-            <div className="flex items-center justify-between mb-6">
-              <h2 className="text-3xl font-bold">Find Our Favorite Course</h2>
-              {/* Đã bỏ thanh tìm kiếm */}
             </div>
-            {/* Category tags giống ảnh */}
-            <div className="flex gap-2 mb-4 flex-wrap">
-              <button className={`px-4 py-1 rounded-full font-semibold ${!filters.category ? 'bg-blue-100 text-blue-600' : 'bg-gray-100 text-gray-600'}`} onClick={() => handleFilterChange('category', '')}>All Category</button>
-              {categoryOptions.map(cat => (
-                <button
-                  key={cat.name}
-                  className={`px-4 py-1 rounded-full font-semibold flex items-center gap-2 ${filters.category === cat.name ? 'bg-blue-600 text-white' : 'bg-gray-100 text-gray-600'}`}
-                  onClick={() => handleFilterChange('category', cat.name)}
-                >
-                  <img src={cat.img} alt={cat.name} className="w-5 h-5" />
-                  {cat.name}
-                </button>
-              ))}
             </div>
-            {/* Danh sách khóa học */}
-            <AnimatePresence initial={false} custom={direction}>
-              <motion.div
-                key={currentPage}
-                custom={direction}
-                variants={variants}
-                initial="enter"
-                animate="center"
-                exit="exit"
-                transition={{
-                  x: { type: "spring", stiffness: 300, damping: 30 },
-                  opacity: { duration: 0.2 }
-                }}
-                className="flex flex-col gap-4"
+          </motion.div>
+        )}
+
+        {filteredProducts.length > 0 ? (
+          <div className="grid grid-cols-1 gap-4">
+            {filteredProducts.map((product) => (
+              <div 
+                key={product.id} 
+                className="flex bg-white rounded-lg shadow p-4 items-center gap-4 border border-gray-200"
               >
-                {filteredProducts.map((product, index) => (
-                  <div key={index} className="flex bg-white rounded-lg shadow p-4 items-center gap-4 border border-gray-200">
                     <img src={product.image} alt={product.name} className="w-40 h-28 object-cover rounded-lg border" />
                     <div className="flex-1">
                       <div className="flex items-center gap-2 mb-1">
                         <span className="bg-blue-100 text-blue-600 text-xs font-bold px-2 py-1 rounded">{product.rating}★ ({product.ratingCount})</span>
                         <span className="bg-yellow-100 text-yellow-700 text-xs font-bold px-2 py-1 rounded">{product.age}</span>
                         <span className="bg-gray-200 text-gray-700 text-xs font-bold px-2 py-1 rounded">{product.category}</span>
+                    <span className="bg-green-100 text-green-700 text-xs font-bold px-2 py-1 rounded">{product.level}</span>
                       </div>
                       <h3 className="text-lg font-bold text-gray-900 mb-1">{product.name}</h3>
-                      <div className="text-sm text-gray-500 mb-1">{product.owner}</div>
-                      <div className="text-sm text-gray-700 mb-1 line-clamp-2">{product.description}</div>
-                      <div className="text-xs text-gray-400">{product.totalHour} total hour | {product.lessons} lessons</div>
+                  <div className="flex items-center gap-2 mb-2">
+                    <img src={product.owner.avatar} alt={product.owner.name} className="w-6 h-6 rounded-full" />
+                    <div>
+                      <div className="text-sm font-medium text-gray-900">{product.owner.name}</div>
+                      <div className="text-xs text-gray-500">{product.owner.experience} • {product.owner.students} students</div>
                     </div>
-                    <div className="flex flex-col items-end min-w-[80px]">
-                      <div className="text-xl font-bold text-blue-600 mb-2">${product.price.toFixed(2)}</div>
-                      <button className="bg-blue-500 text-white px-4 py-2 rounded-full font-semibold hover:bg-blue-600 transition">Add to cart</button>
+                  </div>
+                  <div className="text-sm text-gray-700 mb-1 line-clamp-2">{product.description}</div>
+                  {product.features && product.features.length > 0 && (
+                    <div className="flex flex-wrap gap-2 mb-2">
+                      {product.features.map((feature, index) => (
+                        <span key={index} className="text-xs bg-gray-100 text-gray-600 px-2 py-1 rounded-full">
+                          {feature}
+                        </span>
+                      ))}
+                    </div>
+                  )}
+                  <div className="text-xs text-gray-400">{product.totalHour} total hours | {product.lessons} lessons | {product.duration}</div>
+                </div>
+                <div className="flex flex-col items-end min-w-[80px]">
+                  <div className="text-xl font-bold text-blue-600 mb-2">${product.price.toFixed(2)}</div>
+                  <div className="flex gap-2">
+                    <button 
+                      onClick={(e) => handleToggleWishlist(product.id, e)}
+                      className={`p-2 rounded-full transition-colors ${
+                        getWishlistProducts().some(p => p.id === product.id)
+                          ? 'bg-red-100 text-red-500 hover:bg-red-200'
+                          : 'bg-gray-100 text-gray-500 hover:bg-gray-200'
+                      }`}
+                    >
+                      <FiHeart className={`w-5 h-5 ${getWishlistProducts().some(p => p.id === product.id) ? 'fill-current' : ''}`} />
+                    </button>
+                    <button 
+                      onClick={(e) => handleAddToCart(product.id, e)}
+                      className="bg-blue-500 text-white px-4 py-2 rounded-full font-semibold hover:bg-blue-600 transition flex items-center gap-2"
+                    >
+                      <FiShoppingCart className="w-4 h-4" />
+                      Add to cart
+                    </button>
+                  </div>
                     </div>
                   </div>
                 ))}
-              </motion.div>
-            </AnimatePresence>
           </div>
+        ) : (
+          <div className="text-center py-12 bg-white rounded-lg shadow">
+            <FiSearch className="w-16 h-16 mx-auto text-gray-400 mb-4" />
+            <h3 className="text-xl font-semibold text-gray-900 mb-2">No courses found</h3>
+            <p className="text-gray-500 mb-4">Try adjusting your filters or search term</p>
+            <button
+              onClick={clearFilters}
+              className="px-4 py-2 bg-blue-500 text-white rounded-full hover:bg-blue-600 transition"
+            >
+              Clear Filters
+            </button>
         </div>
+        )}
       </div>
     </div>
   );
 };
 
-export default Shop;
+export default Store;
