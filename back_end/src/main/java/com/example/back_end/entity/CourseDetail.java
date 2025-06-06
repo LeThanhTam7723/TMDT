@@ -1,6 +1,7 @@
 package com.example.back_end.entity;
 
 import com.fasterxml.jackson.annotation.JsonBackReference;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -19,7 +20,7 @@ public class CourseDetail {
 
     @ManyToOne
     @JoinColumn(name = "course_id")
-    @JsonBackReference
+    @JsonIgnore // Avoid infinite recursion
     private Course course;
 
     @Column(name = "EpisodeNumber")

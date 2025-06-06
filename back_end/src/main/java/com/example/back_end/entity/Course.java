@@ -40,7 +40,8 @@ public class Course {
 
     @Column(name = "Status")
     private Boolean status;
-    @JsonManagedReference
+
     @OneToMany(mappedBy = "course", cascade = CascadeType.ALL, fetch = FetchType.EAGER)
+    @JsonManagedReference
     private List<CourseDetail> courseDetails;
 }
