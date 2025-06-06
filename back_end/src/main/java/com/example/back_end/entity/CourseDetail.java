@@ -1,5 +1,6 @@
 package com.example.back_end.entity;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -17,7 +18,8 @@ public class CourseDetail {
     private Long id; // tạo ID riêng vì bảng không có khóa chính rõ ràng trong ảnh
 
     @ManyToOne
-    @JoinColumn(name = "CourseID", nullable = false)
+    @JoinColumn(name = "course_id")
+    @JsonBackReference
     private Course course;
 
     @Column(name = "EpisodeNumber")
