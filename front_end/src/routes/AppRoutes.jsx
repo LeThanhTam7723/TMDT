@@ -7,6 +7,7 @@ import CheckoutPage from "../Pages/Payment";
 import AuthPage from "../Pages/Authentication";
 import Detail from "../Pages/Detail";
 import UserInfo from "../Pages/UserInfo";
+import AdminDashboard from "../Pages/AdminDashBoard";
 
 function AppRoutes() {
   return (
