@@ -1,14 +1,26 @@
-import React, { useState } from "react";
-import { FiHeart, FiSearch } from "react-icons/fi";
+import React, { useState, useEffect } from "react";
+import { FiHeart, FiSearch, FiFilter, FiX, FiClock, FiUsers, FiBook, FiDollarSign, FiShoppingCart } from "react-icons/fi";
 import { motion } from "framer-motion";
 import { useNavigate } from "react-router-dom";
 import { useProduct } from "../context/ProductContext";
 
 const Wishlist = () => {
-  const { getWishlistProducts, toggleWishlist } = useProduct();
+  const { getWishlistProducts, toggleWishlist, addToCart, cart } = useProduct();
   const [searchTerm, setSearchTerm] = useState("");
   const [notification, setNotification] = useState({ show: false, message: '', type: '' });
+  const [showFilters, setShowFilters] = useState(false);
+  const [selectedCategories, setSelectedCategories] = useState([]);
+  const [selectedLevels, setSelectedLevels] = useState([]);
+  const [selectedAges, setSelectedAges] = useState([]);
+  const [selectedDurations, setSelectedDurations] = useState([]);
+  const [selectedPrices, setSelectedPrices] = useState([]);
+  const [selectedFeatures, setSelectedFeatures] = useState([]);
+  const [selectedRatings, setSelectedRatings] = useState([]);
   const navigate = useNavigate();
+
+  useEffect(() => {
+    console.log('Wishlist Products:', getWishlistProducts());
+  }, [getWishlistProducts]);
 
   const showNotification = (message, type) => {
     setNotification({ show: true, message, type });
@@ -31,10 +43,116 @@ const Wishlist = () => {
     }
   };
 
-  const filteredWishlistProducts = getWishlistProducts().filter(product => 
-    product.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    product.description.toLowerCase().includes(searchTerm.toLowerCase())
-  );
+  const isInCart = (id) => cart && Array.isArray(cart) && cart.some(item => item.id === id);
+
+  const handleAddToCart = (productId, event) => {
+    event.preventDefault();
+    event.stopPropagation();
+    const product = getWishlistProducts().find(p => p.id === productId);
+    if (product && !isInCart(productId)) {
+      addToCart(product);
+      showNotification(`Added "${product.name}" to cart`, 'add');
+    }
+  };
+
+  const toggleCategory = (category) => {
+    setSelectedCategories(prev => 
+      prev.includes(category)
+        ? prev.filter(c => c !== category)
+        : [...prev, category]
+    );
+  };
+
+  const toggleLevel = (level) => {
+    setSelectedLevels(prev => 
+      prev.includes(level)
+        ? prev.filter(l => l !== level)
+        : [...prev, level]
+    );
+  };
+
+  const toggleAge = (age) => {
+    setSelectedAges(prev => 
+      prev.includes(age)
+        ? prev.filter(a => a !== age)
+        : [...prev, age]
+    );
+  };
+
+  const toggleDuration = (duration) => {
+    setSelectedDurations(prev => 
+      prev.includes(duration)
+        ? prev.filter(d => d !== duration)
+        : [...prev, duration]
+    );
+  };
+
+  const togglePrice = (price) => {
+    setSelectedPrices(prev => 
+      prev.includes(price)
+        ? prev.filter(p => p !== price)
+        : [...prev, price]
+    );
+  };
+
+  const toggleFeature = (feature) => {
+    setSelectedFeatures(prev => 
+      prev.includes(feature)
+        ? prev.filter(f => f !== feature)
+        : [...prev, feature]
+    );
+  };
+
+  const toggleRating = (rating) => {
+    setSelectedRatings(prev => 
+      prev.includes(rating)
+        ? prev.filter(r => r !== rating)
+        : [...prev, rating]
+    );
+  };
+
+  const clearFilters = () => {
+    setSelectedCategories([]);
+    setSelectedLevels([]);
+    setSelectedAges([]);
+    setSelectedDurations([]);
+    setSelectedPrices([]);
+    setSelectedFeatures([]);
+    setSelectedRatings([]);
+  };
+
+  const filteredWishlistProducts = getWishlistProducts().filter(product => {
+    const matchesSearch = product.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                         product.description.toLowerCase().includes(searchTerm.toLowerCase());
+    const matchesCategory = selectedCategories.length === 0 || selectedCategories.includes(product.category);
+    const matchesLevel = selectedLevels.length === 0 || selectedLevels.includes(product.level);
+    const matchesAge = selectedAges.length === 0 || selectedAges.includes(product.age);
+    const matchesDuration = selectedDurations.length === 0 || selectedDurations.includes(product.duration);
+    const matchesPrice = selectedPrices.length === 0 || selectedPrices.some(price => {
+      const [min, max] = price.split('-').map(Number);
+      return product.price >= min && product.price <= max;
+    });
+    const matchesFeatures = selectedFeatures.length === 0 || 
+      selectedFeatures.every(feature => product.features.includes(feature));
+    const matchesRating = selectedRatings.length === 0 || 
+      selectedRatings.some(rating => product.rating >= Number(rating));
+
+    return matchesSearch && matchesCategory && matchesLevel && matchesAge && 
+           matchesDuration && matchesPrice && matchesFeatures && matchesRating;
+  });
+
+  const categories = [...new Set(getWishlistProducts().map(p => p.category))];
+  const levels = [...new Set(getWishlistProducts().map(p => p.level))];
+  const ages = [...new Set(getWishlistProducts().map(p => p.age))];
+  const durations = [...new Set(getWishlistProducts().map(p => p.duration))];
+  const allFeatures = [...new Set(getWishlistProducts().flatMap(p => p.features))];
+  const priceRanges = [
+    { label: 'Under $20', value: '0-20' },
+    { label: '$20 - $50', value: '20-50' },
+    { label: '$50 - $100', value: '50-100' },
+    { label: 'Over $100', value: '100-1000' }
+  ];
+  const ratingOptions = ['4.5', '4.0', '3.5', '3.0'];
 
   return (
     <div className="min-h-screen bg-white">
@@ -60,17 +178,188 @@ const Wishlist = () => {
               {filteredWishlistProducts.length} {filteredWishlistProducts.length === 1 ? 'item' : 'items'}
             </span>
           </div>
-          <div className="relative">
-            <input
-              type="text"
-              placeholder="Search in wishlist..."
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-              className="w-64 px-4 py-2 rounded-full border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-            />
-            <FiSearch className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400" />
+          <div className="flex items-center gap-4">
+            <div className="relative">
+              <input
+                type="text"
+                placeholder="Search in wishlist..."
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+                className="w-64 px-4 py-2 rounded-full border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              />
+              <FiSearch className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400" />
+            </div>
+            <button
+              onClick={() => setShowFilters(!showFilters)}
+              className="flex items-center gap-2 px-4 py-2 rounded-full border border-gray-300 hover:bg-gray-50 transition"
+            >
+              <FiFilter />
+              Filters
+            </button>
           </div>
         </div>
+
+        {/* Filters */}
+        {showFilters && (
+          <motion.div
+            initial={{ opacity: 0, height: 0 }}
+            animate={{ opacity: 1, height: 'auto' }}
+            exit={{ opacity: 0, height: 0 }}
+            className="mb-8 p-4 bg-white rounded-lg shadow border border-gray-200"
+          >
+            <div className="flex justify-between items-center mb-4">
+              <h3 className="text-lg font-semibold text-gray-900">Filters</h3>
+              <button
+                onClick={clearFilters}
+                className="text-sm text-gray-500 hover:text-gray-700 flex items-center gap-1"
+              >
+                <FiX className="w-4 h-4" />
+                Clear all
+              </button>
+            </div>
+            <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
+              <div>
+                <h4 className="font-medium text-gray-900 mb-3 flex items-center gap-2">
+                  <FiBook className="w-4 h-4" />
+                  Course Type
+                </h4>
+                <div className="space-y-2">
+                  {categories.map(category => (
+                    <label key={category} className="flex items-center gap-2 cursor-pointer">
+                      <input
+                        type="checkbox"
+                        checked={selectedCategories.includes(category)}
+                        onChange={() => toggleCategory(category)}
+                        className="w-4 h-4 text-blue-600 rounded border-gray-300 focus:ring-blue-500"
+                      />
+                      <span className="text-sm text-gray-700">{category}</span>
+                    </label>
+                  ))}
+                </div>
+              </div>
+              <div>
+                <h4 className="font-medium text-gray-900 mb-3 flex items-center gap-2">
+                  <FiUsers className="w-4 h-4" />
+                  Level & Age
+                </h4>
+                <div className="space-y-4">
+                  <div>
+                    <h5 className="text-sm font-medium text-gray-700 mb-2">Level</h5>
+                    <div className="space-y-2">
+                      {levels.map(level => (
+                        <label key={level} className="flex items-center gap-2 cursor-pointer">
+                          <input
+                            type="checkbox"
+                            checked={selectedLevels.includes(level)}
+                            onChange={() => toggleLevel(level)}
+                            className="w-4 h-4 text-blue-600 rounded border-gray-300 focus:ring-blue-500"
+                          />
+                          <span className="text-sm text-gray-700">{level}</span>
+                        </label>
+                      ))}
+                    </div>
+                  </div>
+                  <div>
+                    <h5 className="text-sm font-medium text-gray-700 mb-2">Age Group</h5>
+                    <div className="space-y-2">
+                      {ages.map(age => (
+                        <label key={age} className="flex items-center gap-2 cursor-pointer">
+                          <input
+                            type="checkbox"
+                            checked={selectedAges.includes(age)}
+                            onChange={() => toggleAge(age)}
+                            className="w-4 h-4 text-blue-600 rounded border-gray-300 focus:ring-blue-500"
+                          />
+                          <span className="text-sm text-gray-700">{age}</span>
+                        </label>
+                      ))}
+                    </div>
+                  </div>
+                </div>
+              </div>
+              <div>
+                <h4 className="font-medium text-gray-900 mb-3 flex items-center gap-2">
+                  <FiClock className="w-4 h-4" />
+                  Duration & Price
+                </h4>
+                <div className="space-y-4">
+                  <div>
+                    <h5 className="text-sm font-medium text-gray-700 mb-2">Duration</h5>
+                    <div className="space-y-2">
+                      {durations.map(duration => (
+                        <label key={duration} className="flex items-center gap-2 cursor-pointer">
+                          <input
+                            type="checkbox"
+                            checked={selectedDurations.includes(duration)}
+                            onChange={() => toggleDuration(duration)}
+                            className="w-4 h-4 text-blue-600 rounded border-gray-300 focus:ring-blue-500"
+                          />
+                          <span className="text-sm text-gray-700">{duration}</span>
+                        </label>
+                      ))}
+                    </div>
+                  </div>
+                  <div>
+                    <h5 className="text-sm font-medium text-gray-700 mb-2">Price Range</h5>
+                    <div className="space-y-2">
+                      {priceRanges.map(range => (
+                        <label key={range.value} className="flex items-center gap-2 cursor-pointer">
+                          <input
+                            type="checkbox"
+                            checked={selectedPrices.includes(range.value)}
+                            onChange={() => togglePrice(range.value)}
+                            className="w-4 h-4 text-blue-600 rounded border-gray-300 focus:ring-blue-500"
+                          />
+                          <span className="text-sm text-gray-700">{range.label}</span>
+                        </label>
+                      ))}
+                    </div>
+                  </div>
+                </div>
+              </div>
+              <div>
+                <h4 className="font-medium text-gray-900 mb-3 flex items-center gap-2">
+                  <FiDollarSign className="w-4 h-4" />
+                  Features & Rating
+                </h4>
+                <div className="space-y-4">
+                  <div>
+                    <h5 className="text-sm font-medium text-gray-700 mb-2">Course Features</h5>
+                    <div className="space-y-2">
+                      {allFeatures.map(feature => (
+                        <label key={feature} className="flex items-center gap-2 cursor-pointer">
+                          <input
+                            type="checkbox"
+                            checked={selectedFeatures.includes(feature)}
+                            onChange={() => toggleFeature(feature)}
+                            className="w-4 h-4 text-blue-600 rounded border-gray-300 focus:ring-blue-500"
+                          />
+                          <span className="text-sm text-gray-700">{feature}</span>
+                        </label>
+                      ))}
+                    </div>
+                  </div>
+                  <div>
+                    <h5 className="text-sm font-medium text-gray-700 mb-2">Minimum Rating</h5>
+                    <div className="space-y-2">
+                      {ratingOptions.map(rating => (
+                        <label key={rating} className="flex items-center gap-2 cursor-pointer">
+                          <input
+                            type="checkbox"
+                            checked={selectedRatings.includes(rating)}
+                            onChange={() => toggleRating(rating)}
+                            className="w-4 h-4 text-blue-600 rounded border-gray-300 focus:ring-blue-500"
+                          />
+                          <span className="text-sm text-gray-700">{rating}★ & Up</span>
+                        </label>
+                      ))}
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </motion.div>
+        )}
 
         {filteredWishlistProducts.length > 0 ? (
           <div className="grid grid-cols-1 gap-4">
@@ -112,14 +401,21 @@ const Wishlist = () => {
                   <div className="flex gap-2">
                     <button 
                       onClick={(e) => handleToggleWishlist(product.id, e)}
-                      className="p-2 rounded-full bg-red-100 text-red-500 hover:bg-red-200 transition-colors"
+                      className={`p-2 rounded-full transition-colors ${
+                        getWishlistProducts().some(p => p.id === product.id)
+                          ? 'bg-red-100 text-red-500 hover:bg-red-200'
+                          : 'bg-gray-100 text-gray-500 hover:bg-gray-200'
+                      }`}
                     >
-                      <FiHeart className="w-5 h-5 fill-current" />
+                      <FiHeart className={`w-5 h-5 ${getWishlistProducts().some(p => p.id === product.id) ? 'fill-current' : ''}`} />
                     </button>
                     <button 
-                      className="bg-blue-500 text-white px-4 py-2 rounded-full font-semibold hover:bg-blue-600 transition"
+                      onClick={(e) => handleAddToCart(product.id, e)}
+                      disabled={isInCart(product.id)}
+                      className={`bg-blue-500 text-white px-4 py-2 rounded-full font-semibold hover:bg-blue-600 transition flex items-center gap-2 ${isInCart(product.id) ? 'opacity-50 cursor-not-allowed' : ''}`}
                     >
-                      Add to cart
+                      <FiShoppingCart className="w-4 h-4" />
+                      {isInCart(product.id) ? 'Đã trong giỏ' : 'Add to cart'}
                     </button>
                   </div>
                 </div>
@@ -132,7 +428,7 @@ const Wishlist = () => {
             <h3 className="text-xl font-semibold text-gray-900 mb-2">Your wishlist is empty</h3>
             <p className="text-gray-500 mb-4">Add courses to your wishlist to keep track of your favorites</p>
             <button
-              onClick={() => navigate('/store')}
+              onClick={() => navigate('/shop')}
               className="px-4 py-2 bg-blue-500 text-white rounded-full hover:bg-blue-600 transition"
             >
               Browse Courses
