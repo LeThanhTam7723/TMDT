@@ -3,9 +3,10 @@ import { FiHeart, FiSearch, FiFilter, FiX, FiClock, FiUsers, FiBook, FiDollarSig
 import { motion } from "framer-motion";
 import { useNavigate } from "react-router-dom";
 import { useProduct } from "../context/ProductContext";
+import favoriteService from '../API/favoriteService';
 
 const Store = () => {
-  const { products, toggleWishlist, getWishlistProducts, addToCart } = useProduct();
+  const { products, toggleFavorite, getFavoriteProducts, addToCart } = useProduct();
   const [searchTerm, setSearchTerm] = useState("");
   const [notification, setNotification] = useState({ show: false, message: '', type: '' });
   const [showFilters, setShowFilters] = useState(false);
@@ -25,21 +26,25 @@ const Store = () => {
     }, 2000);
   };
 
-  const handleToggleWishlist = (productId, event) => {
+  const handleToggleFavorite = (productId, event) => {
     event.preventDefault();
     event.stopPropagation();
     
-    toggleWishlist(productId);
+    toggleFavorite(productId);
     const product = products.find(p => p.id === productId);
     if (product) {
-      const isInWishlist = getWishlistProducts().some(p => p.id === productId);
+      const isInFavorite = getFavoriteProducts().some(p => p.id === productId);
       showNotification(
-        isInWishlist 
-          ? `Added "${product.name}" to wishlist`
-          : `Removed "${product.name}" from wishlist`,
-        isInWishlist ? 'add' : 'remove'
+        isInFavorite 
+          ? `Removed "${product.name}" from favorites`
+          : `Added "${product.name}" to favorites`,
+        isInFavorite ? 'remove' : 'add'
       );
     }
+  };
+
+  const isInFavorite = (productId) => {
+    return getFavoriteProducts().some(p => p.id === productId);
   };
 
   const handleAddToCart = (productId, event) => {
@@ -351,10 +356,10 @@ const Store = () => {
                           <span className="text-sm text-gray-700">{rating}★ & Up</span>
                         </label>
                       ))}
+                    </div>
+                  </div>
+                </div>
               </div>
-            </div>
-          </div>
-            </div>
             </div>
           </motion.div>
         )}
@@ -398,14 +403,14 @@ const Store = () => {
                   <div className="text-xl font-bold text-blue-600 mb-2">${product.price.toFixed(2)}</div>
                   <div className="flex gap-2">
                     <button 
-                      onClick={(e) => handleToggleWishlist(product.id, e)}
+                      onClick={(e) => handleToggleFavorite(product.id, e)}
                       className={`p-2 rounded-full transition-colors ${
-                        getWishlistProducts().some(p => p.id === product.id)
-                          ? 'bg-red-100 text-red-500 hover:bg-red-200'
-                          : 'bg-gray-100 text-gray-500 hover:bg-gray-200'
+                        isInFavorite(product.id)
+                            ? 'bg-red-100 text-red-500 hover:bg-red-200'
+                            : 'bg-gray-100 text-gray-500 hover:bg-gray-200'
                       }`}
                     >
-                      <FiHeart className={`w-5 h-5 ${getWishlistProducts().some(p => p.id === product.id) ? 'fill-current' : ''}`} />
+                      <FiHeart className={`w-5 h-5 ${isInFavorite(product.id) ? 'fill-current' : ''}`} />
                     </button>
                     <button 
                       onClick={(e) => handleAddToCart(product.id, e)}

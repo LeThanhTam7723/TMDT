@@ -41,6 +41,6 @@ public class Course {
     @Column(name = "Status")
     private Boolean status;
     @JsonManagedReference
-    @OneToMany(mappedBy = "course", cascade = CascadeType.ALL, fetch = FetchType.EAGER)
+    @OneToMany(mappedBy = "course", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     private List<CourseDetail> courseDetails;
 }
