@@ -3,7 +3,7 @@ import HomePage from '../Pages/HomePage';
 import Login from '../Pages/Login';
 import Register from '../Pages/Register';
 import Store from '../Pages/Store';
-import WishList from '../Pages/WishList';
+import Favorite from '../Pages/Favorite';
 import Cart from '../Pages/Cart';
 import Checkout from '../Pages/Checkout';
 import SellerDashboard from '../Pages/SellerDashboard';
@@ -33,8 +33,8 @@ const router = createBrowserRouter([
     element: <Store />,
   },
   {
-    path: '/wishlist',
-    element: <WishList />,
+    path: '/favorites',
+    element: <Favorite />,
   },
   {
     path: '/cart',

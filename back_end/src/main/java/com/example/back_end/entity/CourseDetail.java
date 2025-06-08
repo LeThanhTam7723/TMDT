@@ -4,9 +4,9 @@ import com.fasterxml.jackson.annotation.JsonBackReference;
 import jakarta.persistence.*;
 import lombok.*;
 
+@Entity
 @Getter
 @Setter
-@Entity
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
@@ -15,12 +15,10 @@ public class CourseDetail {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id; // tạo ID riêng vì bảng không có khóa chính rõ ràng trong ảnh
+    private Integer id; // tạo ID riêng vì bảng không có khóa chính rõ ràng trong ảnh
 
-    @ManyToOne
-    @JoinColumn(name = "course_id")
-    @JsonBackReference
-    private Course course;
+    @Column(name = "CourseID")
+    private Integer courseId;
 
     @Column(name = "EpisodeNumber")
     private Integer episodeNumber;
@@ -33,4 +31,8 @@ public class CourseDetail {
 
     @Column(name = "IsPreview")
     private Boolean isPreview;
+
+    @ManyToOne
+    @JoinColumn(name = "CourseID", insertable = false, updatable = false)
+    private Course course;
 }

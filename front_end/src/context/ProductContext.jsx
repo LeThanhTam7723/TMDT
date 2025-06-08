@@ -1,13 +1,10 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
+import favoriteService from '../API/favoriteService';
 
 const ProductContext = createContext();
 
 export const useProduct = () => {
-  const context = useContext(ProductContext);
-  if (!context) {
-    throw new Error('useProduct must be used within a ProductProvider');
-  }
-  return context;
+  return useContext(ProductContext);
 };
 
 export const ProductProvider = ({ children }) => {
@@ -158,39 +155,48 @@ export const ProductProvider = ({ children }) => {
     }
   ]);
 
-  const [wishlist, setWishlist] = useState(() => {
-    const savedWishlist = localStorage.getItem('wishlist');
-    return savedWishlist ? JSON.parse(savedWishlist) : [];
-  });
-
+  const [favorites, setFavorites] = useState([]);
   const [cart, setCart] = useState(() => {
     const savedCart = localStorage.getItem('cart');
     return savedCart ? JSON.parse(savedCart) : [];
   });
 
   useEffect(() => {
-    localStorage.setItem('wishlist', JSON.stringify(wishlist));
-  }, [wishlist]);
-
-  useEffect(() => {
     localStorage.setItem('cart', JSON.stringify(cart));
   }, [cart]);
 
-  const toggleWishlist = (productId) => {
-    setWishlist(prev => {
-      const isInWishlist = prev.includes(productId);
-      return isInWishlist
-        ? prev.filter(id => id !== productId)
-        : [...prev, productId];
-    });
+  const toggleFavorite = async (productId) => {
+    try {
+      const userId = 1; // TODO: Get from auth context
+      const isInFavorites = favorites.some(item => item.course.id === productId);
+      
+      if (isInFavorites) {
+        await favoriteService.removeFromFavorites(userId, productId);
+        setFavorites(prev => prev.filter(item => item.course.id !== productId));
+      } else {
+        const response = await favoriteService.addToFavorites(userId, productId);
+        setFavorites(prev => [...prev, response.data.result]);
+      }
+    } catch (error) {
+      console.error('Error toggling favorite:', error);
+    }
   };
 
-  const isInWishlist = (productId) => {
-    return wishlist.includes(productId);
+  const isInFavorites = (productId) => {
+    return favorites.some(item => item.course.id === productId);
   };
 
-  const getWishlistProducts = () => {
-    return products.filter(product => isInWishlist(product.id));
+  const getFavoriteProducts = () => {
+    return favorites.map(item => item.course);
+  };
+
+  const loadUserFavorites = async (userId) => {
+    try {
+      const response = await favoriteService.getUserFavorites(userId);
+      setFavorites(response.data.result);
+    } catch (error) {
+      console.error('Error loading favorites:', error);
+    }
   };
 
   const addToCart = (product) => {
@@ -223,11 +229,12 @@ export const ProductProvider = ({ children }) => {
 
   const value = {
     products,
-    wishlist,
+    favorites,
     cart,
-    toggleWishlist,
-    isInWishlist,
-    getWishlistProducts,
+    toggleFavorite,
+    isInFavorites,
+    getFavoriteProducts,
+    loadUserFavorites,
     addToCart,
     removeFromCart,
     updateCartItemQuantity
