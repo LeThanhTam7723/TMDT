@@ -1,10 +1,7 @@
 package com.example.back_end.entity;
 
-import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
 import lombok.*;
-
-import java.util.List;
 
 @Getter
 @Setter
@@ -40,7 +37,4 @@ public class Course {
 
     @Column(name = "Status")
     private Boolean status;
-    @JsonManagedReference
-    @OneToMany(mappedBy = "course", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
-    private List<CourseDetail> courseDetails;
 }
