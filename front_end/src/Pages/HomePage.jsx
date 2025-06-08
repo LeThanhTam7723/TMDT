@@ -78,26 +78,27 @@ const HomePage = () => {
     }
   ];
   useEffect(() => {
-  const fetchAllCourses = async () => {
-    try {
-      const response = await axiosClient.get('/courses', 
-      
-      );
-
-      if (response.data && response.data.code === 200 && Array.isArray(response.data.result)) {
-        console.log("Fetched courses:", response.data.result);
-        // Nếu bạn muốn lưu vào state thì tạo state setCourses và gọi nó ở đây
-        setProducts(response.data.result);
-      } else {
-        throw new Error("Invalid response format");
+    const fetchAllCourses = async () => {
+      try {
+        const response = await axiosClient.get('/courses');
+        
+        if (response.data && response.data.code === 200 && Array.isArray(response.data.result)) {
+          // Filter out courseDetails from each course to prevent circular reference
+          const coursesWithoutDetails = response.data.result.map(course => ({
+            ...course,
+            courseDetails: undefined
+          }));
+          setProducts(coursesWithoutDetails);
+        } else {
+          throw new Error("Invalid response format");
+        }
+      } catch (error) {
+        console.error("Failed to fetch all courses:", error.message || error);
       }
-    } catch (error) {
-      console.error("Failed to fetch all courses:", error.message || error);
-    }
-  };
+    };
 
-  fetchAllCourses();
-}, []);
+    fetchAllCourses();
+  }, []);
 
   // Auto-rotate banners
   useEffect(() => {

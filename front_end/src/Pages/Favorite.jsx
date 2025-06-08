@@ -5,8 +5,8 @@ import { useNavigate } from "react-router-dom";
 import { useProduct } from "../context/ProductContext";
 import favoriteService from '../API/favoriteService';
 
-const Store = () => {
-  const { products, toggleFavorite, getFavoriteProducts, addToCart } = useProduct();
+const Favorite = () => {
+  const { getFavoriteProducts, toggleFavorite, addToCart, cart, loadUserFavorites } = useProduct();
   const [searchTerm, setSearchTerm] = useState("");
   const [notification, setNotification] = useState({ show: false, message: '', type: '' });
   const [showFilters, setShowFilters] = useState(false);
@@ -17,7 +17,35 @@ const Store = () => {
   const [selectedPrices, setSelectedPrices] = useState([]);
   const [selectedFeatures, setSelectedFeatures] = useState([]);
   const [selectedRatings, setSelectedRatings] = useState([]);
+  const [favorites, setFavorites] = useState([]);
+  const [loading, setLoading] = useState(true);
   const navigate = useNavigate();
+
+  useEffect(() => {
+    const userId = 1; // TODO: Get from auth context
+    loadFavorites(userId);
+  }, []);
+
+  const loadFavorites = async (userId) => {
+    try {
+      const response = await favoriteService.getUserFavorites(userId);
+      setFavorites(response.data.result);
+    } catch (error) {
+      console.error('Error loading favorites:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleRemoveFavorite = async (courseId) => {
+    try {
+      const userId = 1; // TODO: Get from auth context
+      await favoriteService.removeFromFavorites(userId, courseId);
+      setFavorites(favorites.filter(fav => fav.idCourse !== courseId));
+    } catch (error) {
+      console.error('Error removing from favorites:', error);
+    }
+  };
 
   const showNotification = (message, type) => {
     setNotification({ show: true, message, type });
@@ -26,33 +54,27 @@ const Store = () => {
     }, 2000);
   };
 
-  const handleToggleFavorite = (productId, event) => {
+  const handleToggleFavorite = async (productId, event) => {
     event.preventDefault();
     event.stopPropagation();
     
-    toggleFavorite(productId);
-    const product = products.find(p => p.id === productId);
+    await toggleFavorite(productId);
+    const product = getFavoriteProducts().find(p => p.id === productId);
     if (product) {
-      const isInFavorite = getFavoriteProducts().some(p => p.id === productId);
       showNotification(
-        isInFavorite 
-          ? `Removed "${product.name}" from favorites`
-          : `Added "${product.name}" to favorites`,
-        isInFavorite ? 'remove' : 'add'
+        `Removed "${product.name}" from favorites`,
+        'remove'
       );
     }
   };
 
-  const isInFavorite = (productId) => {
-    return getFavoriteProducts().some(p => p.id === productId);
-  };
+  const isInCart = (id) => cart && Array.isArray(cart) && cart.some(item => item.id === id);
 
   const handleAddToCart = (productId, event) => {
     event.preventDefault();
     event.stopPropagation();
-    
-    const product = products.find(p => p.id === productId);
-    if (product) {
+    const product = getFavoriteProducts().find(p => p.id === productId);
+    if (product && !isInCart(productId)) {
       addToCart(product);
       showNotification(`Added "${product.name}" to cart`, 'add');
     }
@@ -124,7 +146,7 @@ const Store = () => {
     setSelectedRatings([]);
   };
 
-  const filteredProducts = products.filter(product => {
+  const filteredFavoriteProducts = getFavoriteProducts().filter(product => {
     const matchesSearch = product.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
                          product.description.toLowerCase().includes(searchTerm.toLowerCase());
     const matchesCategory = selectedCategories.length === 0 || selectedCategories.includes(product.category);
@@ -144,11 +166,11 @@ const Store = () => {
            matchesDuration && matchesPrice && matchesFeatures && matchesRating;
   });
 
-  const categories = [...new Set(products.map(p => p.category))];
-  const levels = [...new Set(products.map(p => p.level))];
-  const ages = [...new Set(products.map(p => p.age))];
-  const durations = [...new Set(products.map(p => p.duration))];
-  const allFeatures = [...new Set(products.flatMap(p => p.features))];
+  const categories = [...new Set(getFavoriteProducts().map(p => p.category))];
+  const levels = [...new Set(getFavoriteProducts().map(p => p.level))];
+  const ages = [...new Set(getFavoriteProducts().map(p => p.age))];
+  const durations = [...new Set(getFavoriteProducts().map(p => p.duration))];
+  const allFeatures = [...new Set(getFavoriteProducts().flatMap(p => p.features))];
   const priceRanges = [
     { label: 'Under $20', value: '0-20' },
     { label: '$20 - $50', value: '20-50' },
@@ -156,6 +178,10 @@ const Store = () => {
     { label: 'Over $100', value: '100-1000' }
   ];
   const ratingOptions = ['4.5', '4.0', '3.5', '3.0'];
+
+  if (loading) {
+    return <div>Loading...</div>;
+  }
 
   return (
     <div className="min-h-screen bg-white">
@@ -176,16 +202,16 @@ const Store = () => {
       <div className="container mx-auto px-4 py-16">
         <div className="flex items-center justify-between mb-8">
           <div className="flex items-center gap-4">
-            <h1 className="text-3xl font-bold text-gray-900">English Courses</h1>
-            <span className="px-3 py-1 bg-blue-100 text-blue-600 rounded-full text-sm font-medium">
-              {filteredProducts.length} {filteredProducts.length === 1 ? 'course' : 'courses'}
+            <h1 className="text-3xl font-bold text-gray-900">My Favorites</h1>
+            <span className="px-3 py-1 bg-red-100 text-red-600 rounded-full text-sm font-medium">
+              {favorites.length} {favorites.length === 1 ? 'item' : 'items'}
             </span>
           </div>
           <div className="flex items-center gap-4">
             <div className="relative">
               <input
                 type="text"
-                placeholder="Search courses..."
+                placeholder="Search in favorites..."
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
                 className="w-64 px-4 py-2 rounded-full border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
@@ -364,82 +390,55 @@ const Store = () => {
           </motion.div>
         )}
 
-        {filteredProducts.length > 0 ? (
+        {favorites.length > 0 ? (
           <div className="grid grid-cols-1 gap-4">
-            {filteredProducts.map((product) => (
+            {favorites.map((favorite) => (
               <div 
-                key={product.id} 
+                key={favorite.id} 
                 className="flex bg-white rounded-lg shadow p-4 items-center gap-4 border border-gray-200"
               >
-                    <img src={product.image} alt={product.name} className="w-40 h-28 object-cover rounded-lg border" />
-                    <div className="flex-1">
-                      <div className="flex items-center gap-2 mb-1">
-                        <span className="bg-blue-100 text-blue-600 text-xs font-bold px-2 py-1 rounded">{product.rating}★ ({product.ratingCount})</span>
-                        <span className="bg-yellow-100 text-yellow-700 text-xs font-bold px-2 py-1 rounded">{product.age}</span>
-                        <span className="bg-gray-200 text-gray-700 text-xs font-bold px-2 py-1 rounded">{product.category}</span>
-                    <span className="bg-green-100 text-green-700 text-xs font-bold px-2 py-1 rounded">{product.level}</span>
-                      </div>
-                      <h3 className="text-lg font-bold text-gray-900 mb-1">{product.name}</h3>
-                  <div className="flex items-center gap-2 mb-2">
-                    <img src={product.owner.avatar} alt={product.owner.name} className="w-6 h-6 rounded-full" />
-                    <div>
-                      <div className="text-sm font-medium text-gray-900">{product.owner.name}</div>
-                      <div className="text-xs text-gray-500">{product.owner.experience} • {product.owner.students} students</div>
-                    </div>
+                <img src={favorite.courseImage} alt={favorite.courseName} className="w-40 h-28 object-cover rounded-lg border" />
+                <div className="flex-1">
+                  <div className="flex items-center gap-2 mb-1">
+                    <span className="bg-blue-100 text-blue-600 text-xs font-bold px-2 py-1 rounded">{favorite.courseRating}★ ({favorite.courseRatingCount})</span>
+                    <span className="bg-yellow-100 text-yellow-700 text-xs font-bold px-2 py-1 rounded">{favorite.courseAge}</span>
+                    <span className="bg-gray-200 text-gray-700 text-xs font-bold px-2 py-1 rounded">{favorite.courseCategory}</span>
+                    <span className="bg-green-100 text-green-700 text-xs font-bold px-2 py-1 rounded">{favorite.courseLevel}</span>
                   </div>
-                  <div className="text-sm text-gray-700 mb-1 line-clamp-2">{product.description}</div>
-                  {product.features && product.features.length > 0 && (
-                    <div className="flex flex-wrap gap-2 mb-2">
-                      {product.features.map((feature, index) => (
-                        <span key={index} className="text-xs bg-gray-100 text-gray-600 px-2 py-1 rounded-full">
-                          {feature}
-                        </span>
-                      ))}
-                    </div>
-                  )}
-                  <div className="text-xs text-gray-400">{product.totalHour} total hours | {product.lessons} lessons | {product.duration}</div>
+                  <h3 className="text-lg font-bold text-gray-900 mb-1">{favorite.courseName}</h3>
+                  <div className="text-sm text-gray-700 mb-1 line-clamp-2">{favorite.courseDescription}</div>
+                  <div className="text-xs text-gray-400">{favorite.courseTotalHour} total hours | {favorite.courseLessons} lessons | {favorite.courseDuration}</div>
                 </div>
                 <div className="flex flex-col items-end min-w-[80px]">
-                  <div className="text-xl font-bold text-blue-600 mb-2">${product.price.toFixed(2)}</div>
+                  <div className="text-xl font-bold text-blue-600 mb-2">${favorite.coursePrice.toFixed(2)}</div>
                   <div className="flex gap-2">
                     <button 
-                      onClick={(e) => handleToggleFavorite(product.id, e)}
-                      className={`p-2 rounded-full transition-colors ${
-                        isInFavorite(product.id)
-                            ? 'bg-red-100 text-red-500 hover:bg-red-200'
-                            : 'bg-gray-100 text-gray-500 hover:bg-gray-200'
-                      }`}
+                      onClick={() => handleRemoveFavorite(favorite.idCourse)}
+                      className="text-red-500 hover:text-red-700"
                     >
-                      <FiHeart className={`w-5 h-5 ${isInFavorite(product.id) ? 'fill-current' : ''}`} />
-                    </button>
-                    <button 
-                      onClick={(e) => handleAddToCart(product.id, e)}
-                      className="bg-blue-500 text-white px-4 py-2 rounded-full font-semibold hover:bg-blue-600 transition flex items-center gap-2"
-                    >
-                      <FiShoppingCart className="w-4 h-4" />
-                      Add to cart
+                      Remove
                     </button>
                   </div>
-                    </div>
-                  </div>
-                ))}
+                </div>
+              </div>
+            ))}
           </div>
         ) : (
           <div className="text-center py-12 bg-white rounded-lg shadow">
-            <FiSearch className="w-16 h-16 mx-auto text-gray-400 mb-4" />
-            <h3 className="text-xl font-semibold text-gray-900 mb-2">No courses found</h3>
-            <p className="text-gray-500 mb-4">Try adjusting your filters or search term</p>
+            <FiHeart className="w-16 h-16 mx-auto text-gray-400 mb-4" />
+            <h3 className="text-xl font-semibold text-gray-900 mb-2">Your favorites list is empty</h3>
+            <p className="text-gray-500 mb-4">Add courses to your favorites to keep track of your favorites</p>
             <button
-              onClick={clearFilters}
+              onClick={() => navigate('/shop')}
               className="px-4 py-2 bg-blue-500 text-white rounded-full hover:bg-blue-600 transition"
             >
-              Clear Filters
+              Browse Courses
             </button>
-        </div>
+          </div>
         )}
       </div>
     </div>
   );
 };
 
-export default Store;
+export default Favorite; 

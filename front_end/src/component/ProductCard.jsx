@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import { FiShoppingCart, FiHeart } from "react-icons/fi";
 import { useNavigate } from "react-router-dom";
+import favoriteService from '../API/favoriteService';
 
 // Dummy star renderer
 const renderStars = (rating) => {
@@ -20,16 +21,17 @@ const renderStars = (rating) => {
 };
 
 const ProductCard = ({ product }) => {
-  const [isWishlisted, setIsWishlisted] = useState(false);
+  const [isFavorited, setIsFavorited] = useState(false);
   const navigate = useNavigate();
 
   const handleClick = () => {
     navigate(`/detail/${product.id}`);
   };
 
-  const toggleWishlist = (e) => {
+  const toggleFavorite = (e) => {
+    e.preventDefault();
     e.stopPropagation();
-    setIsWishlisted(!isWishlisted);
+    setIsFavorited(!isFavorited);
   };
 
   const addToCart = (e) => {
@@ -37,8 +39,9 @@ const ProductCard = ({ product }) => {
     console.log("Added to cart:", product.name);
   };
 
-  const addToWishlist = () => {
-  }
+  const addToFavorite = () => {
+    // Add to favorite logic
+  };
 
   return (
     <div
@@ -85,9 +88,9 @@ const ProductCard = ({ product }) => {
               <FiShoppingCart className="inline mr-1" />
               Add
             </button>
-            <button onClick={toggleWishlist}>
+            <button onClick={toggleFavorite}>
               <FiHeart
-                className={`w-5 h-5 ${isWishlisted ? 'text-red-500 fill-current' : 'text-white'}`}
+                className={`w-5 h-5 ${isFavorited ? 'text-red-500 fill-current' : 'text-white'}`}
               />
             </button>
           </div>

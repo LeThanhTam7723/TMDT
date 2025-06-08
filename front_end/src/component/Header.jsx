@@ -13,9 +13,9 @@ const Header = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isOpen, setIsOpen] = useState(false);
   const [cartCount, setCartCount] = useState(0);
-  const [wishlistCount, setWishlistCount] = useState(() => {
-    const savedWishlist = localStorage.getItem('wishlist');
-    return savedWishlist ? JSON.parse(savedWishlist).length : 0;
+  const [favoriteCount, setFavoriteCount] = useState(() => {
+    const savedFavorites = localStorage.getItem('favorites');
+    return savedFavorites ? JSON.parse(savedFavorites).length : 0;
   });
   //Tìm kiếm giọng nói
   const [isListening, setIsListening] = useState(false);
@@ -96,20 +96,16 @@ const Header = () => {
     { name: "Contact", link: "/video" },
   ];
 
+  const updateFavoriteCount = () => {
+    const savedFavorites = localStorage.getItem('favorites');
+    setFavoriteCount(savedFavorites ? JSON.parse(savedFavorites).length : 0);
+  };
+
   useEffect(() => {
-    const updateWishlistCount = () => {
-      const savedWishlist = localStorage.getItem('wishlist');
-      setWishlistCount(savedWishlist ? JSON.parse(savedWishlist).length : 0);
-    };
-
-    // Update count when localStorage changes
-    window.addEventListener('storage', updateWishlistCount);
-    
-    // Initial count
-    updateWishlistCount();
-
+    window.addEventListener('storage', updateFavoriteCount);
+    updateFavoriteCount();
     return () => {
-      window.removeEventListener('storage', updateWishlistCount);
+      window.removeEventListener('storage', updateFavoriteCount);
     };
   }, []);
 
@@ -250,14 +246,14 @@ const Header = () => {
                     </span>
                   )}
                 </div>
-                {/* Wishlist Icon */}
+                {/* Favorite Icon */}
                 <div className="relative">
                   <FiHeart 
-                    className="text-2xl text-gray-300 hover:text-blue-400 cursor-pointer" 
-                    onClick={() => navigate('/wishlist')}
+                      className="text-2xl text-gray-300 hover:text-blue-400 cursor-pointer" 
+                      onClick={() => navigate('/favorites')}
                   />
                   <span className="absolute -top-2 -right-2 bg-blue-600 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center">
-                    {wishlistCount}
+                      {favoriteCount}
                   </span>
                 </div>
                 {/* Cart Icon */}
