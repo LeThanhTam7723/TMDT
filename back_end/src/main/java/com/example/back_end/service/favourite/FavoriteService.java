@@ -7,15 +7,20 @@ import com.example.back_end.entity.Favorite;
 import com.example.back_end.entity.User;
 import com.example.back_end.exception.AppException;
 import com.example.back_end.exception.ErrorCode;
+import com.example.back_end.mapper.CourseMapper;
 import com.example.back_end.repositories.CourseRepository;
 import com.example.back_end.repositories.FavoriteRepository;
 import com.example.back_end.repositories.UserRepository;
 import lombok.RequiredArgsConstructor;
+import org.modelmapper.ModelMapper;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.ui.Model;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 @Transactional
@@ -24,6 +29,8 @@ public class FavoriteService implements IFavoriteService{
     private final FavoriteRepository favoriteRepository;
     private final UserRepository userRepository;
     private final CourseRepository courseRepository;
+    @Autowired
+    private CourseMapper courseMapper;
 
     @Override
     public ApiResponse<Course> addFavorite(int userId, int courseId) {
@@ -82,8 +89,20 @@ public class FavoriteService implements IFavoriteService{
 
     @Override
     public List<Course> getFavoritesByUserId(int userId) {
-        return null;
+        List<Favorite> favorites = favoriteRepository.findAllByIdUser_Id(userId);
+        System.out.println("favorites");
+        List<Course>courses = favorites.stream()
+                .map(Favorite::getIdCourse)
+                .collect(Collectors.toList());
+        System.out.println("Course");
+        List<CourseDto> courseDtos = courses.stream()
+                .map(courseMapper::toDto)
+                .collect(Collectors.toList());
+        System.out.println("DTo");
+
+        return courses;
     }
+
 
     @Override
     public boolean isFavorite(int userId, int courseId) {

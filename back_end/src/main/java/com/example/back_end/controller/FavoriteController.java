@@ -4,6 +4,7 @@ import com.example.back_end.dto.CourseDto;
 import com.example.back_end.dto.request.FavoriteRequest;
 import com.example.back_end.dto.response.ApiResponse;
 import com.example.back_end.entity.Course;
+import com.example.back_end.entity.Favorite;
 import com.example.back_end.service.favourite.FavoriteService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;

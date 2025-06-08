@@ -3,6 +3,7 @@ package com.example.back_end.service.favourite;
 import com.example.back_end.dto.CourseDto;
 import com.example.back_end.dto.response.ApiResponse;
 import com.example.back_end.entity.Course;
+import com.example.back_end.entity.Favorite;
 
 import java.util.List;
 

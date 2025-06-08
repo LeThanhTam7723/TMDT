@@ -4,7 +4,8 @@ import { FaFacebook, FaEye, FaEyeSlash } from "react-icons/fa";
 import { motion, AnimatePresence } from "framer-motion";
 import ReCAPTCHA from "react-google-recaptcha";
 import { checkEmailExists, signIn, verifyRegister} from "../API/AuthService";
-import { useNavigate } from "react-router-dom";
+import { useNavigate } from "react-router-dom";// Đường dẫn tùy vào dự án của bạn
+
 
 const VerificationPage = ({ email, onResend }) => {
   return (
@@ -164,8 +165,16 @@ const Login = () => {
           }
           console.error("Đã xảy ra lỗi khi gọi API:", err);
         });
-        
-          
+      // đăng nhập với firebase
+      // firebase.auth().signInWithEmailAndPassword(formData.email, formData.password)
+      // .then((userCredential) => {
+      //   const user = userCredential.user;
+      //   console.log("Đăng nhập thành công:", user.uid);
+      // })
+      // .catch((error) => {
+      //   console.error("Lỗi đăng nhập:", error.message);
+      // });
+             
     } else {
       if(authState==="forgot"){
         console.log("forgot :", formData);
