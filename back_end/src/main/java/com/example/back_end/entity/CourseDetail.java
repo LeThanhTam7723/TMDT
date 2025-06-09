@@ -34,6 +34,8 @@ public class CourseDetail {
     private Boolean isPreview;
 
     @ManyToOne
-    @JoinColumn(name = "CourseID", insertable = false, updatable = false)
+    @JoinColumn(name = "course_id")
+    @JsonIgnore
+//    @JoinColumn(name = "CourseID", insertable = false, updatable = false)
     private Course course;
 }

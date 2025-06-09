@@ -16,6 +16,7 @@ import Favorite from '../Pages/Favorite';
 import Checkout from '../Pages/Checkout';
 import Login from '../Pages/Login';
 import Register from '../Pages/Register';
+import ChatInterface from '../Pages/Chat';
 
 const AppRoutes = () => {
   return (
@@ -35,6 +36,7 @@ const AppRoutes = () => {
         <Route path="/checkout" element={<Checkout />} />
         <Route path="/login" element={<Login />} />
         <Route path="/register" element={<Register />} />
+        <Route path="/chat" element={<ChatInterface />} />
         
         {/* Seller Routes */}
         <Route path="/seller/dashboard" element={<SellerDashboard />} />

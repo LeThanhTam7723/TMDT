@@ -69,7 +69,7 @@ public class CourseServiceImpl {
     }
 
     public List<CourseDetailResponseDTO> getCourseDetailsByCourseId(Integer courseId) {
-        return courseDetailRepository.findByCourseId(courseId).stream()
+        return courseDetailRepository.findByCourse_Id(courseId).stream()
                 .map(detail -> CourseDetailResponseDTO.builder()
                         .id(detail.getId())
                         .episodeNumber(detail.getEpisodeNumber())

@@ -1,8 +1,10 @@
 import axiosClient from './axiosClient';
 
 const favoriteService = {
-    getUserFavorites: (userId) => {
-        return axiosClient.get(`/api/favorites/user/${userId}`);
+    getUserFavorites: (userId,token) => {
+        return axiosClient.get(`/favorites/idUser/${userId}`,{
+            headers: { Authorization: `Bearer ${token}` }
+        });
     },
 
     addToFavorites: (userId, courseId) => {
