@@ -103,7 +103,7 @@ const Detail = () => {
           setCourse(courseResponse.data.result);
           
           // Fetch course details separately
-          const detailsResponse = await axiosClient.get(`/courses/${id}/details`);
+          const detailsResponse = await axiosClient.get(`/courses/details/${id}`);
           if (detailsResponse.data && detailsResponse.data.code === 200) {
             setCourseDetails(detailsResponse.data.result);
           }
