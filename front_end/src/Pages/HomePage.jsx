@@ -85,8 +85,8 @@ const HomePage = () => {
       );
 
       if (response.data && response.data.code === 200 && Array.isArray(response.data.result)) {
-        console.log("Fetched courses:", response.data.result);
-        // Nếu bạn muốn lưu vào state thì tạo state setCourses và gọi nó ở đây
+        // console.log("Fetched courses:", response.data.result);
+        // // Nếu bạn muốn lưu vào state thì tạo state setCourses và gọi nó ở đây
         setProducts(response.data.result);
       } else {
         throw new Error("Invalid response format");
