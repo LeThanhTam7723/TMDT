@@ -62,7 +62,7 @@ public class CourseController {
         }
     }
 
-    @GetMapping("/{id}/details")
+    @GetMapping("/details/{id}")
     public ApiResponse<List<CourseDetailResponseDTO>> getCourseDetailsByCourseId(@PathVariable Integer id) {
         List<CourseDetailResponseDTO> details = courseService.getCourseDetailsByCourseId(id);
         if (details == null) {

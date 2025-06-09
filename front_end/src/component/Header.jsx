@@ -1,14 +1,15 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useContext } from "react";
 import { FiSearch, FiShoppingCart, FiHeart, FiMenu, FiX, FiMic, FiBell, FiUser } from "react-icons/fi";
 import { FaFacebookF, FaTwitter, FaInstagram, FaLinkedinIn } from "react-icons/fa";
 import { MdEmail, MdPhone, MdKeyboardArrowDown } from "react-icons/md";
 import { useNavigate, Link } from "react-router-dom";
 import logo from "../assets/images/logo.jpg";
 import { introspect, logOutApi } from "../API/AuthService";
-import { useProduct } from '../context/ProductContext';
+import { ProductContext, useProduct } from '../context/ProductContext';
 
 
 const Header = () => {
+  const {favorites,setSession}= useContext(ProductContext);
   const [isToken, setIsToken] = useState("");
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isOpen, setIsOpen] = useState(false);
@@ -78,6 +79,7 @@ const Header = () => {
         if (isValid) {
           setIsLogin(true);
           setIsToken(session.token);
+          setSession(session);
         } else {
           setIsLogin(false);
           setCartCount(0);
@@ -92,7 +94,7 @@ const Header = () => {
     { name: "Home", link: "/" },
     { name: "Shop", link: "/shop", hasDropdown: true },
     { name: "Pages", link: "#", hasDropdown: true },
-    { name: "Blog", link: "/info" },
+    { name: "Blog", link: "/user-info" },
     { name: "Contact", link: "/video" },
   ];
 
@@ -253,7 +255,7 @@ const Header = () => {
                       onClick={() => navigate('/favorites')}
                   />
                   <span className="absolute -top-2 -right-2 bg-blue-600 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center">
-                      {favoriteCount}
+                      {favorites.length}
                   </span>
                 </div>
                 {/* Cart Icon */}
@@ -272,7 +274,7 @@ const Header = () => {
                   </div>
                   {isOpen && (
                     <div className="absolute top-full right-0 w-48 bg-gray-800 shadow-lg rounded-md py-2 mt-2">
-                      <a href="/profile" className="block px-4 py-2 text-sm text-gray-300 hover:bg-gray-700">Profile</a>
+                      <a href="/user-info" className="block px-4 py-2 text-sm text-gray-300 hover:bg-gray-700">Profile</a>
                       <a href="#" className="block px-4 py-2 text-sm text-gray-300 hover:bg-gray-700">Settings</a>
                       <a onClick={async() => {
                         console.log(isToken);

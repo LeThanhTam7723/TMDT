@@ -1,6 +1,7 @@
 package com.example.back_end.entity;
 
 import com.fasterxml.jackson.annotation.JsonBackReference;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -33,6 +34,8 @@ public class CourseDetail {
     private Boolean isPreview;
 
     @ManyToOne
-    @JoinColumn(name = "CourseID", insertable = false, updatable = false)
+    @JoinColumn(name = "course_id")
+    @JsonIgnore
+//    @JoinColumn(name = "CourseID", insertable = false, updatable = false)
     private Course course;
 }

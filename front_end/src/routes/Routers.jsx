@@ -38,11 +38,14 @@ const routes = [
     path: '/info',
     component: lazy(()=> import('../Pages/UserInfo.jsx'))  ,
   },
-   {
+  {
     path: '/video',
     component: lazy(()=> import('../Pages/CourseVideo.jsx'))  ,
+  },
+  {
+    path: '/chat',
+    component: lazy(()=> import('../Pages/Chat.jsx'))  ,
   }
-
 ];
 
 export default routes;
