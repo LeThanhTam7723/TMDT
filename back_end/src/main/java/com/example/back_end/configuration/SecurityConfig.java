@@ -29,7 +29,7 @@ public class SecurityConfig {
     private final String[] PUBLIC_ENDPOINTS_POST_PERMITALL = {"users/createUser",
             "auth/login","auth/introspect","/verifyRegister/**","users/existUser"};
     private final String[] PUBLIC_ENDPOINTS_GET_PERMITALL = {"/auth/verifyAccount","users/id/**","/courses/**"};
-    private final String[] PUBLIC_ENDPOINTS_GET = {"/sendEmail","/users/all","/favorites/idUser/**"};
+    private final String[] PUBLIC_ENDPOINTS_GET = {"/sendEmail","/users/all","/favorites/idUser/**","/payment/vnpay/**"};
     private final String[] PUBLIC_ENDPOINTS_LOGIN = {"/auth/logout","/favorites/add"};
     private final String[] PUBLIC_ENDPOINTS_DELETE = {"/favorites/remove"};
     @Value("${jwt.signer-key}")

@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Play, Clock, ChevronLeft, ChevronRight, Star, Users, BookOpen, Award, ChevronDown } from 'lucide-react';
 import { useParams } from 'react-router-dom'; // Import useParams
 import axiosClient from '../API/axiosClient'; // Adjust the path as needed
+import FacebookComment from '../component/commentFb/FacebookComment';
 
 const Detail = () => {
   const [currentSlide, setCurrentSlide] = useState(0);
@@ -255,6 +256,7 @@ const Detail = () => {
           </div>
         </div>
       </div>
+      <FacebookComment url={'https://your-public-url.com/product/'+id} />
 
       {/* Related Courses */}
       <div className="py-8 border-t border-gray-200">
