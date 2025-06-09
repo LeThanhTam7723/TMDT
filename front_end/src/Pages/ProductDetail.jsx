@@ -2,6 +2,7 @@ import React, { useState } from "react";
 import { FiHeart, FiShoppingCart, FiMinus, FiPlus } from "react-icons/fi";
 import { motion } from "framer-motion";
 import { useNavigate } from 'react-router-dom';
+import favoriteService from '../API/favoriteService';
 
 
 const ProductDetail = () => {
@@ -10,7 +11,7 @@ const ProductDetail = () => {
   const [selectedColor, setSelectedColor] = useState("");
   const [currentImage, setCurrentImage] = useState(0);
   const [showSizeGuide, setShowSizeGuide] = useState(false);
-  const [isWishlist, setIsWishlist] = useState(false);
+  const [isFavorite, setIsFavorite] = useState(false);
   const navigate = useNavigate();
 
   const handleAddToCart = () => {
@@ -139,8 +140,8 @@ const ProductDetail = () => {
               Buy Now
             </button>
             <button
-              onClick={() => setIsWishlist(!isWishlist)}
-              className={`p-3 rounded-full border ${isWishlist ? "text-red-500" : ""}`}
+              onClick={() => setIsFavorite(!isFavorite)}
+              className={`p-3 rounded-full border ${isFavorite ? "text-red-500" : ""}`}
             >
               <FiHeart className="w-6 h-6" />
             </button>
