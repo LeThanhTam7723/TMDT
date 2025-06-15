@@ -3,6 +3,7 @@ package com.example.back_end.controller;
 import com.example.back_end.dto.UserDto;
 import com.example.back_end.dto.request.UserCreationRequest;
 import com.example.back_end.dto.response.ApiResponse;
+import com.example.back_end.dto.response.UserResponse;
 import com.example.back_end.entity.User;
 import com.example.back_end.repositories.UserRepository;
 import com.example.back_end.service.UserService;
@@ -12,9 +13,12 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
+import org.springframework.http.MediaType;
 
 import java.util.List;
 @Slf4j
@@ -51,5 +55,48 @@ public class UserController {
             rs = false;
         }
         return ApiResponse.<Boolean>builder().result(rs).build();
+    }
+    @PutMapping(value = "/me/avatar", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    @PreAuthorize("isAuthenticated()")
+    public ResponseEntity<ApiResponse<UserResponse>> updateAvatar(
+            @RequestParam("file") MultipartFile file) {
+        try {
+            // Kiểm tra định dạng file
+            String contentType = file.getContentType();
+            if (contentType == null || !contentType.startsWith("image/")) {
+                return ResponseEntity.badRequest()
+                        .body(ApiResponse.<UserResponse>builder()
+                                .code(1)
+                                .message("File không phải là hình ảnh")
+                                .build());
+            }
+
+            // Kiểm tra kích thước file (tối đa 5MB)
+            if (file.getSize() > 5 * 1024 * 1024) {
+                return ResponseEntity.badRequest()
+                        .body(ApiResponse.<UserResponse>builder()
+                                .code(1)
+                                .message("Kích thước file quá lớn (tối đa 5MB)")
+                                .build());
+            }
+
+            UserResponse currentUser = userService.getCurrentUser();
+            System.out.println(currentUser.getId());
+            UserResponse updatedUser = userService.updateAvatar(currentUser.getId(), file);
+            return ResponseEntity.ok(
+                    ApiResponse.<UserResponse>builder()
+                            .code(0)
+                            .message("Cập nhật ảnh đại diện thành công")
+                            .result(updatedUser)
+                            .build()
+            );
+        } catch (Exception e) {
+            log.error("Failed to update avatar", e);
+            return ResponseEntity.badRequest()
+                    .body(ApiResponse.<UserResponse>builder()
+                            .code(1)
+                            .message("Không thể cập nhật ảnh đại diện: " + e.getMessage())
+                            .build());
+        }
     }
 }

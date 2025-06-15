@@ -175,39 +175,39 @@ export const ProductProvider = ({ children }) => {
     fetchFavorites();
   }, [session]);
 
-  // const toggleFavorite = async (productId) => {
-  //   try {
-  //     const userId = 1; // TODO: Get from auth context
-  //     const isInFavorites = favorites.some(item => item.course.id === productId);
+  const toggleFavorite = async (productId) => {
+    try {
+      const userId = 1; // TODO: Get from auth context
+      const isInFavorites = favorites.some(item => item.course.id === productId);
       
-  //     if (isInFavorites) {
-  //       await favoriteService.removeFromFavorites(userId, productId);
-  //       setFavorites(prev => prev.filter(item => item.course.id !== productId));
-  //     } else {
-  //       const response = await favoriteService.addToFavorites(userId, productId);
-  //       setFavorites(prev => [...prev, response.data.result]);
-  //     }
-  //   } catch (error) {
-  //     console.error('Error toggling favorite:', error);
-  //   }
-  // };
+      if (isInFavorites) {
+        await favoriteService.removeFromFavorites(userId, productId);
+        setFavorites(prev => prev.filter(item => item.course.id !== productId));
+      } else {
+        const response = await favoriteService.addToFavorites(userId, productId);
+        setFavorites(prev => [...prev, response.data.result]);
+      }
+    } catch (error) {
+      console.error('Error toggling favorite:', error);
+    }
+  };
 
-  // const isInFavorites = (productId) => {
-  //   return favorites.some(item => item.course.id === productId);
-  // };
+  const isInFavorites = (productId) => {
+    return favorites.some(item => item.course.id === productId);
+  };
 
-  // const getFavoriteProducts = () => {
-  //   return favorites.map(item => item.course);
-  // };
+  const getFavoriteProducts = () => {
+    return favorites.map(item => item.course);
+  };
 
-  // const loadUserFavorites = async (userId) => {
-  //   try {
-  //     const response = await favoriteService.getUserFavorites(userId);
-  //     setFavorites(response.data.result);
-  //   } catch (error) {
-  //     console.error('Error loading favorites:', error);
-  //   }
-  // };
+  const loadUserFavorites = async (userId) => {
+    try {
+      const response = await favoriteService.getUserFavorites(userId);
+      setFavorites(response.data.result);
+    } catch (error) {
+      console.error('Error loading favorites:', error);
+    }
+  };
 
   const addToCart = (product) => {
     setCart(prev => {
@@ -246,7 +246,7 @@ export const ProductProvider = ({ children }) => {
     addToCart,
     removeFromCart,
     updateCartItemQuantity,
-    // getFavoriteProducts, toggleFavorite,
+    getFavoriteProducts, toggleFavorite,
   };
 
   return (
