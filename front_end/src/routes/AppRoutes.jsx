@@ -1,3 +1,4 @@
+// src/routes/AppRoutes.jsx
 import React, { Suspense } from "react";
 import { Routes, Route } from "react-router-dom";
 import Home from "../Pages/HomePage";
@@ -11,10 +12,11 @@ import UserInfo from "../Pages/UserInfo";
 import CourseVideo from "../Pages/CourseVideo";
 import SellerDashboard from "../Pages/SellerDashboard";
 import CourseForm from "../Pages/CourseForm";
-import Wishlist from "../Pages/Wishlist";
+import Favorite from "../Pages/Favorite";
 import Checkout from "../Pages/Checkout";
 import Login from "../Pages/Login";
 import Register from "../Pages/Register";
+import ChatInterface from "../Pages/Chat";
 import AdminDashboard from "../Pages/Admin/AdminDashboard";
 
 const AppRoutes = () => {
@@ -24,7 +26,7 @@ const AppRoutes = () => {
         {/* Public Routes */}
         <Route path="/" element={<Home />} />
         <Route path="/shop" element={<Store />} />
-        <Route path="/wishlist" element={<Wishlist />} />
+        <Route path="/favorites" element={<Favorite />} />
         <Route path="/product/:id" element={<ProductDetail />} />
         <Route path="/cart" element={<Cart />} />
         <Route path="/payment" element={<CheckoutPage />} />
@@ -35,6 +37,7 @@ const AppRoutes = () => {
         <Route path="/checkout" element={<Checkout />} />
         <Route path="/login" element={<Login />} />
         <Route path="/register" element={<Register />} />
+        <Route path="/chat" element={<ChatInterface />} />
 
         {/* Seller Routes */}
         <Route path="/seller/dashboard" element={<SellerDashboard />} />

@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { Mail, ChevronDown, User } from 'lucide-react';
 import { getUserById } from '../API/AuthService';
 import { useEffect } from 'react';
+import { Camera, Save } from 'lucide-react'
 
 const  UserInformation =() => {
   const [isEditing, setIsEditing] = useState(false);
@@ -79,9 +80,36 @@ const  UserInformation =() => {
           {/* Avatar and Header */}
           <div className="flex items-start p-6">
             <div className="relative -mt-16">
-              <div className="bg-gray-300 rounded-full h-24 w-24 flex items-center justify-center text-gray-500">
-                <User size={40} />
-              </div>
+            <div className="relative w-24 h-24">
+            {/* Avatar tròn */}
+            <div className="bg-gray-300 rounded-full w-full h-full flex items-center justify-center text-gray-500">
+              <User size={40} />
+            </div>
+
+            {/* Label chọn ảnh ở góc dưới phải */}
+            <label className="absolute bottom-0 right-0 bg-white p-1 rounded-full shadow cursor-pointer">
+              <Camera size={18} className="text-gray-700" />
+              <input
+                type="file"
+                accept="image/*"
+                className="hidden"
+                onChange={(e) => {
+                  console.log(e.target.files[0]);
+                }}
+              />
+            </label>
+          </div>
+
+              <button
+                className="mt-2 text-sm px-3 py-1 rounded bg-blue-500 text-white hover:bg-blue-600"
+                onClick={() => {
+                  // xử lý lưu ảnh
+                  console.log("Lưu ảnh");
+                }}
+              >
+                <Save size={16} className="inline mr-1" />
+                Lưu ảnh
+              </button>
             </div>
             
             <div className="ml-4 flex-grow">

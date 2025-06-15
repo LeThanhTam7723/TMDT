@@ -18,6 +18,9 @@ public enum ErrorCode {
     UNAUTHORIZED(1007, "You do not have permission", HttpStatus.FORBIDDEN),
     INVALID_DOB(1008, "Your age must be at least {min}", HttpStatus.BAD_REQUEST),
     INACTIVE_ACC(1009,"Your account had been clock", HttpStatus.LOCKED),
+    COURSE_NOT_FOUND(1010, "Can not find the course", HttpStatus.NOT_FOUND),
+    INVALID_File(1011, "Nhập sai mật khẩu", HttpStatus.BAD_REQUEST),
+    CLOUDINARY_ERROR(1012, "Error occurred while processing image on Cloudinary", HttpStatus.INTERNAL_SERVER_ERROR),
     ;
 
     private final int code;

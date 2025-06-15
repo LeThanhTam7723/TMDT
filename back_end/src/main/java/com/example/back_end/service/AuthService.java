@@ -122,7 +122,7 @@ public class AuthService {
         System.out.println(buildScope(user));
 
         JWTClaimsSet jwtClaimsSet = new JWTClaimsSet.Builder()
-                .subject(user.getUsername())
+                .subject(user.getEmail())
                 .issuer("CDWED.com")
                 .issueTime(new Date())
                 .expirationTime(new Date(

@@ -1,5 +1,6 @@
 package com.example.back_end.entity;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -34,7 +35,7 @@ public class User {
     @Column(name = "phone", nullable = false, length = 20)
     private String phone;
 
-    @Column(name = "avatar", length = 45)
+    @Column(name = "avatar")
     private String avatar;
 
     @Column(name = "introduce", length = 225)
@@ -43,7 +44,7 @@ public class User {
     @Column(name = "gender", length = 45)
     private String gender;
 
-    @Column(name = "certificate", length = 45)
+    @Column(name = "certificate")
     private String certificate;
 
     @Column(name = "active", nullable = false)

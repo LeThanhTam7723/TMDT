@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Play, Clock, ChevronLeft, ChevronRight, Star, Users, BookOpen, Award, ChevronDown } from 'lucide-react';
 import { useParams } from 'react-router-dom'; // Import useParams
 import axiosClient from '../API/axiosClient'; // Adjust the path as needed
+import FacebookComment from '../component/commentFb/FacebookComment';
 
 const Detail = () => {
   const [currentSlide, setCurrentSlide] = useState(0);
@@ -11,6 +12,7 @@ const Detail = () => {
   const { id } = useParams(); // This will get the ID from the URL
   
   const [course, setCourse] = useState(null);
+  const [courseDetails, setCourseDetails] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   
@@ -95,41 +97,30 @@ const Detail = () => {
       setError(null);
 
       try {
-        // Fixed: Use 'id' instead of 'product.id'
-        const response = await axiosClient.get(`/courses/${id}`, 
-         );
-
-        // Check if response has the expected structure
-        if (response.data && response.data.code === 200 && response.data.result) {
-          setCourse(response.data.result);
+        // Fetch course basic info
+        const courseResponse = await axiosClient.get(`/courses/${id}`);
+        
+        if (courseResponse.data && courseResponse.data.code === 200 && courseResponse.data.result) {
+          setCourse(courseResponse.data.result);
+          
+          // Fetch course details separately
+          const detailsResponse = await axiosClient.get(`/courses/details/${id}`);
+          if (detailsResponse.data && detailsResponse.data.code === 200) {
+            setCourseDetails(detailsResponse.data.result);
+          }
         } else {
           throw new Error('Invalid response format');
         }
       } catch (error) {
         console.error('API fetch failed:', error);
         setError(error.message || 'Failed to load course');
-        
-        // Optional: Set fallback data for development
-        setCourse({
-          id: parseInt(id),
-          name: `Advanced English Course #${id}`,
-          description: "Master advanced English skills with our comprehensive course program.",
-          rating: 4.5,
-          price: 199.99,
-          status: true,
-          courseDetails: [
-            { id: 1, episodeNumber: 1, duration: 15, isPreview: true },
-            { id: 2, episodeNumber: 2, duration: 22, isPreview: false },
-            { id: 3, episodeNumber: 3, duration: 19, isPreview: false }
-          ]
-        });
       } finally {
         setLoading(false);
       }
     };
 
     fetchCourse();
-  }, [id]); // Make sure to include 'id' in dependencies
+  }, [id]);
   
   if (loading) {
     return (
@@ -171,9 +162,9 @@ const Detail = () => {
     );
   }
 
-  const totalDuration = calculateTotalDuration(course.courseDetails);
-  const totalEpisodes = course.courseDetails ? course.courseDetails.length : 0;
-  const previewEpisodes = course.courseDetails ? course.courseDetails.filter(ep => ep.isPreview).length : 0;
+  const totalDuration = calculateTotalDuration(courseDetails);
+  const totalEpisodes = courseDetails ? courseDetails.length : 0;
+  const previewEpisodes = courseDetails ? courseDetails.filter(ep => ep.isPreview).length : 0;
 
   return (
     <div className="max-w-6xl mx-auto px-4 bg-white">
@@ -245,7 +236,7 @@ const Detail = () => {
           </div>
           
           <div className="space-y-3">
-            {course.courseDetails && course.courseDetails.map((episode) => (
+            {courseDetails && courseDetails.map((episode) => (
               <div key={episode.id} className="flex items-center justify-between p-3 bg-white rounded border hover:shadow-sm transition-shadow">
                 <div className="flex items-center">
                   <Play className="w-4 h-4 text-gray-400 mr-3" />
@@ -265,6 +256,7 @@ const Detail = () => {
           </div>
         </div>
       </div>
+      <FacebookComment url={'https://your-public-url.com/product/'+id} />
 
       {/* Related Courses */}
       <div className="py-8 border-t border-gray-200">
