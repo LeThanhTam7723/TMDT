@@ -83,6 +83,11 @@
             <artifactId>spring-boot-starter-mail</artifactId>
             <version>3.4.2</version>
         </dependency>
+        <dependency>
+            <groupId>com.cloudinary</groupId>
+            <artifactId>cloudinary-http44</artifactId>
+            <version>1.35.0</version>
+        </dependency>
 
         <dependency>
             <groupId>com.mysql</groupId>
