@@ -15,7 +15,7 @@ import Wishlist from "../Pages/Wishlist";
 import Checkout from "../Pages/Checkout";
 import Login from "../Pages/Login";
 import Register from "../Pages/Register";
-import AdminDashboard from "../Pages/AdminDashBoard";
+import AdminDashboard from "../Pages/Admin/AdminDashboard";
 
 const AppRoutes = () => {
   return (
@@ -40,6 +40,8 @@ const AppRoutes = () => {
         <Route path="/seller/dashboard" element={<SellerDashboard />} />
         <Route path="/seller/course/new" element={<CourseForm />} />
         <Route path="/seller/course/:id/edit" element={<CourseForm />} />
+
+        {/* Admin Routes */}
         <Route path="/admin" element={<AdminDashboard />} />
       </Routes>
     </Suspense>

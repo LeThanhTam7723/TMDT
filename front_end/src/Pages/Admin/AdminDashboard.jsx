@@ -13,7 +13,7 @@ import {
   Cell,
 } from "recharts";
 import { Bell, Users, BookOpen, DollarSign, LogOut } from "lucide-react";
-import logo from "../assets/images/logo.jfif"; // Adjust the path to your logo image
+import logo from "../../assets/images/logo.jpg";
 
 // Sample data for the charts
 const monthlyData = [
