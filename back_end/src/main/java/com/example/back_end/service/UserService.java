@@ -1,11 +1,14 @@
 package com.example.back_end.service;
 
+import com.cloudinary.Cloudinary;
+import com.cloudinary.utils.ObjectUtils;
 import com.example.back_end.constant.PredefinedRole;
 import com.example.back_end.dto.UserDto;
 import com.example.back_end.dto.request.IntrospectRequest;
 import com.example.back_end.dto.request.UserCreationRequest;
 import com.example.back_end.dto.response.AuthenticationResponse;
 import com.example.back_end.dto.response.IntrospectResponse;
+import com.example.back_end.dto.response.UserResponse;
 import com.example.back_end.entity.Role;
 import com.example.back_end.entity.User;
 import com.example.back_end.exception.AppException;
@@ -25,11 +28,14 @@ import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
+import org.springframework.web.multipart.MultipartFile;
 
+import java.io.IOException;
 import java.text.ParseException;
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
@@ -42,6 +48,8 @@ public class UserService {
     private final UserRepository userRepository;
     private final RoleRepository roleRepository;
     private final ModelMapper modelMapper;
+    private final UserMapper userMapper;
+    private final Cloudinary cloudinary;
     private final PasswordEncoder passwordEncoder = new BCryptPasswordEncoder(10);
 
     @Value("${jwt.signer-key}")
@@ -121,6 +129,42 @@ public class UserService {
 //            userDto.setAvatar(avatarDto);
 //        }
         return userDto;
+    }
+    public UserResponse getCurrentUser() {
+        String email = SecurityContextHolder.getContext()
+                .getAuthentication().getName();
+        User user = userRepository.findByEmail(email)
+                .orElseThrow(() -> new AppException(ErrorCode.USER_NOT_EXISTED));
+        return userMapper.toResponse(user);
+    }
+    public UserResponse updateAvatar(int userId, MultipartFile file) {
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new AppException(ErrorCode.USER_NOT_EXISTED));
+        try {
+            // Upload ảnh lên Cloudinary
+            Map<?, ?> uploadResult = cloudinary.uploader().upload(
+                    file.getBytes(),
+                    ObjectUtils.asMap(
+                            "folder", "user_avatars",
+                            "resource_type", "image"
+                    )
+            );
+
+            // Xóa ảnh cũ nếu có
+            if (user.getAvatar() != null) {
+                String publicId = user.getAvatar().split("/")[user.getAvatar().split("/").length - 1].split("\\.")[0];
+                cloudinary.uploader().destroy(publicId, ObjectUtils.emptyMap());
+            }
+
+            // Cập nhật URL ảnh mới
+            user.setAvatar((String) uploadResult.get("secure_url"));
+            User updatedUser = userRepository.save(user);
+            return userMapper.toResponse(updatedUser);
+
+        } catch (IOException e) {
+            log.error("Failed to upload avatar", e);
+            throw new AppException(ErrorCode.CLOUDINARY_ERROR);
+        }
     }
 
 }
