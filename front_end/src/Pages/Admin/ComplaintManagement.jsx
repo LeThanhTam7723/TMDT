@@ -1,9 +1,28 @@
 import React, { useState, useEffect } from "react";
+// eslint-disable-next-line no-unused-vars
 import { motion, AnimatePresence } from "framer-motion";
-import { FiMenu, FiBell, FiSearch, FiUser, FiSettings, FiEye, FiTrash2, FiSend, FiX, FiClock, FiMail } from "react-icons/fi";
-import { MdDashboard, MdAnalytics, MdPeople, MdReport, MdFeedback } from "react-icons/md";
+import {
+  FiMenu,
+  FiBell,
+  FiSearch,
+  FiUser,
+  FiSettings,
+  FiEye,
+  FiTrash2,
+  FiSend,
+  FiX,
+  FiClock,
+  FiMail,
+} from "react-icons/fi";
+import {
+  MdDashboard,
+  MdAnalytics,
+  MdPeople,
+  MdReport,
+  MdFeedback,
+} from "react-icons/md";
 import { BsSun, BsMoon } from "react-icons/bs";
-import axiosClient from '../../API/axiosClient';
+import axiosClient from "../../API/axiosClient";
 
 const api = {
   getAllReports: async () => {
@@ -17,7 +36,7 @@ const api = {
       console.error("Error fetching reports:", error);
       throw error;
     }
-  }
+  },
 };
 
 const ComplaintManagement = () => {
@@ -37,7 +56,7 @@ const ComplaintManagement = () => {
         setLoading(true);
         const data = await api.getAllReports();
 
-        const transformedData = data.map(item => ({
+        const transformedData = data.map((item) => ({
           id: item.id.toString(),
           userId: item.userEmail,
           courseId: item.courseName,
@@ -49,14 +68,14 @@ const ComplaintManagement = () => {
           priority: item.priority.toLowerCase(),
           category: item.category,
           subject: item.subject,
-          detail: item.detail
+          detail: item.detail,
         }));
 
         setComplaints(transformedData);
         setError(null);
       } catch (err) {
-        console.error('Failed to fetch complaints:', err);
-        setError('Không thể tải danh sách khiếu nại. Vui lòng thử lại.');
+        console.error("Failed to fetch complaints:", err);
+        setError("Không thể tải danh sách khiếu nại. Vui lòng thử lại.");
       } finally {
         setLoading(false);
       }
@@ -67,24 +86,33 @@ const ComplaintManagement = () => {
 
   // Filter and sort complaints
   const sortedComplaints = complaints
-    .filter(complaint => 
-      complaint.userName.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      complaint.subject.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      complaint.id.toLowerCase().includes(searchTerm.toLowerCase())
+    .filter(
+      (complaint) =>
+        complaint.userName.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        complaint.subject.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        complaint.id.toLowerCase().includes(searchTerm.toLowerCase())
     )
     .sort((a, b) => new Date(b.date) - new Date(a.date));
 
   const formatDate = (dateString) => {
     const date = new Date(dateString);
-    return date.toLocaleDateString('vi-VN') + ' ' + date.toLocaleTimeString('vi-VN', { hour: '2-digit', minute: '2-digit' });
+    return (
+      date.toLocaleDateString("vi-VN") +
+      " " +
+      date.toLocaleTimeString("vi-VN", { hour: "2-digit", minute: "2-digit" })
+    );
   };
 
   const getPriorityColor = (priority) => {
     switch (priority) {
-      case 'high': return 'text-red-500 bg-red-100 dark:bg-red-900';
-      case 'medium': return 'text-yellow-500 bg-yellow-100 dark:bg-yellow-900';
-      case 'low': return 'text-green-500 bg-green-100 dark:bg-green-900';
-      default: return 'text-gray-500 bg-gray-100 dark:bg-gray-700';
+      case "high":
+        return "text-red-500 bg-red-100 dark:bg-red-900";
+      case "medium":
+        return "text-yellow-500 bg-yellow-100 dark:bg-yellow-900";
+      case "low":
+        return "text-green-500 bg-green-100 dark:bg-green-900";
+      default:
+        return "text-gray-500 bg-gray-100 dark:bg-gray-700";
     }
   };
 
@@ -97,11 +125,13 @@ const ComplaintManagement = () => {
   const handleSendResponse = () => {
     if (response.trim()) {
       // TODO: Implement API call to send response
-      alert(`Đã gửi phản hồi cho ${selectedComplaint.userName}:\n"${response}"`);
-      
+      alert(
+        `Đã gửi phản hồi cho ${selectedComplaint.userName}:\n"${response}"`
+      );
+
       // Remove complaint from list (simulate resolution)
-      setComplaints(complaints.filter(c => c.id !== selectedComplaint.id));
-      
+      setComplaints(complaints.filter((c) => c.id !== selectedComplaint.id));
+
       setShowModal(false);
       setSelectedComplaint(null);
       setResponse("");
@@ -111,7 +141,7 @@ const ComplaintManagement = () => {
   const handleDeleteComplaint = (complaintId) => {
     if (window.confirm("Bạn có chắc chắn muốn xóa khiếu nại này?")) {
       // TODO: Implement API call to delete complaint
-      setComplaints(complaints.filter(c => c.id !== complaintId));
+      setComplaints(complaints.filter((c) => c.id !== complaintId));
     }
   };
 
@@ -119,7 +149,7 @@ const ComplaintManagement = () => {
     try {
       setLoading(true);
       const data = await api.getAllReports();
-      const transformedData = data.map(item => ({
+      const transformedData = data.map((item) => ({
         id: item.id.toString(),
         userId: item.userEmail,
         courseId: item.courseName,
@@ -131,12 +161,12 @@ const ComplaintManagement = () => {
         priority: item.priority.toLowerCase(),
         category: item.category,
         subject: item.subject,
-        detail: item.detail
+        detail: item.detail,
       }));
       setComplaints(transformedData);
       setError(null);
     } catch (err) {
-      setError('Không thể tải lại danh sách khiếu nại. Vui lòng thử lại.');
+      setError("Không thể tải lại danh sách khiếu nại. Vui lòng thử lại.");
     } finally {
       setLoading(false);
     }
@@ -158,7 +188,7 @@ const ComplaintManagement = () => {
       <div className="min-h-screen flex items-center justify-center">
         <div className="text-center">
           <p className="text-red-500 mb-4">{error}</p>
-          <button 
+          <button
             onClick={handleRefresh}
             className="px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600"
           >
@@ -176,7 +206,9 @@ const ComplaintManagement = () => {
         <motion.div
           initial={false}
           animate={{ width: sidebarOpen ? "auto" : "0" }}
-          className={`${sidebarOpen ? "w-64" : "w-0"} bg-white dark:bg-gray-800 h-screen fixed transition-all duration-300 z-10`}
+          className={`${
+            sidebarOpen ? "w-64" : "w-0"
+          } bg-white dark:bg-gray-800 h-screen fixed transition-all duration-300 z-10`}
         >
           <div className="p-4">
             <nav>
@@ -190,27 +222,42 @@ const ComplaintManagement = () => {
               </div>
               <ul className="space-y-2">
                 <li>
-                  <a href="/admin/dashboard" className="flex items-center p-3 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg">
+                  <a
+                    href="/admin/dashboard"
+                    className="flex items-center p-3 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg"
+                  >
                     <MdDashboard className="mr-3" /> Dashboard
                   </a>
                 </li>
                 <li>
-                  <a href="/admin/CourseAnalytics" className="flex items-center p-3 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg">
+                  <a
+                    href="/admin/CourseAnalytics"
+                    className="flex items-center p-3 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg"
+                  >
                     <MdAnalytics className="mr-3" /> Analytics
                   </a>
                 </li>
                 <li>
-                  <a href="/admin/UserManagement" className="flex items-center p-3 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg">
+                  <a
+                    href="/admin/UserManagement"
+                    className="flex items-center p-3 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg"
+                  >
                     <MdPeople className="mr-3" /> User Management
                   </a>
                 </li>
                 <li className="bg-blue-500 text-white rounded-lg">
-                  <a href="/admin/ComplaintManagement" className="flex items-center p-3">
+                  <a
+                    href="/admin/ComplaintManagement"
+                    className="flex items-center p-3"
+                  >
                     <MdReport className="mr-3" /> Reports
                   </a>
                 </li>
                 <li>
-                  <a href="#" className="flex items-center p-3 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg">
+                  <a
+                    href="#"
+                    className="flex items-center p-3 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg"
+                  >
                     <FiSettings className="mr-3" /> Settings
                   </a>
                 </li>
@@ -220,7 +267,11 @@ const ComplaintManagement = () => {
         </motion.div>
 
         {/* Main Content */}
-        <div className={`flex-1 ${sidebarOpen ? "ml-64" : "ml-0"} transition-all duration-300`}>
+        <div
+          className={`flex-1 ${
+            sidebarOpen ? "ml-64" : "ml-0"
+          } transition-all duration-300`}
+        >
           {/* Header */}
           <header className="bg-white dark:bg-gray-800 shadow-md">
             <div className="flex items-center justify-between p-4">
@@ -289,8 +340,12 @@ const ComplaintManagement = () => {
               >
                 <div className="flex items-center justify-between">
                   <div>
-                    <p className="text-gray-500 dark:text-gray-400 text-sm">Tổng khiếu nại</p>
-                    <h3 className="text-2xl font-bold mt-2">{complaints.length}</h3>
+                    <p className="text-gray-500 dark:text-gray-400 text-sm">
+                      Tổng khiếu nại
+                    </p>
+                    <h3 className="text-2xl font-bold mt-2">
+                      {complaints.length}
+                    </h3>
                   </div>
                   <div className="text-blue-500 text-3xl">
                     <MdFeedback />
@@ -304,9 +359,11 @@ const ComplaintManagement = () => {
               >
                 <div className="flex items-center justify-between">
                   <div>
-                    <p className="text-gray-500 dark:text-gray-400 text-sm">Ưu tiên cao</p>
+                    <p className="text-gray-500 dark:text-gray-400 text-sm">
+                      Ưu tiên cao
+                    </p>
                     <h3 className="text-2xl font-bold mt-2 text-red-500">
-                      {complaints.filter(c => c.priority === 'high').length}
+                      {complaints.filter((c) => c.priority === "high").length}
                     </h3>
                   </div>
                   <div className="text-red-500 text-3xl">
@@ -321,9 +378,11 @@ const ComplaintManagement = () => {
               >
                 <div className="flex items-center justify-between">
                   <div>
-                    <p className="text-gray-500 dark:text-gray-400 text-sm">Ưu tiên trung bình</p>
+                    <p className="text-gray-500 dark:text-gray-400 text-sm">
+                      Ưu tiên trung bình
+                    </p>
                     <h3 className="text-2xl font-bold mt-2 text-yellow-500">
-                      {complaints.filter(c => c.priority === 'medium').length}
+                      {complaints.filter((c) => c.priority === "medium").length}
                     </h3>
                   </div>
                   <div className="text-yellow-500 text-3xl">
@@ -338,9 +397,11 @@ const ComplaintManagement = () => {
               >
                 <div className="flex items-center justify-between">
                   <div>
-                    <p className="text-gray-500 dark:text-gray-400 text-sm">Ưu tiên thấp</p>
+                    <p className="text-gray-500 dark:text-gray-400 text-sm">
+                      Ưu tiên thấp
+                    </p>
                     <h3 className="text-2xl font-bold mt-2 text-green-500">
-                      {complaints.filter(c => c.priority === 'low').length}
+                      {complaints.filter((c) => c.priority === "low").length}
                     </h3>
                   </div>
                   <div className="text-green-500 text-3xl">
@@ -396,13 +457,21 @@ const ComplaintManagement = () => {
                           </td>
                           <td className="px-6 py-4 whitespace-nowrap">
                             <div>
-                              <div className="text-sm font-medium">{complaint.userName}</div>
-                              <div className="text-sm text-gray-500 dark:text-gray-400">{complaint.userEmail}</div>
+                              <div className="text-sm font-medium">
+                                {complaint.userName}
+                              </div>
+                              <div className="text-sm text-gray-500 dark:text-gray-400">
+                                {complaint.userEmail}
+                              </div>
                             </div>
                           </td>
                           <td className="px-6 py-4">
-                            <div className="text-sm font-medium max-w-xs truncate">{complaint.subject}</div>
-                            <div className="text-sm text-gray-500 dark:text-gray-400">{complaint.courseTitle}</div>
+                            <div className="text-sm font-medium max-w-xs truncate">
+                              {complaint.subject}
+                            </div>
+                            <div className="text-sm text-gray-500 dark:text-gray-400">
+                              {complaint.courseTitle}
+                            </div>
                           </td>
                           <td className="px-6 py-4 whitespace-nowrap">
                             <span className="px-2 py-1 text-xs font-medium rounded-full bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200">
@@ -410,7 +479,11 @@ const ComplaintManagement = () => {
                             </span>
                           </td>
                           <td className="px-6 py-4 whitespace-nowrap">
-                            <span className={`px-2 py-1 text-xs font-medium rounded-full capitalize ${getPriorityColor(complaint.priority)}`}>
+                            <span
+                              className={`px-2 py-1 text-xs font-medium rounded-full capitalize ${getPriorityColor(
+                                complaint.priority
+                              )}`}
+                            >
                               {complaint.priority}
                             </span>
                           </td>
@@ -427,7 +500,9 @@ const ComplaintManagement = () => {
                                 <FiEye size={18} />
                               </button>
                               <button
-                                onClick={() => handleDeleteComplaint(complaint.id)}
+                                onClick={() =>
+                                  handleDeleteComplaint(complaint.id)
+                                }
                                 className="text-red-600 hover:text-red-900 dark:text-red-400 dark:hover:text-red-300"
                                 title="Xóa khiếu nại"
                               >
@@ -441,11 +516,13 @@ const ComplaintManagement = () => {
                   </tbody>
                 </table>
               </div>
-              
+
               {sortedComplaints.length === 0 && (
                 <div className="text-center py-8">
                   <p className="text-gray-500 dark:text-gray-400">
-                    {searchTerm ? 'Không tìm thấy khiếu nại nào phù hợp' : 'Chưa có khiếu nại nào'}
+                    {searchTerm
+                      ? "Không tìm thấy khiếu nại nào phù hợp"
+                      : "Chưa có khiếu nại nào"}
                   </p>
                 </div>
               )}
@@ -477,57 +554,91 @@ const ComplaintManagement = () => {
                     <FiX size={24} />
                   </button>
                 </div>
-                
+
                 <div className="p-6 overflow-y-auto max-h-[calc(90vh-200px)]">
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
                     <div className="space-y-4">
                       <div>
-                        <label className="text-sm font-medium text-gray-500 dark:text-gray-400">Mã khiếu nại</label>
-                        <p className="text-lg font-semibold">#{selectedComplaint.id}</p>
+                        <label className="text-sm font-medium text-gray-500 dark:text-gray-400">
+                          Mã khiếu nại
+                        </label>
+                        <p className="text-lg font-semibold">
+                          #{selectedComplaint.id}
+                        </p>
                       </div>
                       <div>
-                        <label className="text-sm font-medium text-gray-500 dark:text-gray-400">Người gửi</label>
+                        <label className="text-sm font-medium text-gray-500 dark:text-gray-400">
+                          Người gửi
+                        </label>
                         <p className="text-lg">{selectedComplaint.userName}</p>
-                        <p className="text-sm text-gray-500">{selectedComplaint.userEmail}</p>
+                        <p className="text-sm text-gray-500">
+                          {selectedComplaint.userEmail}
+                        </p>
                       </div>
                       <div>
-                        <label className="text-sm font-medium text-gray-500 dark:text-gray-400">Khóa học</label>
-                        <p className="text-lg">{selectedComplaint.courseTitle}</p>
+                        <label className="text-sm font-medium text-gray-500 dark:text-gray-400">
+                          Khóa học
+                        </label>
+                        <p className="text-lg">
+                          {selectedComplaint.courseTitle}
+                        </p>
                       </div>
                     </div>
-                    
+
                     <div className="space-y-4">
                       <div>
-                        <label className="text-sm font-medium text-gray-500 dark:text-gray-400">Ngày gửi</label>
-                        <p className="text-lg">{formatDate(selectedComplaint.date)}</p>
+                        <label className="text-sm font-medium text-gray-500 dark:text-gray-400">
+                          Ngày gửi
+                        </label>
+                        <p className="text-lg">
+                          {formatDate(selectedComplaint.date)}
+                        </p>
                       </div>
                       <div>
-                        <label className="text-sm font-medium text-gray-500 dark:text-gray-400">Loại khiếu nại</label>
+                        <label className="text-sm font-medium text-gray-500 dark:text-gray-400">
+                          Loại khiếu nại
+                        </label>
                         <p className="text-lg">{selectedComplaint.category}</p>
                       </div>
                       <div>
-                        <label className="text-sm font-medium text-gray-500 dark:text-gray-400">Mức độ ưu tiên</label>
-                        <span className={`inline-block px-3 py-1 text-sm font-medium rounded-full capitalize ${getPriorityColor(selectedComplaint.priority)}`}>
+                        <label className="text-sm font-medium text-gray-500 dark:text-gray-400">
+                          Mức độ ưu tiên
+                        </label>
+                        <span
+                          className={`inline-block px-3 py-1 text-sm font-medium rounded-full capitalize ${getPriorityColor(
+                            selectedComplaint.priority
+                          )}`}
+                        >
                           {selectedComplaint.priority}
                         </span>
                       </div>
                     </div>
                   </div>
-                  
+
                   <div className="mb-6">
-                    <label className="text-sm font-medium text-gray-500 dark:text-gray-400">Tiêu đề</label>
-                    <p className="text-xl font-semibold mt-1">{selectedComplaint.subject}</p>
+                    <label className="text-sm font-medium text-gray-500 dark:text-gray-400">
+                      Tiêu đề
+                    </label>
+                    <p className="text-xl font-semibold mt-1">
+                      {selectedComplaint.subject}
+                    </p>
                   </div>
-                  
+
                   <div className="mb-6">
-                    <label className="text-sm font-medium text-gray-500 dark:text-gray-400">Nội dung chi tiết</label>
+                    <label className="text-sm font-medium text-gray-500 dark:text-gray-400">
+                      Nội dung chi tiết
+                    </label>
                     <div className="mt-2 p-4 bg-gray-50 dark:bg-gray-700 rounded-lg">
-                      <p className="whitespace-pre-wrap">{selectedComplaint.detail}</p>
+                      <p className="whitespace-pre-wrap">
+                        {selectedComplaint.detail}
+                      </p>
                     </div>
                   </div>
-                  
+
                   <div>
-                    <label className="text-sm font-medium text-gray-500 dark:text-gray-400">Phản hồi cho người dùng</label>
+                    <label className="text-sm font-medium text-gray-500 dark:text-gray-400">
+                      Phản hồi cho người dùng
+                    </label>
                     <textarea
                       value={response}
                       onChange={(e) => setResponse(e.target.value)}
@@ -537,7 +648,7 @@ const ComplaintManagement = () => {
                     />
                   </div>
                 </div>
-                
+
                 <div className="flex items-center justify-end space-x-4 p-6 border-t border-gray-200 dark:border-gray-700">
                   <button
                     onClick={() => setShowModal(false)}
