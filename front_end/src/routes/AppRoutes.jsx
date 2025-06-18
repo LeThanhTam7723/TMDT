@@ -36,7 +36,7 @@ const AppRoutes = () => {
         <Route path="/auth/*" element={<AuthPage />} />
         <Route path="/detail/:id" element={<Detail />} />
         <Route path="/user-info" element={<UserInfo />} />
-        <Route path="/video/:id" element={<CourseVideo />} />
+        <Route path="/course-video/:id" element={<CourseVideo />} />
         <Route path="/checkout" element={<Checkout />} />
         <Route path="/login" element={<Login />} />
         <Route path="/register" element={<Register />} />

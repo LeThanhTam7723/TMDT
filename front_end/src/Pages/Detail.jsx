@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Play, Clock, ChevronLeft, ChevronRight, Star, Users, BookOpen, Award, ChevronDown } from 'lucide-react';
-import { useParams } from 'react-router-dom'; // Import useParams
+import { useParams, useNavigate } from 'react-router-dom'; // Add useNavigate import
 import axiosClient from '../API/axiosClient'; // Adjust the path as needed
 import FacebookComment from '../component/commentFb/FacebookComment';
 import ReusableReportForm from '../component/ReusableReportForm';
@@ -9,8 +9,9 @@ const Detail = () => {
   const [currentSlide, setCurrentSlide] = useState(0);
   const [showMoreInstructor, setShowMoreInstructor] = useState(false);
   
-  // Get ID from URL params
-  const { id } = useParams(); // This will get the ID from the URL
+  // Get ID from URL params and navigation hook
+  const { id } = useParams();
+  const navigate = useNavigate(); // Add this line
   
   const [course, setCourse] = useState(null);
   const [courseDetails, setCourseDetails] = useState([]);
@@ -84,6 +85,11 @@ const Detail = () => {
     const hours = Math.floor(minutes / 60);
     const remainingMinutes = minutes % 60;
     return remainingMinutes > 0 ? `${hours}h ${remainingMinutes}m` : `${hours}h`;
+  };
+
+  // Function to handle navigation to course video
+  const handleWatchCourse = () => {
+    navigate(`/course-video/${id}`);
   };
   
   useEffect(() => {
@@ -212,16 +218,27 @@ const Detail = () => {
           {/* Price Section */}
           <div className="mb-6">
             <span className="text-3xl font-bold text-blue-600">${course.price}</span>
-            <button className="ml-4 bg-blue-600 hover:bg-blue-700 text-white px-6 py-3 rounded-lg font-semibold transition-colors">
-              Enroll Now
-            </button>
+            <div className="flex gap-3 mt-4">
+              <button className="bg-blue-600 hover:bg-blue-700 text-white px-6 py-3 rounded-lg font-semibold transition-colors">
+                Enroll Now
+              </button>
+              {/* Add Watch Course button */}
+              <button 
+                onClick={handleWatchCourse}
+                className="bg-green-600 hover:bg-green-700 text-white px-6 py-3 rounded-lg font-semibold transition-colors flex items-center gap-2"
+              >
+                <Play className="w-5 h-5" />
+                Watch Course
+              </button>
+            </div>
           </div>
         </div>
 
         {/* Course Image/Video Preview */}
         <div className="md:w-1/2">
           <div className="bg-gray-100 rounded-lg overflow-hidden">
-            <div className="aspect-video bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center">
+            <div className="aspect-video bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center cursor-pointer hover:opacity-90 transition-opacity"
+                 onClick={handleWatchCourse}>
               <Play className="w-16 h-16 text-white opacity-80" />
             </div>
           </div>
@@ -257,6 +274,7 @@ const Detail = () => {
           </div>
         </div>
       </div>
+
       <div className="py-8">
         <h2 className="text-2xl font-bold mb-4">Gửi khiếu nại về khoá học</h2>
         <ReusableReportForm courseId={id} />
