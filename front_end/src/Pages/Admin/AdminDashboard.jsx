@@ -136,255 +136,155 @@ const AdminDashboard = () => {
         </div>
       </div>
 
-const Analytics = () => {
-  const [darkMode, setDarkMode] = useState(false);
-  const [sidebarOpen, setSidebarOpen] = useState(true);
-  
-  const lineChartData = {
-    labels: ["Jan", "Feb", "Mar", "Apr", "May", "Jun"],
-    datasets: [{
-      label: "Revenue",
-      data: [3000, 4500, 3500, 5000, 4800, 6000],
-      borderColor: "rgb(59, 130, 246)",
-      tension: 0.4
-    }]
-  };
+      {/* Main Content */}
+      <div className="flex-1 p-6">
+        {/* Stats Cards */}
+        <div className="grid grid-cols-3 gap-6 mb-6">
+          <StatCard
+            icon={<Users className="w-8 h-8 text-blue-500" />}
+            title="Tổng học viên"
+            value="8,750"
+          />
+          <StatCard
+            icon={<BookOpen className="w-8 h-8 text-green-500" />}
+            title="Tổng khóa học"
+            value="125"
+          />
+          <StatCard
+            icon={<DollarSign className="w-8 h-8 text-purple-500" />}
+            title="Doanh thu"
+            value="327,500đ"
+          />
+        </div>
 
-  const pieChartData = {
-    labels: ["Desktop", "Mobile", "Tablet"],
-    datasets: [{
-      data: [45, 40, 15],
-      backgroundColor: ["#3B82F6", "#10B981", "#F59E0B"]
-    }]
-  };
-
-  const barChartData = {
-    labels: ["Jan", "Feb", "Mar", "Apr", "May", "Jun"],
-    datasets: [{
-      label: "Sales",
-      data: [65, 59, 80, 81, 56, 55],
-      backgroundColor: "rgba(59, 130, 246, 0.5)"
-    }]
-  };
-
-  const donutChartData = {
-    labels: ["Electronics", "Clothing", "Food", "Others"],
-    datasets: [{
-      data: [30, 25, 20, 25],
-      backgroundColor: ["#3B82F6", "#10B981", "#F59E0B", "#EF4444"]
-    }]
-  };
-
-  return (
-    <ThemeContext.Provider value={{ darkMode, setDarkMode }}>
-      <div className={`${darkMode ? "dark" : ""} min-h-screen`}>
-        <div className="flex bg-gray-100 dark:bg-gray-900 text-gray-800 dark:text-white">
-          {/* Sidebar */}
-          <motion.div
-            initial={false}
-            animate={{ width: sidebarOpen ? "auto" : "0" }}
-            className={`${sidebarOpen ? "w-64" : "w-0"} bg-white dark:bg-gray-800 h-screen fixed transition-all duration-300`}
-          >
-            <div className="p-4">
-             
-              <nav>
-               <div className="flex items-center mb-8">
-                <img
-                  src="https://images.unsplash.com/photo-1563986768494-4dee2763ff3f"
-                  alt="Logo"
-                  className="h-8 w-8 rounded"
-                />
-                <span className="ml-2 text-xl font-bold">AdminDash</span>
-              </div>
-                   <ul className="space-y-2">
-                               <li>
-                                 <a href="/admin/dashboard" className="flex items-center p-3 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg">
-                                   <MdDashboard className="mr-3" /> Dashboard
-                                 </a>
-                               </li>
-                               <li>
-                                 <a href="/admin/CourseAnalytics" className="flex items-center p-3 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg">
-                                   <MdAnalytics className="mr-3" /> Analytics
-                                 </a>
-                               </li>
-                               <li className="bg-blue-500 text-white rounded-lg">
-                                 <a href="/admin/UserManagement" className="flex items-center p-3">
-                                   <MdPeople className="mr-3" /> User Management
-                                 </a>
-                               </li>
-                               <li>
-                                 <a href="/admin/ComplaintManagement" className="flex items-center p-3 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg">
-                                   <MdReport className="mr-3" /> Reports
-                                 </a>
-                               </li>
-                               <li>
-                                 <a href="#" className="flex items-center p-3 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg">
-                                   <FiSettings className="mr-3" /> Settings
-                                 </a>
-                               </li>
-                             </ul>
-              </nav>
-            </div>
-            <div className="ml-4">
-              <img
-                src="/api/placeholder/32/32"
-                alt="User"
-                className="w-8 h-8 rounded-full"
-              />
-            </div>
-          </div>
-        </header>
-
-        {/* Dashboard Content */}
-        <div className="p-6">
-          {/* Stats Cards */}
-          <div className="grid grid-cols-3 gap-6 mb-6">
-            <StatCard
-              icon={<Users className="w-8 h-8 text-blue-500" />}
-              title="Tổng học viên"
-              value="8,750"
-            />
-            <StatCard
-              icon={<BookOpen className="w-8 h-8 text-green-500" />}
-              title="Tổng khóa học"
-              value="125"
-            />
-            <StatCard
-              icon={<DollarSign className="w-8 h-8 text-purple-500" />}
-              title="Doanh thu"
-              value="327,500đ"
-            />
-          </div>
-
-          {/* Charts */}
-          <div className="grid grid-cols-2 gap-6 mb-6">
-            <div className="bg-white p-4 rounded-lg shadow">
-              <h2 className="text-lg font-medium mb-4">
-                Doanh thu và số lượng bán
-              </h2>
-              <ResponsiveContainer width="100%" height={300}>
-                <BarChart data={monthlyData}>
-                  <CartesianGrid strokeDasharray="3 3" />
-                  <XAxis dataKey="name" />
-                  <YAxis yAxisId="left" orientation="left" stroke="#8884d8" />
-                  <YAxis yAxisId="right" orientation="right" stroke="#82ca9d" />
-                  <Tooltip />
-                  <Legend />
-                  <Bar
-                    yAxisId="left"
-                    dataKey="sales"
-                    name="Số lượng bán"
-                    fill="#8884d8"
-                  />
-                  <Bar
-                    yAxisId="right"
-                    dataKey="revenue"
-                    name="Doanh thu (đ)"
-                    fill="#82ca9d"
-                  />
-                </BarChart>
-              </ResponsiveContainer>
-            </div>
-
-            <div className="bg-white p-4 rounded-lg shadow">
-              <h2 className="text-lg font-medium mb-4">Khóa học phổ biến</h2>
-              <div className="flex">
-                <ResponsiveContainer width="60%" height={300}>
-                  <PieChart>
-                    <Pie
-                      data={courseData}
-                      cx="50%"
-                      cy="50%"
-                      labelLine={false}
-                      outerRadius={80}
-                      fill="#8884d8"
-                      dataKey="value"
-                    >
-                      {courseData.map((entry, index) => (
-                        <Cell key={`cell-${index}`} fill={entry.color} />
-                      ))}
-                    </Pie>
-                    <Tooltip />
-                  </PieChart>
-                </ResponsiveContainer>
-                <div className="w-40 pt-6">
-                  <h3 className="text-sm font-medium mb-2">Top khóa học</h3>
-                  {courseData.map((course, index) => (
-                    <div key={index} className="flex items-center mb-2">
-                      <div
-                        className="w-3 h-3 mr-2"
-                        style={{ backgroundColor: course.color }}
-                      ></div>
-                      <div className="text-sm">{course.name}</div>
-                      <div className="text-xs text-gray-500 ml-1">
-                        {course.value} học viên
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              </div>
-            </div>
-          </div>
-
-          {/* Recent Registrations */}
+        {/* Charts */}
+        <div className="grid grid-cols-2 gap-6 mb-6">
           <div className="bg-white p-4 rounded-lg shadow">
-            <h2 className="text-lg font-medium mb-4">Đăng ký gần đây</h2>
-            <div className="overflow-x-auto">
-              <table className="min-w-full divide-y divide-gray-200">
-                <thead className="bg-gray-50">
-                  <tr>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                      Học viên
-                    </th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                      Khóa học
-                    </th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                      Cấp độ
-                    </th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                      Số buổi học
-                    </th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                      Thời gian học (Dự kiến)
-                    </th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                      Số tiền
-                    </th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                      Trạng thái
-                    </th>
-                  </tr>
-                </thead>
-                <tbody className="bg-white divide-y divide-gray-200">
-                  {recentRegistrations.map((registration) => (
-                    <tr key={registration.id}>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
-                        {registration.name}
-                      </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                        {registration.course}
-                      </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                        {registration.level}
-                      </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                        {registration.sessions}
-                      </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                        {registration.duration}
-                      </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                        {registration.price}
-                      </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm">
-                        <StatusBadge status={registration.status} />
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
+            <h2 className="text-lg font-medium mb-4">
+              Doanh thu và số lượng bán
+            </h2>
+            <ResponsiveContainer width="100%" height={300}>
+              <BarChart data={monthlyData}>
+                <CartesianGrid strokeDasharray="3 3" />
+                <XAxis dataKey="name" />
+                <YAxis yAxisId="left" orientation="left" stroke="#8884d8" />
+                <YAxis yAxisId="right" orientation="right" stroke="#82ca9d" />
+                <Tooltip />
+                <Legend />
+                <Bar
+                  yAxisId="left"
+                  dataKey="sales"
+                  name="Số lượng bán"
+                  fill="#8884d8"
+                />
+                <Bar
+                  yAxisId="right"
+                  dataKey="revenue"
+                  name="Doanh thu (đ)"
+                  fill="#82ca9d"
+                />
+              </BarChart>
+            </ResponsiveContainer>
+          </div>
+
+          <div className="bg-white p-4 rounded-lg shadow">
+            <h2 className="text-lg font-medium mb-4">Khóa học phổ biến</h2>
+            <div className="flex">
+              <ResponsiveContainer width="60%" height={300}>
+                <PieChart>
+                  <Pie
+                    data={courseData}
+                    cx="50%"
+                    cy="50%"
+                    labelLine={false}
+                    outerRadius={80}
+                    fill="#8884d8"
+                    dataKey="value"
+                  >
+                    {courseData.map((entry, index) => (
+                      <Cell key={`cell-${index}`} fill={entry.color} />
+                    ))}
+                  </Pie>
+                  <Tooltip />
+                </PieChart>
+              </ResponsiveContainer>
+              <div className="w-40 pt-6">
+                <h3 className="text-sm font-medium mb-2">Top khóa học</h3>
+                {courseData.map((course, index) => (
+                  <div key={index} className="flex items-center mb-2">
+                    <div
+                      className="w-3 h-3 mr-2"
+                      style={{ backgroundColor: course.color }}
+                    ></div>
+                    <div className="text-sm">{course.name}</div>
+                    <div className="text-xs text-gray-500 ml-1">
+                      {course.value} học viên
+                    </div>
+                  </div>
+                ))}
+              </div>
             </div>
+          </div>
+        </div>
+
+        {/* Recent Registrations */}
+        <div className="bg-white p-4 rounded-lg shadow">
+          <h2 className="text-lg font-medium mb-4">Đăng ký gần đây</h2>
+          <div className="overflow-x-auto">
+            <table className="min-w-full divide-y divide-gray-200">
+              <thead className="bg-gray-50">
+                <tr>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    Học viên
+                  </th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    Khóa học
+                  </th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    Cấp độ
+                  </th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    Số buổi học
+                  </th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    Thời gian học (Dự kiến)
+                  </th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    Số tiền
+                  </th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    Trạng thái
+                  </th>
+                </tr>
+              </thead>
+              <tbody className="bg-white divide-y divide-gray-200">
+                {recentRegistrations.map((registration) => (
+                  <tr key={registration.id}>
+                    <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
+                      {registration.name}
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                      {registration.course}
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                      {registration.level}
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                      {registration.sessions}
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                      {registration.duration}
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                      {registration.price}
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap text-sm">
+                      <StatusBadge status={registration.status} />
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
           </div>
         </div>
       </div>
