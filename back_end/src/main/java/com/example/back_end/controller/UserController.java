@@ -2,6 +2,7 @@ package com.example.back_end.controller;
 
 import com.example.back_end.dto.UserDto;
 import com.example.back_end.dto.request.UserCreationRequest;
+import com.example.back_end.dto.request.UserUpdateStatusRequest;
 import com.example.back_end.dto.response.ApiResponse;
 import com.example.back_end.dto.response.UserResponse;
 import com.example.back_end.entity.User;
@@ -99,4 +100,29 @@ public class UserController {
                             .build());
         }
     }
+    @PutMapping("/updateStatus/{userId}")
+    public ResponseEntity<ApiResponse<UserResponse>> updateUserStatus(
+            @PathVariable int userId,
+            @RequestBody UserUpdateStatusRequest request
+    ) {
+        try {
+            UserResponse updatedUser = userService.updateUserStatus(userId, request);
+            return ResponseEntity.ok(
+                    ApiResponse.<UserResponse>builder()
+                            .code(0)
+                            .message("Cập nhật vai trò và trạng thái thành công")
+                            .result(updatedUser)
+                            .build()
+            );
+        } catch (Exception e) {
+            log.error("Lỗi khi cập nhật role/active:", e);
+            return ResponseEntity.badRequest().body(
+                    ApiResponse.<UserResponse>builder()
+                            .code(1)
+                            .message("Cập nhật thất bại: " + e.getMessage())
+                            .build()
+            );
+        }
+    }
+
 }

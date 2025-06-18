@@ -136,17 +136,94 @@ const AdminDashboard = () => {
         </div>
       </div>
 
-      {/* Main Content */}
-      <div className="flex-1 overflow-auto">
-        {/* Header */}
-        <header className="flex justify-between items-center px-6 py-4 bg-white border-b">
-          <h1 className="text-2xl font-semibold">Thống kê</h1>
-          <div className="flex items-center">
-            <div className="relative">
-              <Bell className="w-6 h-6 text-gray-600" />
-              <span className="absolute top-0 right-0 w-4 h-4 bg-red-500 text-white text-xs flex items-center justify-center rounded-full">
-                1
-              </span>
+const Analytics = () => {
+  const [darkMode, setDarkMode] = useState(false);
+  const [sidebarOpen, setSidebarOpen] = useState(true);
+  
+  const lineChartData = {
+    labels: ["Jan", "Feb", "Mar", "Apr", "May", "Jun"],
+    datasets: [{
+      label: "Revenue",
+      data: [3000, 4500, 3500, 5000, 4800, 6000],
+      borderColor: "rgb(59, 130, 246)",
+      tension: 0.4
+    }]
+  };
+
+  const pieChartData = {
+    labels: ["Desktop", "Mobile", "Tablet"],
+    datasets: [{
+      data: [45, 40, 15],
+      backgroundColor: ["#3B82F6", "#10B981", "#F59E0B"]
+    }]
+  };
+
+  const barChartData = {
+    labels: ["Jan", "Feb", "Mar", "Apr", "May", "Jun"],
+    datasets: [{
+      label: "Sales",
+      data: [65, 59, 80, 81, 56, 55],
+      backgroundColor: "rgba(59, 130, 246, 0.5)"
+    }]
+  };
+
+  const donutChartData = {
+    labels: ["Electronics", "Clothing", "Food", "Others"],
+    datasets: [{
+      data: [30, 25, 20, 25],
+      backgroundColor: ["#3B82F6", "#10B981", "#F59E0B", "#EF4444"]
+    }]
+  };
+
+  return (
+    <ThemeContext.Provider value={{ darkMode, setDarkMode }}>
+      <div className={`${darkMode ? "dark" : ""} min-h-screen`}>
+        <div className="flex bg-gray-100 dark:bg-gray-900 text-gray-800 dark:text-white">
+          {/* Sidebar */}
+          <motion.div
+            initial={false}
+            animate={{ width: sidebarOpen ? "auto" : "0" }}
+            className={`${sidebarOpen ? "w-64" : "w-0"} bg-white dark:bg-gray-800 h-screen fixed transition-all duration-300`}
+          >
+            <div className="p-4">
+             
+              <nav>
+               <div className="flex items-center mb-8">
+                <img
+                  src="https://images.unsplash.com/photo-1563986768494-4dee2763ff3f"
+                  alt="Logo"
+                  className="h-8 w-8 rounded"
+                />
+                <span className="ml-2 text-xl font-bold">AdminDash</span>
+              </div>
+                   <ul className="space-y-2">
+                               <li>
+                                 <a href="/admin/dashboard" className="flex items-center p-3 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg">
+                                   <MdDashboard className="mr-3" /> Dashboard
+                                 </a>
+                               </li>
+                               <li>
+                                 <a href="/admin/CourseAnalytics" className="flex items-center p-3 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg">
+                                   <MdAnalytics className="mr-3" /> Analytics
+                                 </a>
+                               </li>
+                               <li className="bg-blue-500 text-white rounded-lg">
+                                 <a href="/admin/UserManagement" className="flex items-center p-3">
+                                   <MdPeople className="mr-3" /> User Management
+                                 </a>
+                               </li>
+                               <li>
+                                 <a href="/admin/ComplaintManagement" className="flex items-center p-3 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg">
+                                   <MdReport className="mr-3" /> Reports
+                                 </a>
+                               </li>
+                               <li>
+                                 <a href="#" className="flex items-center p-3 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg">
+                                   <FiSettings className="mr-3" /> Settings
+                                 </a>
+                               </li>
+                             </ul>
+              </nav>
             </div>
             <div className="ml-4">
               <img
