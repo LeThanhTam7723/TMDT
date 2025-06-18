@@ -13,11 +13,11 @@ const StarRating = ({ courseId, currentRating = 0 }) => {
 
   const fetchUserRating = async () => {
     const session = JSON.parse(localStorage.getItem("session") || "{}");
-    if (!session.user?.id) return;
+    if (!session.currentUser?.id) return;
 
     try {
       const response = await axiosClient.get(
-        `/courses/${courseId}/user-rating/${session.user.id}`
+        `/courses/${courseId}/user-rating/${session.currentUser.id}`
       );
       if (response.data.code === 200 && response.data.result) {
         setUserRating(response.data.result.rating);
@@ -29,7 +29,7 @@ const StarRating = ({ courseId, currentRating = 0 }) => {
 
   const handleRatingClick = async (rating) => {
     const session = JSON.parse(localStorage.getItem("session") || "{}");
-    if (!session.user?.id) {
+    if (!session.currentUser?.id) {
       alert("Bạn cần đăng nhập để đánh giá");
       return;
     }
@@ -38,7 +38,7 @@ const StarRating = ({ courseId, currentRating = 0 }) => {
     try {
       const response = await axiosClient.post(`/courses/${courseId}/rate`, {
         courseId: parseInt(courseId),
-        userId: session.user.id,
+        userId: session.currentUser.id,
         rating: rating,
       });
 

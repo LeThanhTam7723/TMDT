@@ -211,24 +211,7 @@ const Detail = () => {
           <p className="text-gray-700 mt-3 mb-4">{course.description}</p>
 
           <div className="flex items-center mb-3">
-            <span className="font-bold text-gray-800 mr-2">
-              {course.rating?.toFixed(1) || "N/A"}
-            </span>
-            <div className="flex text-yellow-400">
-              {"★★★★★".split("").map((_, i) => (
-                <span
-                  key={i}
-                  className={
-                    i >= Math.floor(course.rating || 0) ? "opacity-30" : ""
-                  }
-                >
-                  ★
-                </span>
-              ))}
-            </div>
-            <span className="text-gray-600 text-sm ml-2">
-              ({course.rating ? "Based on reviews" : "No ratings yet"})
-            </span>
+            <StarRating courseId={id} currentRating={course.rating} />
           </div>
 
           <div className="flex gap-2 flex-wrap text-sm mb-4">

@@ -9,12 +9,10 @@ const register = async (body) => {
 };
 
 const checkEmailExists = async (email) => {
-  const session = JSON.parse(localStorage.getItem("session") || "{}");
-  const token = session.token;
-
   return await axiosClient.post("users/existUser", null, {
-    params: { email: email },
-    headers: token ? { Authorization: `Bearer ${token}` } : {},
+    params: {
+      email: email,
+    },
   });
 };
 
