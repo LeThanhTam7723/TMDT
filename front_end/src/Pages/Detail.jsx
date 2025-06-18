@@ -3,6 +3,7 @@ import { Play, Clock, ChevronLeft, ChevronRight, Star, Users, BookOpen, Award, C
 import { useParams } from 'react-router-dom'; // Import useParams
 import axiosClient from '../API/axiosClient'; // Adjust the path as needed
 import FacebookComment from '../component/commentFb/FacebookComment';
+import ReusableReportForm from '../component/ReusableReportForm';
 
 const Detail = () => {
   const [currentSlide, setCurrentSlide] = useState(0);
@@ -255,6 +256,10 @@ const Detail = () => {
             ))}
           </div>
         </div>
+      </div>
+      <div className="py-8">
+        <h2 className="text-2xl font-bold mb-4">Gửi khiếu nại về khoá học</h2>
+        <ReusableReportForm courseId={id} />
       </div>
       <FacebookComment url={'https://your-public-url.com/product/'+id} />
 

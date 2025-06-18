@@ -109,33 +109,33 @@ const Analytics = () => {
                 />
                 <span className="ml-2 text-xl font-bold">AdminDash</span>
               </div>
-                <ul className="space-y-2">
-                  <li className="bg-blue-500 text-white rounded-lg">
-                    <a href="#" className="flex items-center p-3">
-                      <MdDashboard className="mr-3" /> Dashboard
-                    </a>
-                  </li>
-                  <li>
-                    <a href="#" className="flex items-center p-3 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg">
-                      <MdAnalytics className="mr-3" /> Analytics
-                    </a>
-                  </li>
-                  <li>
-                    <a href="#" className="flex items-center p-3 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg">
-                      <MdPeople className="mr-3" /> Users
-                    </a>
-                  </li>
-                  <li>
-                    <a href="#" className="flex items-center p-3 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg">
-                      <MdReport className="mr-3" /> Reports
-                    </a>
-                  </li>
-                  <li>
-                    <a href="#" className="flex items-center p-3 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg">
-                      <FiSettings className="mr-3" /> Settings
-                    </a>
-                  </li>
-                </ul>
+                   <ul className="space-y-2">
+                               <li>
+                                 <a href="/admin/dashboard" className="flex items-center p-3 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg">
+                                   <MdDashboard className="mr-3" /> Dashboard
+                                 </a>
+                               </li>
+                               <li>
+                                 <a href="/admin/CourseAnalytics" className="flex items-center p-3 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg">
+                                   <MdAnalytics className="mr-3" /> Analytics
+                                 </a>
+                               </li>
+                               <li className="bg-blue-500 text-white rounded-lg">
+                                 <a href="/admin/UserManagement" className="flex items-center p-3">
+                                   <MdPeople className="mr-3" /> User Management
+                                 </a>
+                               </li>
+                               <li>
+                                 <a href="/admin/ComplaintManagement" className="flex items-center p-3 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg">
+                                   <MdReport className="mr-3" /> Reports
+                                 </a>
+                               </li>
+                               <li>
+                                 <a href="#" className="flex items-center p-3 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg">
+                                   <FiSettings className="mr-3" /> Settings
+                                 </a>
+                               </li>
+                             </ul>
               </nav>
             </div>
           </motion.div>
