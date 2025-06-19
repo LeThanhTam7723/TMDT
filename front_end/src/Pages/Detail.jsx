@@ -1,25 +1,9 @@
 import React, { useState, useEffect } from 'react';
-import { Play, Clock, ChevronLeft, ChevronRight, Star, Users, BookOpen, Award, ChevronDown } from 'lucide-react';
-import { useParams, useNavigate } from 'react-router-dom'; // Add useNavigate import
-import axiosClient from '../API/axiosClient'; // Adjust the path as needed
+import { Play, Clock, ChevronLeft, ChevronRight, Star, Users, BookOpen, Award, ChevronDown, User } from 'lucide-react';
+import { useParams, useNavigate } from 'react-router-dom';
+import axiosClient from '../API/axiosClient';
 import FacebookComment from '../component/commentFb/FacebookComment';
 import ReusableReportForm from '../component/ReusableReportForm';
-import React, { useState, useEffect } from "react";
-import {
-  Play,
-  Clock,
-  ChevronLeft,
-  ChevronRight,
-  Star,
-  Users,
-  BookOpen,
-  Award,
-  ChevronDown,
-} from "lucide-react";
-import { useParams } from "react-router-dom"; // Import useParams
-import axiosClient from "../API/axiosClient"; // Adjust the path as needed
-import FacebookComment from "../component/commentFb/FacebookComment";
-import ReusableReportForm from "../component/ReusableReportForm";
 import StarRating from "../component/StarRating";
 
 const Detail = () => {
@@ -28,10 +12,11 @@ const Detail = () => {
   
   // Get ID from URL params and navigation hook
   const { id } = useParams();
-  const navigate = useNavigate(); // Add this line
+  const navigate = useNavigate();
   
   const [course, setCourse] = useState(null);
   const [courseDetails, setCourseDetails] = useState([]);
+  const [seller, setSeller] = useState(null); // Changed from instructor to seller
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
@@ -117,6 +102,11 @@ const Detail = () => {
   const handleWatchCourse = () => {
     navigate(`/course-video/${id}`);
   };
+
+  // Function to handle navigation to seller profile
+  const handleSellerClick = (sellerId) => {
+    navigate(`/seller/${sellerId}`);
+  };
   
   useEffect(() => {
     const fetchCourse = async () => {
@@ -141,14 +131,33 @@ const Detail = () => {
           setCourse(courseResponse.data.result);
 
           // Fetch course details separately
-          const detailsResponse = await axiosClient.get(
-            `/courses/details/${id}`
-          );
-          if (detailsResponse.data && detailsResponse.data.code === 200) {
-            setCourseDetails(detailsResponse.data.result);
+          try {
+            const detailsResponse = await axiosClient.get(
+              `/courses/details/${id}`
+            );
+            if (detailsResponse.data && detailsResponse.data.code === 200) {
+              setCourseDetails(detailsResponse.data.result);
+            }
+          } catch (detailsError) {
+            console.error("Failed to load course details:", detailsError);
+            // Continue without details if this fails
+          }
+
+          // Fetch seller info using the course ID
+          try {
+            const sellerResponse = await axiosClient.get(`/seller/${id}`);
+            if (sellerResponse.data && sellerResponse.data.id) {
+              setSeller(sellerResponse.data);
+            } else {
+              console.error("Invalid seller response format:", sellerResponse.data);
+              setError("Failed to load seller information");
+            }
+          } catch (sellerError) {
+            console.error("Failed to load seller info:", sellerError);
+            setError("Failed to load seller information");
           }
         } else {
-          throw new Error("Invalid response format");
+          throw new Error("Invalid course response format");
         }
       } catch (error) {
         console.error("API fetch failed:", error);
@@ -271,6 +280,112 @@ const Detail = () => {
           </div>
         </div>
       </div>
+
+      {/* Seller Section */}
+      {seller && (
+        <div className="py-8 border-b border-gray-200">
+          <h2 className="text-2xl font-bold mb-6">Thông tin người bán</h2>
+          <div className="bg-white border rounded-lg p-6 hover:shadow-md transition-shadow">
+            <div className="flex items-start gap-6">
+              {/* Seller Avatar - Clickable */}
+              <div 
+                className="flex-shrink-0 cursor-pointer hover:opacity-80 transition-opacity"
+                onClick={() => handleSellerClick(seller.id)}
+              >
+                {seller.avatar ? (
+                  <img
+                    src={seller.avatar}
+                    alt={seller.fullname}
+                    className="w-20 h-20 rounded-full object-cover border-2 border-gray-200"
+                  />
+                ) : (
+                  <div className="w-20 h-20 bg-gradient-to-br from-blue-500 to-purple-600 rounded-full flex items-center justify-center">
+                    <User className="w-8 h-8 text-white" />
+                  </div>
+                )}
+              </div>
+
+              {/* Seller Info */}
+              <div className="flex-1">
+                {/* Seller Name - Clickable */}
+                <h3 
+                  className="text-xl font-bold text-blue-600 mb-2 cursor-pointer hover:text-blue-700 transition-colors"
+                  onClick={() => handleSellerClick(seller.id)}
+                >
+                  {seller.fullname}
+                </h3>
+
+                {/* Introduction */}
+                {seller.introduce && (
+                  <div className="mb-4">
+                    <p className="text-gray-700 leading-relaxed">
+                      {showMoreInstructor 
+                        ? seller.introduce
+                        : seller.introduce.substring(0, 200) + 
+                          (seller.introduce.length > 200 ? "..." : "")
+                      }
+                    </p>
+                    {seller.introduce.length > 200 && (
+                      <button
+                        onClick={() => setShowMoreInstructor(!showMoreInstructor)}
+                        className="text-blue-600 hover:text-blue-700 text-sm mt-2 flex items-center gap-1"
+                      >
+                        {showMoreInstructor ? "Thu gọn" : "Xem thêm"}
+                        <ChevronDown className={`w-4 h-4 transition-transform ${showMoreInstructor ? 'rotate-180' : ''}`} />
+                      </button>
+                    )}
+                  </div>
+                )}
+
+                {/* Seller Details */}
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
+                  <div className="flex items-center gap-2">
+                    <Users className="w-4 h-4 text-gray-500" />
+                    <span className="text-gray-600">Email: </span>
+                    <span className="font-medium">{seller.email}</span>
+                  </div>
+                  
+                  {seller.phone && (
+                    <div className="flex items-center gap-2">
+                      <Clock className="w-4 h-4 text-gray-500" />
+                      <span className="text-gray-600">Điện thoại: </span>
+                      <span className="font-medium">{seller.phone}</span>
+                    </div>
+                  )}
+
+                  {seller.certificate && (
+                    <div className="flex items-center gap-2 md:col-span-2">
+                      <Award className="w-4 h-4 text-gray-500" />
+                      <span className="text-gray-600">Chứng chỉ: </span>
+                      <span className="font-medium text-green-600">{seller.certificate}</span>
+                    </div>
+                  )}
+
+                  {seller.gender && (
+                    <div className="flex items-center gap-2">
+                      <User className="w-4 h-4 text-gray-500" />
+                      <span className="text-gray-600">Giới tính: </span>
+                      <span className="font-medium">
+                        {seller.gender === 'male' ? 'Nam' : seller.gender === 'female' ? 'Nữ' : 'Khác'}
+                      </span>
+                    </div>
+                  )}
+                </div>
+
+                {/* View Profile Button */}
+                <div className="mt-4">
+                  <button
+                    onClick={() => handleSellerClick(seller.id)}
+                    className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg text-sm font-medium transition-colors"
+                  >
+                    Xem hồ sơ người bán
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* Course Content Section */}
       <div className="py-8">
