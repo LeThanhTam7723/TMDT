@@ -21,17 +21,72 @@ import {
   FiPlus,
   FiMinus,
 } from "react-icons/fi";
+import {
+  BarChart3,
+  Users,
+  BookOpen,
+  ShoppingCart,
+  Star,
+  MessageSquare,
+} from "lucide-react";
 
 const AdminCourseApproval = () => {
   const [requests, setRequests] = useState([]);
   const [filteredRequests, setFilteredRequests] = useState([]);
   const [selectedRequest, setSelectedRequest] = useState(null);
   const [showModal, setShowModal] = useState(false);
-  const [modalType, setModalType] = useState("view");
+  const [modalType, setModalType] = useState("view"); // 'view', 'approve', 'reject'
   const [rejectionReason, setRejectionReason] = useState("");
   const [filterStatus, setFilterStatus] = useState("all");
   const [filterType, setFilterType] = useState("all");
   const [searchTerm, setSearchTerm] = useState("");
+  const [sidebarOpen, setSidebarOpen] = useState(true);
+
+  const menuItems = [
+    {
+      id: "statistics",
+      title: "Thống kê",
+      icon: BarChart3,
+      href: "/admin/dashboard",
+    },
+    {
+      id: "users",
+      title: "Quản lí người dùng",
+      icon: Users,
+      href: "/admin/UserManagement",
+    },
+    {
+      id: "courses",
+      title: "Quản lí khóa học",
+      icon: BookOpen,
+      href: "/admin/CourseAnalytics",
+    },
+    {
+      id: "course-approval",
+      title: "Phê duyệt khóa học",
+      icon: FiCheck,
+      href: "/admin/course-approval",
+      active: true,
+    },
+    {
+      id: "orders",
+      title: "Quản lí đơn hàng",
+      icon: ShoppingCart,
+      href: "/admin/orders",
+    },
+    {
+      id: "reviews",
+      title: "Quản lí đánh giá",
+      icon: Star,
+      href: "/admin/reviews",
+    },
+    {
+      id: "complaints",
+      title: "Quản lí phản hồi khiếu nại",
+      icon: MessageSquare,
+      href: "/admin/ComplaintManagement",
+    },
+  ];
 
   useEffect(() => {
     const mockRequests = [

@@ -1,5 +1,14 @@
 import React, { useState } from "react";
 import { motion } from "framer-motion";
+import { FiSettings } from "react-icons/fi";
+import {
+  MdDashboard,
+  MdAnalytics,
+  MdPeople,
+  MdReport,
+  MdTrendingUp,
+  MdSchool,
+} from "react-icons/md";
 import {
   BarChart,
   Bar,
@@ -28,7 +37,6 @@ import {
   ShoppingCart,
   Star,
 } from "lucide-react";
-import logo from "../../assets/images/logo.jpg";
 
 // Sample data for the charts
 const monthlyData = [
@@ -110,39 +118,33 @@ const AdminDashboard = () => {
   const menuItems = [
     {
       id: "statistics",
-      title: "Thống kê",
+      title: "Dashboard",
       icon: BarChart3,
       href: "/admin/dashboard",
     },
     {
-      id: "users",
-      title: "Quản lí người dùng",
-      icon: Users,
-      href: "/admin/UserManagement",
-    },
-    {
       id: "courses",
-      title: "Quản lí khóa học",
+      title: "Analytics",
       icon: BookOpen,
       href: "/admin/CourseAnalytics",
     },
     {
-      id: "orders",
-      title: "Quản lí đơn hàng",
-      icon: ShoppingCart,
-      href: "/admin/orders",
-    },
-    {
-      id: "reviews",
-      title: "Quản lí đánh giá",
-      icon: Star,
-      href: "/admin/reviews",
+      id: "users",
+      title: "User Management",
+      icon: Users,
+      href: "/admin/UserManagement",
     },
     {
       id: "complaints",
       title: "Quản lí phản hồi khiếu nại",
       icon: MessageSquare,
       href: "/admin/ComplaintManagement",
+    },
+    {
+      id: "settings",
+      title: "Settings",
+      icon: FiSettings,
+      href: "/admin/settings",
     },
   ];
 
@@ -159,8 +161,8 @@ const AdminDashboard = () => {
         >
           <div className="p-4">
             <div className="flex items-center mb-8 justify-center">
-              <img src={logo} alt="Logo" className="h-12 w-12 rounded" />
-              <span className="ml-2 text-xl font-bold">AdminDash</span>
+              <MdSchool className="h-8 w-8 text-blue-500" />
+              <span className="ml-2 text-xl font-bold">EduAnalytics</span>
             </div>
             <nav>
               <ul className="space-y-2">
