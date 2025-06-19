@@ -22,6 +22,7 @@ import Analytics from "../Pages/Admin/AdminDashboard";
 import UserManagement from "../Pages/Admin/UserManagement";
 import CourseAnalytics from "../Pages/Admin/CourseAnalytics";
 import ComplaintManagement from "../Pages/Admin/ComplaintManagement";
+import AdminCourseApproval from "../Pages/Admin/AdminCourseApproval";
 
 const AppRoutes = () => {
   return (
@@ -55,6 +56,10 @@ const AppRoutes = () => {
         <Route
           path="/admin/ComplaintManagement"
           element={<ComplaintManagement />}
+        />
+        <Route
+          path="/admin/course-approval"
+          element={<AdminCourseApproval />}
         />
       </Routes>
     </Suspense>

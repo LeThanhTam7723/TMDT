@@ -10,18 +10,18 @@ const axiosClient = axios.create({
 
 axiosClient.interceptors.request.use(
   (config) => {
-    // Skip auth for login/register endpoints
     const skipAuthEndpoints = [
-      "/auth/login",
-      "/users/createUser",
-      "/users/existUser",
-      "/verifyRegister",
+      "auth/login",
+      "users/createUser",
+      "users/existUser",
+      "verifyRegister",
     ];
     const shouldSkipAuth = skipAuthEndpoints.some((endpoint) =>
       config.url?.includes(endpoint)
     );
 
     if (shouldSkipAuth) {
+      console.log("🔓 Skipping auth for:", config.url);
       return config;
     }
 
