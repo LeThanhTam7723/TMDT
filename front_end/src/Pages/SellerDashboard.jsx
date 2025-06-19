@@ -17,7 +17,6 @@ import {
 } from "react-icons/fi";
 import { motion, AnimatePresence } from "framer-motion";
 
-// Enhanced sample courses data with approval status
 const sampleCourses = [
   {
     id: 1,
