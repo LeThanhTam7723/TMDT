@@ -33,7 +33,7 @@ axiosClient.interceptors.request.use(
       const token = session?.token;
 
       if (token) {
-        config.headers.Authorization = `Bearer ${token}`;
+        config.headers.Authorization = "Bearer ${token}";
         console.log("✅ Token attached:", token);
       } else {
         console.warn("⚠️ No token found in session");

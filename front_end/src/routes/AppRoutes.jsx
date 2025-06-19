@@ -17,6 +17,7 @@ import Checkout from "../Pages/Checkout";
 import Login from "../Pages/Login";
 import Register from "../Pages/Register";
 import ChatInterface from "../Pages/Chat";
+import SellerDetail from "../Pages/SellerDetail";
 
 import Analytics from "../Pages/Admin/AdminDashboard";
 import UserManagement from "../Pages/Admin/UserManagement";
@@ -37,11 +38,12 @@ const AppRoutes = () => {
         <Route path="/auth/*" element={<AuthPage />} />
         <Route path="/detail/:id" element={<Detail />} />
         <Route path="/user-info" element={<UserInfo />} />
-        <Route path="/video/:id" element={<CourseVideo />} />
+        <Route path="/course-video/:id" element={<CourseVideo />} />
         <Route path="/checkout" element={<Checkout />} />
         <Route path="/login" element={<Login />} />
         <Route path="/register" element={<Register />} />
         <Route path="/chat" element={<ChatInterface />} />
+        <Route path="/seller/:id" element={<SellerDetail />} />
 
         {/* Seller Routes */}
         <Route path="/seller/dashboard" element={<SellerDashboard />} />
