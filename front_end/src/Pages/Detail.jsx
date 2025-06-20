@@ -1,12 +1,16 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useContext } from 'react';
 import { Play, Clock, ChevronLeft, ChevronRight, Star, Users, BookOpen, Award, ChevronDown } from 'lucide-react';
 import { useParams } from 'react-router-dom'; // Import useParams
 import axiosClient from '../API/axiosClient'; // Adjust the path as needed
 import FacebookComment from '../component/commentFb/FacebookComment';
+import Swal from 'sweetalert2';
+import { ProductContext } from '../context/ProductContext';
+import PaymentService from '../API/PaymentService';
 
 const Detail = () => {
   const [currentSlide, setCurrentSlide] = useState(0);
   const [showMoreInstructor, setShowMoreInstructor] = useState(false);
+  const {session,setSession} = useContext(ProductContext);
   
   // Get ID from URL params
   const { id } = useParams(); // This will get the ID from the URL
@@ -84,6 +88,40 @@ const Detail = () => {
     const remainingMinutes = minutes % 60;
     return remainingMinutes > 0 ? `${hours}h ${remainingMinutes}m` : `${hours}h`;
   };
+  
+  const handlePaymentClick = async (price,orderId) => {
+    if (session === null) {
+      const result = await Swal.fire({
+        title: "Hãy đăng nhập để thực hiện đăng ký khóa học",
+        showClass: {
+          popup: `animate__animated animate__fadeInUp animate__faster`
+        },
+        hideClass: {
+          popup: `animate__animated animate__fadeOutDown animate__faster`
+        }
+      });
+  
+      if (result.isConfirmed) {
+        window.location.href = "/auth/login";
+      }
+    } else {
+      const result = await Swal.fire({
+        title: "Bạn chắc muốn tham gia khóa học này ?",
+        showCancelButton: true,
+        confirmButtonText: "Đồng ý",
+        cancelButtonText: "Hủy"
+      });
+  
+      if (result.isConfirmed) {
+        Swal.fire("Đã tham gia!", "", "success");
+        const response= await PaymentService.vnPay(10000,session.token,orderId,session.currentUser.id);
+        const {code,result,message} = response.data;
+        console.log(result);
+        window.location.href = result;
+      }
+    }
+  };
+  
   
   useEffect(() => {
     const fetchCourse = async () => {
@@ -211,7 +249,7 @@ const Detail = () => {
           {/* Price Section */}
           <div className="mb-6">
             <span className="text-3xl font-bold text-blue-600">${course.price}</span>
-            <button className="ml-4 bg-blue-600 hover:bg-blue-700 text-white px-6 py-3 rounded-lg font-semibold transition-colors">
+            <button className="ml-4 bg-blue-600 hover:bg-blue-700 text-white px-6 py-3 rounded-lg font-semibold transition-colors" onClick={()=>{handlePaymentClick(course.price,course.id)}}>
               Enroll Now
             </button>
           </div>

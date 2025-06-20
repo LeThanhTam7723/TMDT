@@ -1,7 +1,7 @@
 package com.example.back_end.controller;
 
 
-import com.example.back_end.dto.CourseDto;
+
 import com.example.back_end.dto.request.FavoriteRequest;
 import com.example.back_end.dto.response.ApiResponse;
 import com.example.back_end.entity.Course;
