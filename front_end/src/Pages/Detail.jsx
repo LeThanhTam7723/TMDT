@@ -1,5 +1,5 @@
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useContext } from 'react';
 import { Play, Clock, ChevronLeft, ChevronRight, Star, Users, BookOpen, Award, ChevronDown, User } from 'lucide-react';
 import { useParams, useNavigate } from 'react-router-dom';
 import axiosClient from '../API/axiosClient';
