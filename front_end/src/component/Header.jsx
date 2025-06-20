@@ -94,8 +94,8 @@ const Header = () => {
     { name: "Home", link: "/" },
     { name: "Shop", link: "/shop", hasDropdown: true },
     { name: "Pages", link: "#", hasDropdown: true },
-    { name: "Blog", link: "#" },
-    { name: "Contact", link: "/video" },
+    { name: "Blog", link: "/history" },
+    { name: "Contact", link: "/UserHistory" },
   ];
 
   const updateFavoriteCount = () => {
