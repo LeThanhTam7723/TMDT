@@ -178,11 +178,11 @@ export const ProductProvider = ({ children }) => {
   const toggleFavorite = async (productId) => {
     try {
       const userId = 1; // TODO: Get from auth context
-      const isInFavorites = favorites.some(item => item.course.id === productId);
+      const isInFavorites = favorites.some(item => item.course && item.course.id === productId);
       
       if (isInFavorites) {
         await favoriteService.removeFromFavorites(userId, productId);
-        setFavorites(prev => prev.filter(item => item.course.id !== productId));
+        setFavorites(prev => prev.filter(item => item.course && item.course.id !== productId));
       } else {
         const response = await favoriteService.addToFavorites(userId, productId);
         setFavorites(prev => [...prev, response.data.result]);
@@ -193,11 +193,13 @@ export const ProductProvider = ({ children }) => {
   };
 
   const isInFavorites = (productId) => {
-    return favorites.some(item => item.course.id === productId);
+    if (!Array.isArray(favorites)) return false;
+    return favorites.some(item => item.course && item.course.id === productId);
   };
 
   const getFavoriteProducts = () => {
-    return favorites.map(item => item.course);
+    if (!Array.isArray(favorites)) return [];
+    return favorites.map(item => item.course).filter(course => course != null);
   };
 
   const loadUserFavorites = async (userId) => {
