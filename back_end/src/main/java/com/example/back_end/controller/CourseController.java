@@ -1,8 +1,10 @@
 package com.example.back_end.controller;
 
+import com.example.back_end.dto.request.CourseRatingRequest;
 import com.example.back_end.dto.response.ApiResponse;
 import com.example.back_end.dto.response.CourseDetailResponseDTO;
 import com.example.back_end.dto.response.CourseListResponseDTO;
+import com.example.back_end.dto.response.CourseRatingResponseDTO;
 import com.example.back_end.service.CourseServiceImpl;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -77,5 +79,39 @@ public class CourseController {
                 .message("Fetched course details successfully.")
                 .result(details)
                 .build();
+    }
+
+    @PostMapping("/{id}/rate")
+    public ApiResponse<String> rateCourse(@PathVariable Integer id, @RequestBody CourseRatingRequest request) {
+        try {
+            courseService.submitRating(id, request.getUserId(), request.getRating());
+            return ApiResponse.<String>builder()
+                    .code(200)
+                    .message("Rating submitted successfully")
+                    .build();
+        } catch (Exception e) {
+            log.error("Error rating course: ", e);
+            return ApiResponse.<String>builder()
+                    .code(500)
+                    .message("Error: " + e.getMessage())
+                    .build();
+        }
+    }
+
+    @GetMapping("/{courseId}/user-rating/{userId}")
+    public ApiResponse<CourseRatingResponseDTO> getUserRating(@PathVariable Integer courseId, @PathVariable Integer userId) {
+        try {
+            CourseRatingResponseDTO rating = courseService.getUserRating(courseId, userId);
+            return ApiResponse.<CourseRatingResponseDTO>builder()
+                    .code(200)
+                    .message("Success")
+                    .result(rating)
+                    .build();
+        } catch (Exception e) {
+            return ApiResponse.<CourseRatingResponseDTO>builder()
+                    .code(500)
+                    .message("Error: " + e.getMessage())
+                    .build();
+        }
     }
 }

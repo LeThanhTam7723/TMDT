@@ -6,6 +6,7 @@ import com.example.back_end.constant.PredefinedRole;
 import com.example.back_end.dto.UserDto;
 import com.example.back_end.dto.request.IntrospectRequest;
 import com.example.back_end.dto.request.UserCreationRequest;
+import com.example.back_end.dto.request.UserUpdateStatusRequest;
 import com.example.back_end.dto.response.AuthenticationResponse;
 import com.example.back_end.dto.response.IntrospectResponse;
 import com.example.back_end.dto.response.UserResponse;
@@ -166,5 +167,25 @@ public class UserService {
             throw new AppException(ErrorCode.CLOUDINARY_ERROR);
         }
     }
+    public UserResponse updateUserStatus(int userId, UserUpdateStatusRequest request) {
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new RuntimeException("Không tìm thấy người dùng"));
+
+        if (request.getActive() != null) {
+            user.setActive(request.getActive());
+        }
+
+        if (request.getRole() != null) {
+            // Giả sử mỗi user chỉ có 1 role, bạn có thể sửa thành danh sách nếu cần
+            user.getRoles().clear();
+            Role role = roleRepository.findByName(request.getRole())
+                    .orElseThrow(() -> new RuntimeException("Không tìm thấy role: " + request.getRole()));
+            user.getRoles().add(role);
+        }
+
+        User savedUser = userRepository.save(user);
+        return modelMapper.map(savedUser, UserResponse.class);
+    }
+
 
 }
