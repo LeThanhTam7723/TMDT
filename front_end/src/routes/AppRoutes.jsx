@@ -1,9 +1,7 @@
-// src/routes/AppRoutes.jsx
 import React, { Suspense } from "react";
 import { Routes, Route } from "react-router-dom";
 import Home from "../Pages/HomePage";
 import Store from "../Pages/Store";
-
 import Cart from "../Pages/Cart";
 import CheckoutPage from "../Pages/Payment";
 import AuthPage from "../Pages/Authentication";
@@ -25,6 +23,8 @@ import Analytics from "../Pages/Admin/AdminDashboard";
 import UserManagement from "../Pages/Admin/UserManagement";
 import CourseAnalytics from "../Pages/Admin/CourseAnalytics";
 import ComplaintManagement from "../Pages/Admin/ComplaintManagement";
+import AdminCourseApproval from "../Pages/Admin/AdminCourseApproval";
+import ProtectedRoute from "../component/ProtectedRoute";
 
 const AppRoutes = () => {
   return (
@@ -48,19 +48,80 @@ const AppRoutes = () => {
          <Route path="/UserHistory" element={<UserHistory />} />
         <Route path="/seller/:id" element={<SellerDetail />} />
 
-        {/* Seller Routes */}
-        <Route path="/seller/dashboard" element={<SellerDashboard />} />
-        <Route path="/seller/course/new" element={<CourseForm />} />
-        <Route path="/seller/course/:id/edit" element={<CourseForm />} />
-        {/* {Admin route} */}
-        {/* Admin Routes */}
-        <Route path="/admin/dashboard" element={<Analytics />} />
-        <Route path="/admin/analytics" element={<Analytics />} />
-        <Route path="/admin/UserManagement" element={<UserManagement />} />
-        <Route path="/admin/CourseAnalytics" element={<CourseAnalytics />} />
+        {/* Seller Routes - Only SELLER and ADMIN can access */}
+        <Route
+          path="/seller/dashboard"
+          element={
+            <ProtectedRoute allowedRoles={["SELLER", "ADMIN"]}>
+              <SellerDashboard />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/seller/course/new"
+          element={
+            <ProtectedRoute allowedRoles={["SELLER", "ADMIN"]}>
+              <CourseForm />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/seller/course/:id/edit"
+          element={
+            <ProtectedRoute allowedRoles={["SELLER", "ADMIN"]}>
+              <CourseForm />
+            </ProtectedRoute>
+          }
+        />
+
+        {/* Admin Routes - Only ADMIN can access */}
+        <Route
+          path="/admin/dashboard"
+          element={
+            <ProtectedRoute allowedRoles={["ADMIN"]}>
+              <Analytics />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/admin/analytics"
+          element={
+            <ProtectedRoute allowedRoles={["ADMIN"]}>
+              <Analytics />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/admin/UserManagement"
+          element={
+            <ProtectedRoute allowedRoles={["ADMIN"]}>
+              <UserManagement />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/admin/CourseAnalytics"
+          element={
+            <ProtectedRoute allowedRoles={["ADMIN"]}>
+              <CourseAnalytics />
+            </ProtectedRoute>
+          }
+        />
         <Route
           path="/admin/ComplaintManagement"
-          element={<ComplaintManagement />}
+          element={
+            <ProtectedRoute allowedRoles={["ADMIN"]}>
+              <ComplaintManagement />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/admin/course-approval"
+          element={
+            <ProtectedRoute allowedRoles={["ADMIN"]}>
+              <AdminCourseApproval />
+            </ProtectedRoute>
+          }
         />
       </Routes>
     </Suspense>

@@ -3,17 +3,20 @@ import { FcGoogle } from "react-icons/fc";
 import { FaFacebook, FaEye, FaEyeSlash } from "react-icons/fa";
 import { motion, AnimatePresence } from "framer-motion";
 import ReCAPTCHA from "react-google-recaptcha";
-import { checkEmailExists, signIn, verifyRegister} from "../API/AuthService";
-import { useNavigate } from "react-router-dom";// Đường dẫn tùy vào dự án của bạn
-
+import { checkEmailExists, signIn, verifyRegister } from "../API/AuthService";
+import { useNavigate } from "react-router-dom";
 
 const VerificationPage = ({ email, onResend }) => {
   return (
     <div className="text-center space-y-6">
-      <h2 className="text-3xl font-extrabold text-gray-900">Verify your email</h2>
+      <h2 className="text-3xl font-extrabold text-gray-900">
+        Verify your email
+      </h2>
       <p className="text-gray-600">We have sent a verification link to</p>
       <p className="font-medium text-gray-800">{email}</p>
-      <p className="text-gray-600">Please check your inbox and click the link to verify your account</p>
+      <p className="text-gray-600">
+        Please check your inbox and click the link to verify your account
+      </p>
       <div className="pt-4">
         <button
           onClick={onResend}
@@ -27,7 +30,7 @@ const VerificationPage = ({ email, onResend }) => {
 };
 
 const Login = () => {
-  const navigate = useNavigate(); 
+  const navigate = useNavigate();
   const [authState, setAuthState] = useState("login");
   const [showPassword, setShowPassword] = useState(false);
   const [isCheckingEmail, setIsCheckingEmail] = useState(false);
@@ -39,7 +42,7 @@ const Login = () => {
     username: "",
     phone: "",
     rememberMe: false,
-    termsAccepted: false
+    termsAccepted: false,
   });
   const [errors, setErrors] = useState({});
   const [captchaValue, setCaptchaValue] = useState(null);
@@ -76,61 +79,53 @@ const Login = () => {
       default:
         break;
     }
-    
+
     return error;
   };
 
   const handleInputChange = async (e) => {
     const { name, value, type, checked } = e.target;
     const newValue = type === "checkbox" ? checked : value;
-    
-    setFormData(prev => ({
+
+    setFormData((prev) => ({
       ...prev,
-      [name]: newValue
+      [name]: newValue,
     }));
 
     if (type !== "checkbox") {
       const error = validateField(name, newValue);
-      setErrors(prev => ({
+      setErrors((prev) => ({
         ...prev,
-        [name]: error
+        [name]: error,
       }));
 
       if (name === "email" && validateEmail(newValue)) {
         const response = await checkEmailExists(newValue);
         const emailExists = response.data.result;
         if ((authState === "login" || authState === "forgot") && !emailExists) {
-          setErrors(prev => ({
+          setErrors((prev) => ({
             ...prev,
-            email: "Email not registered"
+            email: "Email not registered",
           }));
           setIsCheckingEmail(false);
         } else if (authState === "register" && emailExists) {
-          setErrors(prev => ({
+          setErrors((prev) => ({
             ...prev,
-            email: "Email already exists"
+            email: "Email already exists",
           }));
           setIsCheckingEmail(false);
-        }else{
+        } else {
           setIsCheckingEmail(true);
         }
       }
     }
-
-    // if (name === "password" && formData.confirmPassword) {
-    //   const confirmError = formData.confirmPassword !== value ? "Passwords do not match" : "";
-    //   setErrors(prev => ({
-    //     ...prev,
-    //     confirmPassword: confirmError
-    //   }));
-    // }
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     const newErrors = {};
 
-    Object.keys(formData).forEach(field => {
+    Object.keys(formData).forEach((field) => {
       if (field !== "rememberMe" && field !== "termsAccepted") {
         const error = validateField(field, formData[field]);
         if (error) {
@@ -141,21 +136,27 @@ const Login = () => {
 
     setErrors(newErrors);
 
-    // if (Object.keys(newErrors).length === 0) {
-    //   if ( authState === "forgot") {
-    //     setVerificationSent(true);
-    //   } else {
-    //     console.log("Form submitted:", formData);
-    //   }
-    // }
-    if(authState === "login"){
+    if (authState === "login") {
       console.log("login :", formData);
-      await signIn({email: formData.email,password: formData.password,})
+      await signIn({ email: formData.email, password: formData.password })
         .then((res) => {
           const { code, message, result } = res.data;
           localStorage.setItem("session", JSON.stringify(result));
-          navigate('/');
 
+          // Role-based redirect
+          const userRole = result.role?.toUpperCase();
+          switch (userRole) {
+            case "ADMIN":
+              navigate("/admin/dashboard");
+              break;
+            case "SELLER":
+              navigate("/seller/dashboard");
+              break;
+            case "USER":
+            default:
+              navigate("/");
+              break;
+          }
         })
         .catch((err) => {
           if (err.response && err.response.data && err.response.data.message) {
@@ -165,43 +166,37 @@ const Login = () => {
           }
           console.error("Đã xảy ra lỗi khi gọi API:", err);
         });
-      // đăng nhập với firebase
-      // firebase.auth().signInWithEmailAndPassword(formData.email, formData.password)
-      // .then((userCredential) => {
-      //   const user = userCredential.user;
-      //   console.log("Đăng nhập thành công:", user.uid);
-      // })
-      // .catch((error) => {
-      //   console.error("Lỗi đăng nhập:", error.message);
-      // });
-             
     } else {
-      if(authState==="forgot"){
+      if (authState === "forgot") {
         console.log("forgot :", formData);
-      }else{
+      } else {
         console.log("register :", formData);
         await verifyRegister(formData.email)
-        .then((res) => {
-          const { code, message, result } = res.data;
-          if(code !== 0){
-            console.log(message);
-          }
-          navigate('/auth/resend');
-
-        })
-        .catch((err) => {
-          console.error("Đã xảy ra lỗi khi gọi API:", err);
-        });
+          .then((res) => {
+            const { code, message, result } = res.data;
+            if (code !== 0) {
+              console.log(message);
+            }
+            navigate("/auth/resend");
+          })
+          .catch((err) => {
+            console.error("Đã xảy ra lỗi khi gọi API:", err);
+          });
       }
     }
   };
 
   const isFormValid = () => {
     if (authState === "login") {
-      return validateEmail(formData.email) && captchaValue && validatePassword(formData.password) && isCheckingEmail;
-    } else if (authState === "forgot" ) {
+      return (
+        validateEmail(formData.email) &&
+        captchaValue &&
+        validatePassword(formData.password) &&
+        isCheckingEmail
+      );
+    } else if (authState === "forgot") {
       return validateEmail(formData.email) && isCheckingEmail;
-    } else if (authState === "register"){
+    } else if (authState === "register") {
       console.log(isCheckingEmail);
       return validateEmail(formData.email) && isCheckingEmail;
     }
@@ -211,16 +206,16 @@ const Login = () => {
   const pageVariants = {
     initial: {
       opacity: 0,
-      y: 20
+      y: 20,
     },
     animate: {
       opacity: 1,
-      y: 0
+      y: 0,
     },
     exit: {
       opacity: 0,
-      y: -20
-    }
+      y: -20,
+    },
   };
 
   return (
@@ -236,94 +231,125 @@ const Login = () => {
       >
         <div className="text-center">
           <h2 className="mt-6 text-3xl font-extrabold text-gray-900">
-            {authState === "login" ? "Login" :
-            authState === "forgot" ? "Forgot password":
-            "Verify Email"
-            }
+            {authState === "login"
+              ? "Login"
+              : authState === "forgot"
+              ? "Forgot password"
+              : "Verify Email"}
             <p className="text-sm text-gray-600">
-              {authState === "login" ? "Sign in to your account" :
-               authState === "forgot" ? "Enter your email to reset password" : 
-               "Check your email for verification"}
+              {authState === "login"
+                ? "Sign in to your account"
+                : authState === "forgot"
+                ? "Enter your email to reset password"
+                : "Check your email for verification"}
             </p>
-            
           </h2>
         </div>
 
         <form className="mt-8 space-y-6" onSubmit={handleSubmit}>
           <div>
-            <label className="block text-sm font-medium text-gray-700">Email address</label>
+            <label className="block text-sm font-medium text-gray-700">
+              Email address
+            </label>
             <input
               type="email"
               name="email"
               placeholder="Enter email address"
               value={formData.email}
               onChange={handleInputChange}
-              className={`mt-1 block w-full px-3 py-2 border ${errors.email ? 'border-red-500' : 'border-gray-300'} rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500`}
+              className={`mt-1 block w-full px-3 py-2 border ${
+                errors.email ? "border-red-500" : "border-gray-300"
+              } rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500`}
             />
-            {errors.email && <p className="mt-1 text-sm text-red-500">{errors.email}</p>}
+            {errors.email && (
+              <p className="mt-1 text-sm text-red-500">{errors.email}</p>
+            )}
           </div>
           {authState === "login" && (
             <>
-            <div className="relative">
-              <label className="block text-sm font-medium text-gray-700">Password</label>
-              <div className="mt-1 relative rounded-md shadow-sm">
-                <input
-                  type={showPassword ? "text" : "password"}
-                  name="password"
-                  placeholder="Enter password"
-                  value={formData.password}
-                  onChange={handleInputChange}
-                  className={`block w-full px-3 py-2 border ${errors.password ? 'border-red-500' : 'border-gray-300'} rounded-md focus:outline-none focus:ring-blue-500 focus:border-blue-500`}
-                />
+              <div className="relative">
+                <label className="block text-sm font-medium text-gray-700">
+                  Password
+                </label>
+                <div className="mt-1 relative rounded-md shadow-sm">
+                  <input
+                    type={showPassword ? "text" : "password"}
+                    name="password"
+                    placeholder="Enter password"
+                    value={formData.password}
+                    onChange={handleInputChange}
+                    className={`block w-full px-3 py-2 border ${
+                      errors.password ? "border-red-500" : "border-gray-300"
+                    } rounded-md focus:outline-none focus:ring-blue-500 focus:border-blue-500`}
+                  />
+                  <button
+                    type="button"
+                    className="absolute inset-y-0 right-0 pr-3 flex items-center"
+                    onClick={() => setShowPassword(!showPassword)}
+                  >
+                    {showPassword ? (
+                      <FaEyeSlash className="text-gray-400" />
+                    ) : (
+                      <FaEye className="text-gray-400" />
+                    )}
+                  </button>
+                </div>
+                {errors.password && (
+                  <p className="mt-1 text-sm text-red-500">{errors.password}</p>
+                )}
+              </div>
+
+              <div className="flex items-center justify-between">
+                <div className="flex items-center">
+                  <input
+                    type="checkbox"
+                    name="rememberMe"
+                    checked={formData.rememberMe}
+                    onChange={handleInputChange}
+                    className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
+                  />
+                  <label className="ml-2 block text-sm text-gray-900">
+                    Remember me
+                  </label>
+                </div>
+
                 <button
                   type="button"
-                  className="absolute inset-y-0 right-0 pr-3 flex items-center"
-                  onClick={() => setShowPassword(!showPassword)}
+                  onClick={() => {
+                    setAuthState("forgot");
+                    setIsCheckingEmail(false);
+                  }}
+                  className="text-sm font-medium text-blue-600 hover:text-blue-500"
                 >
-                  {showPassword ? <FaEyeSlash className="text-gray-400" /> : <FaEye className="text-gray-400" />}
+                  Forgot your password?
                 </button>
               </div>
-              {errors.password && <p className="mt-1 text-sm text-red-500">{errors.password}</p>}
-            </div>
 
-            <div className="flex items-center justify-between">
-              <div className="flex items-center">
-                <input
-                  type="checkbox"
-                  name="rememberMe"
-                  checked={formData.rememberMe}
-                  onChange={handleInputChange}
-                  className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
+              <div className="mt-4 flex justify-center">
+                <ReCAPTCHA
+                  sitekey="6LeWqNkpAAAAANkqcg0zDmNz90pyG4FOLP4QiDQv"
+                  onChange={handleCaptchaChange}
                 />
-                <label className="ml-2 block text-sm text-gray-900">Remember me</label>
+                {errors.captcha && (
+                  <p className="mt-1 text-sm text-red-500">{errors.captcha}</p>
+                )}
               </div>
-
-              <button
-                type="button"
-                onClick={()=> {setAuthState("forgot");setIsCheckingEmail(false)}}
-                className="text-sm font-medium text-blue-600 hover:text-blue-500"
-              >
-                Forgot your password?
-              </button>
-            </div>
-            
-            <div className="mt-4 flex justify-center">
-              <ReCAPTCHA
-                sitekey="6LeWqNkpAAAAANkqcg0zDmNz90pyG4FOLP4QiDQv"
-                onChange={handleCaptchaChange}
-              />
-              {errors.captcha && <p className="mt-1 text-sm text-red-500">{errors.captcha}</p>}
-            </div>
             </>
           )}
           <button
             type="submit"
             disabled={!isFormValid()}
-            className={`group relative w-full flex justify-center py-2 px-4 border border-transparent text-sm font-medium rounded-md text-white ${isFormValid() ? "bg-blue-600 hover:bg-blue-700" : "bg-gray-400 cursor-not-allowed"} focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500`}
+            className={`group relative w-full flex justify-center py-2 px-4 border border-transparent text-sm font-medium rounded-md text-white ${
+              isFormValid()
+                ? "bg-blue-600 hover:bg-blue-700"
+                : "bg-gray-400 cursor-not-allowed"
+            } focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500`}
           >
-            {authState === "login" ? "Sign in" :
-            authState === "forgot" ? "Send Email" :
-            "Send Email"}
+            {authState === "login"
+              ? "Sign in"
+              : authState === "forgot"
+              ? "Send Email"
+              : "Send Email"}
           </button>
 
           {authState === "login" && (
@@ -334,7 +360,9 @@ const Login = () => {
                     <div className="w-full border-t border-gray-300" />
                   </div>
                   <div className="relative flex justify-center text-sm">
-                    <span className="px-2 bg-white text-gray-500">Or continue with</span>
+                    <span className="px-2 bg-white text-gray-500">
+                      Or continue with
+                    </span>
                   </div>
                 </div>
 
@@ -362,14 +390,17 @@ const Login = () => {
         <div className="mt-6 text-center">
           <button
             type="button"
-            onClick={() => {setAuthState(authState === "login" ? "register" : "login");setIsCheckingEmail(false)}}
+            onClick={() => {
+              setAuthState(authState === "login" ? "register" : "login");
+              setIsCheckingEmail(false);
+            }}
             className="text-sm font-medium text-blue-600 hover:text-blue-500"
           >
             {authState === "login"
-                      ? "Don't have an account? Sign up"
-                      : authState === "forgot"
-                      ? "Back to sign in"
-                      : "Already have an account? Sign in"}
+              ? "Don't have an account? Sign up"
+              : authState === "forgot"
+              ? "Back to sign in"
+              : "Already have an account? Sign in"}
           </button>
         </div>
       </motion.div>

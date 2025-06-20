@@ -200,7 +200,7 @@ const ComplaintManagement = () => {
   }
 
   return (
-    <div className={`${darkMode ? "dark" : ""} min-h-screen`}>
+    <div className={`${darkMode ? "dark" : ""} min-h-screen bg-gray-900`}>
       <div className="flex bg-gray-100 dark:bg-gray-900 text-gray-800 dark:text-white">
         {/* Sidebar */}
         <motion.div
