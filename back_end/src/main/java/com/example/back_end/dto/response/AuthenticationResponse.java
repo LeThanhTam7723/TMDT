@@ -10,4 +10,5 @@ public class AuthenticationResponse {
     String token;
     boolean authenticated;
     UserDto currentUser;
+    private String role;
 }

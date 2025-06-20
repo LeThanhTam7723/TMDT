@@ -69,23 +69,32 @@ public class AuthService {
         return IntrospectResponse.builder().valid(isValue).email(email).build();
     }
 
-    public AuthenticationResponse login (LoginRequest request){
+    public AuthenticationResponse login(LoginRequest request){
         var user = userRepository.findByEmail(request.getEmail())
                 .orElseThrow(() -> new AppException(ErrorCode.USER_NOT_EXISTED));
-        UserDto userDto = modelMapper.map(user,UserDto.class);
+        UserDto userDto = modelMapper.map(user, UserDto.class);
 
         if(!user.getActive()){
             throw new AppException(ErrorCode.INACTIVE_ACC);
         }
-        System.out.println(user.getEmail());
-        System.out.println(user.getPassword());
-        boolean authenticated =passwordEncoder.matches(request.getPassword(), user.getPassword());
-        System.out.println(authenticated);
+
+        boolean authenticated = passwordEncoder.matches(request.getPassword(), user.getPassword());
         if(!authenticated){
             throw new AppException(ErrorCode.INVALID_PASSWORD);
         }
+
         var token = generateToken(user);
-        return AuthenticationResponse.builder().token(token).currentUser(userDto).authenticated(true).build();
+
+        // Get user role
+        String userRole = user.getRoles().isEmpty() ? "USER" :
+                user.getRoles().iterator().next().getName();
+
+        return AuthenticationResponse.builder()
+                .token(token)
+                .currentUser(userDto)
+                .authenticated(true)
+                .role(userRole)
+                .build();
     }
 
     public void logout(IntrospectRequest request) throws ParseException, JOSEException {

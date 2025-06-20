@@ -21,6 +21,9 @@ public class CourseDetail {
     @Column(name = "CourseID")
     private Integer courseId;
 
+    @Column(name = "Name")
+    private String name;
+
     @Column(name = "EpisodeNumber")
     private Integer episodeNumber;
 
