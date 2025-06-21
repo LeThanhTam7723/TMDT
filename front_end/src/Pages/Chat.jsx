@@ -2,15 +2,35 @@ import React, { useState, useRef, useEffect } from "react";
 import { FiSend, FiPaperclip, FiSmile } from "react-icons/fi";
 import { format } from "date-fns";
 import { db } from "../firebase/config";
-import { push, ref, set ,query, orderByChild, equalTo,get,onChildAdded} from "firebase/database";
+import { push, ref, set ,query, orderByChild, equalTo,get,onChildAdded,child} from "firebase/database";
+import { useParams } from "react-router-dom";
 
+const getConversationByKey = async (key) => {
+  const dbRef = ref(db);
+
+  try {
+    const snapshot = await get(child(dbRef, `conversations/${key}`));
+    if (snapshot.exists()) {
+      console.log("Conversation:", snapshot.val());
+      return snapshot.val();
+    } else {
+      console.log("No data available");
+      return null;
+    }
+  } catch (error) {
+    console.error("Error getting conversation:", error);
+    return null;
+  }
+};
 const ChatInterface = () => {
   const session = JSON.parse(localStorage.getItem("session"));
   const [messages, setMessages] = useState([]);
-
   const [newMessage, setNewMessage] = useState("");
+  const [conversation,setConversation] = useState("");
+  
   const [isTyping, setIsTyping] = useState(false);
   const messagesEndRef = useRef(null);
+  const { id } = useParams();
 
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
@@ -22,7 +42,13 @@ const ChatInterface = () => {
   // phần xử lý nhắn tin
   const messagesRef = ref(db, 'messages');
   useEffect(() =>{
-    const q = query(messagesRef, orderByChild('conversation_id'), equalTo("conver_1"));
+    getConversationByKey(id).then(conversation => {
+      if (conversation) {
+        setConversation(conversation); // hoặc xử lý theo ý bạn
+      }
+    });
+    console.log(conversation);
+    const q = query(messagesRef, orderByChild('conversation_id'), equalTo(id));
 
     get(q).then((snapshot) => {
       if (snapshot.exists()) {
@@ -42,8 +68,10 @@ const ChatInterface = () => {
     });
   },[]);
   useEffect(() => {
+    if (!id) return;
+  
     const messagesRef = ref(db, "messages");
-    const q = query(messagesRef, orderByChild("conversation_id"), equalTo("conver_1"));
+    const q = query(messagesRef, orderByChild("conversation_id"), equalTo(id));
   
     const unsubscribe = onChildAdded(q, (snapshot) => {
       const msg = snapshot.val();
@@ -51,29 +79,29 @@ const ChatInterface = () => {
       setMessages(prev => [...prev, { id, ...msg }]);
     });
   
-    return () => unsubscribe();
-  }, []);
+    return () => unsubscribe(); // sẽ ngắt listener khi id thay đổi
+  }, [id]);
+  
 
   const handleSendMessage = (e) => {
     e.preventDefault();
     if (newMessage.trim() === "") return;
 
     const newMsg = {
-      // id: messages.length + 1,
-      conversation_id: "conver_1",
-      sender: 1,
+      conversation_id: id,
+      sender: session.currentUser.id,
       content: newMessage,
       timestamp: Date.now(),
       read: true
     };
-    const conversation = {
-      id: "conver_1",
-      user1_id: 1,
-      user2_id: 2,
-    };
+    // const conversation = {
+    //   id: "conver_1",
+    //   user1_id: 1,
+    //   user2_id: 2,
+    // };
     try {
         // set(ref(db, 'message/' + 1), newMessage);
-        set(ref(db, 'conversations/' + 1), conversation);
+        set(ref(db, 'conversations/' + id), conversation);
         console.log(newMessage);
         const newRef = push(ref(db, 'messages'));
         set(newRef, newMsg);
@@ -85,18 +113,6 @@ const ChatInterface = () => {
     setMessages([...messages, newMsg]);
     setNewMessage("");
     
-    // Simulate received message
-    // setTimeout(() => {
-    //   const replyMsg = {
-    //     id: messages.length + 2,
-    //     conversation_id: "conver_1",
-    //     sender: 2,
-    //     content: "I'm doing great! Thanks for asking. How about you?",
-    //     timestamp: new Date(2024, 0, 1, 12, 1),
-    //     read: true
-    //   };
-    //   setMessages(prev => [...prev, replyMsg]);
-    // }, 1000);
   };
 
   return (
@@ -122,7 +138,7 @@ const ChatInterface = () => {
         {messages.map((message) => (
           <div
             key={message.id}
-            className={`flex ${(message.sender===1) ? "justify-end" : "justify-start"}`}
+            className={`flex ${(message.sender===session.currentUser.id) ? "justify-end" : "justify-start"}`}
           >
             <div
               className={`max-w-[70%] rounded-lg p-3 ${
@@ -194,6 +210,31 @@ const ChatInterface = () => {
       </form>
     </div>
   );
+};
+// tìm ra đoạn hội dựa vài id của 2 người
+export const findConversationByUsers = async (userA, userB) => {
+  const snapshot = await get(ref(db, "conversations"));
+
+  if (snapshot.exists()) {
+    const conversations = snapshot.val();
+
+    for (let key in conversations) {
+      const conv = conversations[key];
+      const u1 = conv.user1_id;
+      const u2 = conv.user2_id;
+
+      // So sánh theo cả hai chiều
+      if (
+        (u1 === userA && u2 === userB) ||
+        (u1 === userB && u2 === userA)
+      ) {
+        return { key, ...conv };
+        
+      }
+    }
+  }
+
+  return null;
 };
 
 export default ChatInterface;

@@ -2,13 +2,18 @@ import { useState } from 'react';
 import { Mail, ChevronDown, User } from 'lucide-react';
 import { getUserById } from '../API/AuthService';
 import { useEffect } from 'react';
-import { Camera, Save } from 'lucide-react'
+import { Camera, Save } from 'lucide-react';
+import { toast } from "react-toastify";
+import UserService from '../API/UserService';
 
 const  UserInformation =() => {
   const [isEditing, setIsEditing] = useState(false);
   const session = JSON.parse(localStorage.getItem("session"));
   const [userInfo, setUserInfo] = useState({});
   const [formData, setFormData] = useState({});
+  const [selectedFile, setSelectedFile] = useState(null);
+  const [previewUrl, setPreviewUrl] = useState(null);
+  const [avatarLoading, setAvatarLoading] = useState(false);
   const fetchUser = async(id) => {
     try {
       const rs = await getUserById(id);
@@ -57,16 +62,43 @@ const  UserInformation =() => {
   const handleFileChange = (e) => {
     const file = e.target.files[0];
     if (file) {
-      const reader = new FileReader();
-      const imageUrl = URL.createObjectURL(file);
-      console.log(file);
-      reader.onloadend = () => {
-        setFormData({
-          ...formData,
-          certificate: reader.result
-        });
-      };
-      reader.readAsDataURL(file);
+      if (file.size > 5 * 1024 * 1024) {
+        toast.error(t('profile.avatarSection.fileSizeError'));
+        return;
+      }
+      if (!file.type.startsWith('image/')) {
+        toast.error(t('profile.avatarSection.fileTypeError'));
+        return;
+      }
+      setSelectedFile(file);
+      setPreviewUrl(URL.createObjectURL(file));
+    }
+  };
+
+  const handleAvatarUpdate = async () => {
+    if (!selectedFile) {
+      toast.warning(t('profile.avatarSection.selectNewImage'));
+      return;
+    }
+
+    try {
+      setAvatarLoading(true);
+      await UserService.updateAvatar(selectedFile);
+      toast.success(t('profile.avatarSection.updateAvatarSuccess'));
+      fetchUserProfile();
+    } catch (error) {
+      if (error.response?.status === 401) {
+        toast.error(t('session.expired'));
+        localStorage.removeItem("session");
+        navigate('/auth/login');
+      } else {
+        toast.error(error.response?.data?.message || t('profile.avatarSection.updateAvatarFailed'));
+        console.error("Error updating avatar:", error);
+      }
+    } finally {
+      setAvatarLoading(false);
+      setSelectedFile(null);
+      setPreviewUrl(null);
     }
   };
 
@@ -78,38 +110,63 @@ const  UserInformation =() => {
         
         <div className="bg-white rounded-lg border border-gray-200 shadow-sm relative -mt-6">
           {/* Avatar and Header */}
-          <div className="flex items-start p-6">
-            <div className="relative -mt-16">
-            <div className="relative w-24 h-24">
-            {/* Avatar tròn */}
-            <div className="bg-gray-300 rounded-full w-full h-full flex items-center justify-center text-gray-500">
-              <User size={40} />
+            <div className="flex items-start p-6">
+              <div className="relative -mt-16">
+              <div className="relative w-24 h-24">
+              {/* Avatar tròn */}
+              <div className="bg-gray-300 rounded-full w-full h-full flex items-center justify-center text-gray-500">
+                {previewUrl ? (
+                      <img
+                          src={previewUrl}
+                          alt="Preview"
+                          className="w-full h-full object-cover"
+                      />
+                  ) : userInfo.avatar ? (
+                      <img
+                          src={userInfo.avatar}
+                          alt="Profile"
+                          className="w-full h-full object-cover"
+                          onError={(e) => {
+                            e.target.onerror = null;
+                            setUserInfo(prev => ({ ...prev, avatar: null }));
+                          }}
+                      />
+                  ) : (
+                    <User size={40} />
+                  )}
+                  
+              </div>
+
+              {/* Label chọn ảnh ở góc dưới phải */}
+              <label className="absolute bottom-0 right-0 bg-white p-1 rounded-full shadow cursor-pointer">
+                <Camera size={18} className="text-gray-700" />
+                <input
+                  type="file"
+                  accept="image/*"
+                  className="hidden"
+                  onChange={handleFileChange}
+                />
+              </label>
             </div>
-
-            {/* Label chọn ảnh ở góc dưới phải */}
-            <label className="absolute bottom-0 right-0 bg-white p-1 rounded-full shadow cursor-pointer">
-              <Camera size={18} className="text-gray-700" />
-              <input
-                type="file"
-                accept="image/*"
-                className="hidden"
-                onChange={(e) => {
-                  console.log(e.target.files[0]);
-                }}
-              />
-            </label>
-          </div>
-
+            { selectedFile && (
               <button
                 className="mt-2 text-sm px-3 py-1 rounded bg-blue-500 text-white hover:bg-blue-600"
-                onClick={() => {
-                  // xử lý lưu ảnh
-                  console.log("Lưu ảnh");
-                }}
+                onClick={handleAvatarUpdate}
+                disabled={avatarLoading}
               >
-                <Save size={16} className="inline mr-1" />
-                Lưu ảnh
+                {avatarLoading ? (
+                    <div className="animate-spin h-4 w-4 border-2 border-white border-t-transparent rounded-full"></div>
+                ) : (
+                    <>
+                      <Save size={16} className="inline mr-1" />
+                      Lưu ảnh
+                    </>
+                )}
               </button>
+
+            )}
+
+              
             </div>
             
             <div className="ml-4 flex-grow">
