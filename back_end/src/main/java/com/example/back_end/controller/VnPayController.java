@@ -24,7 +24,7 @@ import java.util.*;
 public class VnPayController {
 
     @GetMapping("/vnpay")
-    public ApiResponse<String> createPayment(@RequestParam long amount) {
+    public ApiResponse<String> createPayment(@RequestParam long amount,@RequestParam int courseId,@RequestParam int userId) {
         try {
             Map<String, String> vnp_Params = new HashMap<>();
             vnp_Params.put("vnp_Version", "2.1.0");
@@ -38,7 +38,7 @@ public class VnPayController {
             vnp_Params.put("vnp_OrderInfo", "Thanh toán đơn hàng");
             vnp_Params.put("vnp_OrderType", "100000");
             vnp_Params.put("vnp_Locale", "vn");
-            vnp_Params.put("vnp_ReturnUrl", VnpayConfig.vnp_ReturnUrl);
+            vnp_Params.put("vnp_ReturnUrl", VnpayConfig.vnp_ReturnUrl+"?orderId="+courseId+"&userId="+userId);
             vnp_Params.put("vnp_IpAddr", "127.0.0.1");
 
             // Thời gian tạo, hạn thanh toán
