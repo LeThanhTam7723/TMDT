@@ -46,7 +46,10 @@ const AppRoutes = () => {
         <Route path="/chat" element={<ChatInterface />} />
          <Route path="/history" element={<OrderHistory />} />
          <Route path="/UserHistory" element={<UserHistory />} />
-        <Route path="/seller/:id" element={<SellerDetail />} />
+
+        <Route path="/chat/:id" element={<ChatInterface />} />
+
+//         <Route path="/seller/:id" element={<SellerDetail />} />
 
         {/* Seller Routes - Only SELLER and ADMIN can access */}
         <Route
