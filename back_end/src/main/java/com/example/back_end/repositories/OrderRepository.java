@@ -8,5 +8,6 @@ import java.util.List;
 
 public interface OrderRepository extends JpaRepository<Order,Integer> {
     List<Order> getOrdersByIdUser(User user);
-    List<Order> findAll();
+
+        boolean existsByIdUser_IdAndIdCourse_Id(Integer userId, Integer courseId);
 }

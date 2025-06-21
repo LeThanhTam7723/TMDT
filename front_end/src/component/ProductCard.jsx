@@ -19,6 +19,12 @@ const renderStars = (rating) => {
   }
   return <div className="flex">{stars}</div>;
 };
+const defaultImages = [
+  "https://study4.com/media/courses/CourseSeries/files/2023/10/11/ielts_band_0_7.webp",
+  "https://m.media-amazon.com/images/I/51yBYmDJPNL._SL500_.jpg",
+  "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSzaxe4xnXoGduxVSFzSGrNYLjK4vKfmtr4fg&s",
+  "https://www.lingobest.com/free-online-english-course/wp-content/uploads/2021/03/Blog-Banners-Bruna-S-15-1.jpg",
+];
 
 const ProductCard = ({ product }) => {
   const [isFavorited, setIsFavorited] = useState(false);
@@ -49,11 +55,13 @@ const ProductCard = ({ product }) => {
       onClick={handleClick}
     >
       <div className="relative">
-        <img
-          src={product.image || `/api/placeholder/400/300`}
-          alt={product.name}
-          className="w-full h-48 object-cover"
-        />
+       <img
+  src={
+    product.image || defaultImages[product.id % 4]
+  }
+  alt={product.name}
+  className="w-full h-48 object-cover"
+/>
         <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black to-transparent h-20"></div>
         {product.discount > 0 && (
           <div className="absolute top-2 right-2 bg-red-500 text-white px-2 py-1 rounded text-xs">

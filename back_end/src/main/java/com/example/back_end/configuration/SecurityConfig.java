@@ -28,10 +28,9 @@ public class SecurityConfig {
     //Xác thực yêu cầu
     private final String[] PUBLIC_ENDPOINTS_POST_PERMITALL = {"users/createUser",
             "auth/login","auth/introspect","/verifyRegister/**","users/existUser"};
-    private final String[] PUBLIC_ENDPOINTS_GET_PERMITALL = {"/auth/verifyAccount","users/id/**","/courses/**","/seller/**","/order/add/**"};
-    private final String[] PUBLIC_ENDPOINTS_GET = {"/sendEmail","/users/**","/favorites/idUser/**","/payment/vnpay/**","/reports/**"};
-    private final String[] PUBLIC_ENDPOINTS_LOGIN = {"/auth/logout","/favorites/add","/order/**"};
-
+    private final String[] PUBLIC_ENDPOINTS_GET_PERMITALL = {"/auth/verifyAccount","users/id/**","/seller/**"};
+    private final String[] PUBLIC_ENDPOINTS_GET = {"/sendEmail","/users/**","/favorites/idUser/**","/payment/vnpay/**","/reports/**","/courses/**"};
+    private final String[] PUBLIC_ENDPOINTS_LOGIN = {"/auth/logout","/favorites/add"};
     private final String[] PUBLIC_ENDPOINTS_DELETE = {"/favorites/remove"};
     @Value("${jwt.signer-key}")
     protected String SIGNER_KEY;

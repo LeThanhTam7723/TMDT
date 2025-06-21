@@ -26,25 +26,25 @@ const HomePage = () => {
     {
       title: "Master English with Native Speakers",
       description: "Learn from experienced native speakers and improve your English skills. Special offer: 25% off!",
-      image: "https://img.freepik.com/free-photo/dark-gradient-background-with-copy-space_53876-99548.jpg",
-      bgGradient: "from-purple-900 to-indigo-800"
+      image: "https://keithspeakingacademy.com/wp-content/uploads/2024/10/Understand-native-English-speaker.jpg",
+      // bgGradient: "from-purple-900 to-indigo-800"
     },
     {
       title: "Professional IELTS Training",
       description: "Achieve your target IELTS score with our comprehensive course. Expert guidance and practice materials!",
-      image: "https://img.freepik.com/free-photo/dark-gradient-background-with-copy-space_53876-99548.jpg",
+      image: "https://learnovateonecenter.com/wp-content/uploads/2024/05/IELTS-Training-Learnovate-1024x538.jpg",
       bgGradient: "from-blue-900 to-blue-700"
     },
     {
       title: "Business English Excellence",
       description: "Enhance your professional communication skills. Perfect for career advancement!",
-      image: "https://img.freepik.com/free-photo/dark-gradient-background-with-copy-space_53876-99548.jpg",
+      image: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQzCZMkcrlHCrHhrS-M9Umn2XwnnIBWAzmkoA&s",
       bgGradient: "from-indigo-900 to-violet-800"
     }
   ];
 
   const courses = [
-    {
+     {
       id: 1,
       name: "English Grammar Mastery",
       teacher: "Sarah Wilson",
