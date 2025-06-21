@@ -41,7 +41,7 @@ const AppRoutes = () => {
         <Route path="/checkout" element={<Checkout />} />
         <Route path="/login" element={<Login />} />
         <Route path="/register" element={<Register />} />
-        <Route path="/chat" element={<ChatInterface />} />
+        <Route path="/chat/:id" element={<ChatInterface />} />
         <Route path="/seller/:id" element={<SellerDetail />} />
 
         {/* Seller Routes - Only SELLER and ADMIN can access */}

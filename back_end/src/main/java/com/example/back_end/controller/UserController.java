@@ -82,7 +82,8 @@ public class UserController {
             }
 
             UserResponse currentUser = userService.getCurrentUser();
-            System.out.println(currentUser.getId());
+            System.out.println("use"+currentUser.getId());
+
             UserResponse updatedUser = userService.updateAvatar(currentUser.getId(), file);
             return ResponseEntity.ok(
                     ApiResponse.<UserResponse>builder()

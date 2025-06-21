@@ -9,6 +9,9 @@ import ReusableReportForm from '../component/ReusableReportForm';
 import StarRating from "../component/StarRating";
 import { ProductContext } from '../context/ProductContext';
 import PaymentService from '../API/PaymentService';
+import { db } from "../firebase/config";
+import { findConversationByUsers } from './Chat';
+import { push, ref, set ,query, orderByChild, equalTo,get,onChildAdded} from "firebase/database";
 
 const Detail = () => {
   const [currentSlide, setCurrentSlide] = useState(0);
@@ -145,6 +148,32 @@ const Detail = () => {
       }
     }
   };
+  const handleChatClick  =(sellerId)=>{
+    findConversationByUsers(sellerId, session.currentUser.id).then(result => {
+        if (result) {
+          console.log("Conversation found:", result);
+          navigate(`/chat/${result.key}`);
+        } else {
+          console.log("No conversation found. You can create one.");
+          const conversationRef = push(ref(db, "conversations")); // Tạo ID tự động
+          const newConversation = {
+            user1_id: Number(sellerId),
+            user2_id: session.currentUser.id,
+            created_at: Date.now(),
+          };
+
+          set(conversationRef, newConversation)
+          .then(() => {
+            console.log("Conversation created:", conversationRef.key);
+            navigate(`/chat/${conversationRef.key}`);
+          })
+          .catch((error) => {
+            console.error("Error creating conversation:", error);
+          });
+        }
+    });
+    // navigate(`/chat/${sellerId}`);
+  }
   
   
   useEffect(() => {
@@ -410,12 +439,18 @@ const Detail = () => {
                 </div>
 
                 {/* View Profile Button */}
-                <div className="mt-4">
+                <div className="mt-4 flex gap-82">
                   <button
                     onClick={() => handleSellerClick(seller.id)}
                     className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg text-sm font-medium transition-colors"
                   >
                     Xem hồ sơ người bán
+                  </button>
+                  <button
+                    onClick={() => handleChatClick(seller.id)}
+                    className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg text-sm font-medium transition-colors"
+                  >
+                    Nhắn tin cho người bán
                   </button>
                 </div>
               </div>
