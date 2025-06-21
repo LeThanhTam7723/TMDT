@@ -13,7 +13,8 @@ const Detail = () => {
   const [currentSlide, setCurrentSlide] = useState(0);
   const [showMoreInstructor, setShowMoreInstructor] = useState(false);
   const [showVideoPreview, setShowVideoPreview] = useState(false);
-  
+  const session = JSON.parse(localStorage.getItem("session"));
+
   // Get ID from URL params and navigation hook
   const { id } = useParams();
   const navigate = useNavigate();
@@ -130,9 +131,9 @@ const Detail = () => {
 
   // Function to handle enrollment
   const handleEnrollment = () => {
-    // Add your enrollment logic here
+  
     console.log('Enrolling in course:', id);
-    // You can redirect to payment page or show enrollment modal
+    
   };
 
   // Improved function to extract YouTube video ID from various URL formats
@@ -464,12 +465,12 @@ const courseResponse = await axiosClient.get(`/courses/${id}`, {
           ${course.price}
         </span>
       </div>
-      <button 
-        onClick={handleEnrollment}
-        className="bg-blue-600 hover:bg-blue-700 text-white px-6 py-3 rounded-lg font-semibold transition-colors"
-      >
-        Enroll Now
-      </button>
+     <button 
+  onClick={() => handlePaymentClick(course.price, course.id)} 
+  className="bg-blue-600 hover:bg-blue-700 text-white px-6 py-3 rounded-lg font-semibold transition-colors"
+>
+  Enroll Now
+</button>
     </>
   )}
 </div>
