@@ -41,7 +41,9 @@ public class CourseController {
     }
 
     @GetMapping("/{id}")
-    public ApiResponse<CourseListResponseDTO> getCourseById(@PathVariable Integer id) {
+    public ApiResponse<CourseListResponseDTO> getCourseById(
+            @PathVariable Integer id,
+            @RequestParam(required = false) Integer userId) {
         try {
             CourseListResponseDTO course = courseService.getCourseById(id);
             if (course == null) {
@@ -50,6 +52,14 @@ public class CourseController {
                         .message("Course not found")
                         .build();
             }
+
+            // Kiểm tra xem người dùng đã mua chưa
+            boolean isPurchased = false;
+            if (userId != null) {
+                isPurchased = courseService.isCoursePurchasedByUser(userId, id);
+            }
+            course.setPurchased(isPurchased);
+
             return ApiResponse.<CourseListResponseDTO>builder()
                     .code(200)
                     .message("Course found")
@@ -63,6 +73,7 @@ public class CourseController {
                     .build();
         }
     }
+
 
     @GetMapping("/details/{id}")
     public ApiResponse<List<CourseDetailResponseDTO>> getCourseDetailsByCourseId(@PathVariable Integer id) {

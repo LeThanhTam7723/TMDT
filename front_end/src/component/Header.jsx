@@ -275,7 +275,7 @@ const Header = () => {
                   {isOpen && (
                     <div className="absolute top-full right-0 w-48 bg-gray-800 shadow-lg rounded-md py-2 mt-2">
                       <a href="/user-info" className="block px-4 py-2 text-sm text-gray-300 hover:bg-gray-700">Profile</a>
-                      <a href="#" className="block px-4 py-2 text-sm text-gray-300 hover:bg-gray-700">Settings</a>
+                      <a href="/UserHistory" className="block px-4 py-2 text-sm text-gray-300 hover:bg-gray-700">History</a>
                       <a onClick={async() => {
                         console.log(isToken);
                         await logOutApi({token:isToken});localStorage.clear();

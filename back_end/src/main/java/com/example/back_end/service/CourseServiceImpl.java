@@ -7,10 +7,7 @@ import com.example.back_end.entity.Course;
 import com.example.back_end.entity.CourseDetail;
 import com.example.back_end.entity.CourseRating;
 import com.example.back_end.entity.User;
-import com.example.back_end.repositories.CourseDetailRepository;
-import com.example.back_end.repositories.CourseRatingRepository;
-import com.example.back_end.repositories.CourseRepository;
-import com.example.back_end.repositories.UserRepository;
+import com.example.back_end.repositories.*;
 import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -24,15 +21,19 @@ public class CourseServiceImpl {
 
     @Autowired
     private CourseRepository courseRepository;
+    @Autowired
+    private OrderRepository orderRepository;
 
     @Autowired
     private CourseRatingRepository courseRatingRepository;
+
 
     @Autowired
     private CourseDetailRepository courseDetailRepository;
 
     @Autowired
     private UserRepository userRepository;
+
 
     public List<CourseListResponseDTO> getAllCourses() {
         return courseRepository.findAll().stream()
@@ -54,7 +55,9 @@ public class CourseServiceImpl {
                 })
                 .collect(Collectors.toList());
     }
-
+    public boolean isCoursePurchasedByUser(Integer userId, Integer courseId) {
+        return orderRepository.existsByIdUser_IdAndIdCourse_Id(userId, courseId);
+    }
     public CourseListResponseDTO getCourseById(Integer id) {
         Course course = courseRepository.findById(id).orElse(null);
         if (course == null) {
