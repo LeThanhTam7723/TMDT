@@ -136,7 +136,7 @@ public class UserService {
                 .getAuthentication().getName();
         User user = userRepository.findByEmail(email)
                 .orElseThrow(() -> new AppException(ErrorCode.USER_NOT_EXISTED));
-        return userMapper.toResponse(user);
+        return toResponse(user);
     }
     public UserResponse updateAvatar(int userId, MultipartFile file) {
         User user = userRepository.findById(userId)
@@ -185,6 +185,20 @@ public class UserService {
 
         User savedUser = userRepository.save(user);
         return modelMapper.map(savedUser, UserResponse.class);
+    }
+    public static UserResponse toResponse(User user) {
+        if (user == null) return null;
+
+        return UserResponse.builder()
+                .id(user.getId())
+                .username(user.getUsername())
+                .email(user.getEmail())
+                .fullname(user.getFullname())
+                .phone(user.getPhone())
+                .imageUrl(user.getAvatar())
+                .active(user.getActive())
+                .roles(user.getRoles())
+                .build();
     }
 
 
