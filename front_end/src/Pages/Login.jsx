@@ -29,6 +29,11 @@ const VerificationPage = ({ email, onResend }) => {
   );
 };
 
+const handleGoogleLogin = () => {
+  window.location.href =
+    "http://localhost:8080/api/oauth2/authorization/google";
+};
+
 const Login = () => {
   const navigate = useNavigate();
   const [authState, setAuthState] = useState("login");
@@ -142,9 +147,9 @@ const Login = () => {
         .then((res) => {
           const { code, message, result } = res.data;
           localStorage.setItem("session", JSON.stringify(result));
-          
+
           // Dispatch custom event to notify other components about session update
-          window.dispatchEvent(new Event('sessionUpdated'));
+          window.dispatchEvent(new Event("sessionUpdated"));
 
           // Role-based redirect
           const userRole = result.role?.toUpperCase();
@@ -372,6 +377,7 @@ const Login = () => {
                 <div className="mt-6 grid grid-cols-2 gap-3">
                   <button
                     type="button"
+                    onClick={handleGoogleLogin}
                     className="w-full inline-flex justify-center py-2 px-4 border border-gray-300 rounded-md shadow-sm bg-white text-sm font-medium text-gray-500 hover:bg-gray-50"
                   >
                     <FcGoogle className="h-5 w-5" />

@@ -141,7 +141,7 @@ public class AuthService {
         return signedJWT;
     }
 
-    private String generateToken(User user){
+    public String generateToken(User user){
         JWSHeader header = new JWSHeader(JWSAlgorithm.HS512);
         System.out.println(buildScope(user));
 

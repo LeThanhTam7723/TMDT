@@ -25,8 +25,9 @@ public class AuthController {
     private AuthService authService;
     @Autowired
     SendEmailService sendEmailService;
+
     @PostMapping("/login")
-    ApiResponse<AuthenticationResponse> login (@RequestBody LoginRequest request) {
+    ApiResponse<AuthenticationResponse> login(@RequestBody LoginRequest request) {
         var res = authService.login(request);
         return ApiResponse.<AuthenticationResponse>builder().result(res).build();
     }
@@ -36,11 +37,13 @@ public class AuthController {
         var result = authService.introspect(request);
         return ApiResponse.<IntrospectResponse>builder().result(result).build();
     }
+
     @PostMapping("/logout")
     ApiResponse<Void> logout(@RequestBody IntrospectRequest request) throws ParseException, JOSEException {
         authService.logout(request);
         return ApiResponse.<Void>builder().build();
     }
+
     @GetMapping("/verifyAccount")
     ApiResponse<Void> verifyAccount(@RequestParam("token") String token, HttpServletResponse response) throws ParseException, JOSEException, IOException {
         IntrospectRequest request = new IntrospectRequest(token);

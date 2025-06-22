@@ -40,7 +40,6 @@ const AdminCourseApproval = () => {
   const [filterStatus, setFilterStatus] = useState("all");
   const [filterType, setFilterType] = useState("all");
   const [searchTerm, setSearchTerm] = useState("");
-  const [sidebarOpen, setSidebarOpen] = useState(true);
 
   const menuItems = [
     {
@@ -82,9 +81,15 @@ const AdminCourseApproval = () => {
     },
     {
       id: "complaints",
-      title: "Quản lí phản hồi khiếu nại",
+      title: "Report",
       icon: MessageSquare,
       href: "/admin/ComplaintManagement",
+    },
+    {
+      id: "complaints",
+      title: "Request Course from seller",
+      icon: MessageSquare,
+      href: "/admin/course-approval",
     },
   ];
 
