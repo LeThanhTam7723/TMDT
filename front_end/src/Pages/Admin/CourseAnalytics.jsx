@@ -322,14 +322,18 @@ const CourseAnalytics = () => {
           animate={{ width: sidebarOpen ? "auto" : "0" }}
           className={`${
             sidebarOpen ? "w-64" : "w-0"
-          } bg-white dark:bg-gray-800 h-screen fixed transition-all duration-300 shadow-lg z-10`}
+          } bg-white dark:bg-gray-800 h-screen fixed transition-all duration-300 z-10`}
         >
-          <div className="p-4 overflow-hidden">
-            <div className="flex items-center mb-8">
-              <MdSchool className="h-8 w-8 text-blue-500" />
-              <span className="ml-2 text-xl font-bold">EduAnalytics</span>
-            </div>
+          <div className="p-4">
             <nav>
+              <div className="flex items-center mb-8">
+                <img
+                  src="https://images.unsplash.com/photo-1563986768494-4dee2763ff3f"
+                  alt="Logo"
+                  className="h-8 w-8 rounded"
+                />
+                <span className="ml-2 text-xl font-bold">AdminDash</span>
+              </div>
               <ul className="space-y-2">
                 <li>
                   <a
@@ -347,20 +351,28 @@ const CourseAnalytics = () => {
                     <MdAnalytics className="mr-3" /> Analytics
                   </a>
                 </li>
-                <li className="bg-blue-500 text-white rounded-lg">
+                <li>
                   <a
                     href="/admin/UserManagement"
-                    className="flex items-center p-3"
+                    className="flex items-center p-3 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg"
                   >
                     <MdPeople className="mr-3" /> User Management
                   </a>
                 </li>
-                <li>
+                <li className="bg-blue-500 text-white rounded-lg">
                   <a
                     href="/admin/ComplaintManagement"
-                    className="flex items-center p-3 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg"
+                    className="flex items-center p-3"
                   >
                     <MdReport className="mr-3" /> Reports
+                  </a>
+                </li>
+                <li className="flex items-center p-3 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg">
+                  <a
+                    href="/admin/course-approval"
+                    className="flex items-center p-3"
+                  >
+                    <MdReport className="mr-3" /> Seller Request
                   </a>
                 </li>
                 <li>

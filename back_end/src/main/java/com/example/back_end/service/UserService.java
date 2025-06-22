@@ -55,6 +55,7 @@ public class UserService {
 
     @Value("${jwt.signer-key}")
     private String SIGNER_KEY;
+
     public User createRequest(UserCreationRequest request) {
         if (userRepository.existsByUsername(request.getUsername())) {
             throw new AppException(ErrorCode.USER_EXISTED);
@@ -82,6 +83,7 @@ public class UserService {
         log.info("In method at User");
         return userRepository.findAll();
     }
+
     public User getUserById(Integer id) {
         return userRepository.findUserById(id)
                 .orElseThrow(() -> new RuntimeException("Không tìm thấy người dùng với ID: " + id))
@@ -116,6 +118,7 @@ public class UserService {
         }
         return joiner.toString();
     }
+
     public List<UserDto> getConvertedUsers(List<User> users) {
         return users.stream().map(this::convertToDto).toList();
     }
@@ -131,6 +134,7 @@ public class UserService {
 //        }
         return userDto;
     }
+
     public UserResponse getCurrentUser() {
         String email = SecurityContextHolder.getContext()
                 .getAuthentication().getName();
@@ -138,6 +142,7 @@ public class UserService {
                 .orElseThrow(() -> new AppException(ErrorCode.USER_NOT_EXISTED));
         return toResponse(user);
     }
+
     public UserResponse updateAvatar(int userId, MultipartFile file) {
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new AppException(ErrorCode.USER_NOT_EXISTED));
@@ -167,6 +172,7 @@ public class UserService {
             throw new AppException(ErrorCode.CLOUDINARY_ERROR);
         }
     }
+
     public UserResponse updateUserStatus(int userId, UserUpdateStatusRequest request) {
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new RuntimeException("Không tìm thấy người dùng"));
@@ -186,6 +192,7 @@ public class UserService {
         User savedUser = userRepository.save(user);
         return modelMapper.map(savedUser, UserResponse.class);
     }
+
     public static UserResponse toResponse(User user) {
         if (user == null) return null;
 
@@ -201,5 +208,26 @@ public class UserService {
                 .build();
     }
 
+    public User findOrCreateOAuth2User(String email, String name, String picture) {
+        return userRepository.findByEmail(email)
+                .orElseGet(() -> {
+                    // Get USER role
+                    Role userRole = roleRepository.findByName(PredefinedRole.USER_ROLE)
+                            .orElseGet(() -> roleRepository.save(
+                                    Role.builder()
+                                            .name(PredefinedRole.USER_ROLE)
+                                            .description("User role")
+                                            .build()
+                            ));
 
+                    User newUser = User.builder()
+                            .email(email)
+                            .fullname(name)
+                            .avatar(picture)
+                            .roles(Set.of(userRole))
+                            .active(true)
+                            .build();
+                    return userRepository.save(newUser);
+                });
+    }
 }

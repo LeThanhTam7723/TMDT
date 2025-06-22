@@ -157,39 +157,69 @@ const AdminDashboard = () => {
           animate={{ width: sidebarOpen ? "auto" : "0" }}
           className={`${
             sidebarOpen ? "w-64" : "w-0"
-          } bg-white dark:bg-gray-800 h-screen fixed transition-all duration-300 overflow-hidden z-30 shadow-lg`}
+          } bg-white dark:bg-gray-800 h-screen fixed transition-all duration-300 z-10`}
         >
           <div className="p-4">
-            <div className="flex items-center mb-8 justify-center">
-              <MdSchool className="h-8 w-8 text-blue-500" />
-              <span className="ml-2 text-xl font-bold">EduAnalytics</span>
-            </div>
             <nav>
+              <div className="flex items-center mb-8">
+                <img
+                  src="https://images.unsplash.com/photo-1563986768494-4dee2763ff3f"
+                  alt="Logo"
+                  className="h-8 w-8 rounded"
+                />
+                <span className="ml-2 text-xl font-bold">AdminDash</span>
+              </div>
               <ul className="space-y-2">
-                {menuItems.map((item) => (
-                  <li key={item.id}>
-                    <a
-                      href={item.href}
-                      className={`flex items-center p-3 rounded-lg transition-colors duration-200 ${
-                        activeMenuItem === item.id
-                          ? "bg-blue-500 text-white"
-                          : "hover:bg-gray-100 dark:hover:bg-gray-700"
-                      }`}
-                      onClick={() => setActiveMenuItem(item.id)}
-                    >
-                      <item.icon className="mr-3 w-5 h-5" />
-                      {item.title}
-                    </a>
-                  </li>
-                ))}
+                <li>
+                  <a
+                    href="/admin/dashboard"
+                    className="flex items-center p-3 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg"
+                  >
+                    <MdDashboard className="mr-3" /> Dashboard
+                  </a>
+                </li>
+                <li>
+                  <a
+                    href="/admin/CourseAnalytics"
+                    className="flex items-center p-3 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg"
+                  >
+                    <MdAnalytics className="mr-3" /> Analytics
+                  </a>
+                </li>
+                <li>
+                  <a
+                    href="/admin/UserManagement"
+                    className="flex items-center p-3 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg"
+                  >
+                    <MdPeople className="mr-3" /> User Management
+                  </a>
+                </li>
+                <li className="bg-blue-500 text-white rounded-lg">
+                  <a
+                    href="/admin/ComplaintManagement"
+                    className="flex items-center p-3"
+                  >
+                    <MdReport className="mr-3" /> Reports
+                  </a>
+                </li>
+                <li className="flex items-center p-3 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg">
+                  <a
+                    href="/admin/course-approval"
+                    className="flex items-center p-3"
+                  >
+                    <MdReport className="mr-3" /> Seller Request
+                  </a>
+                </li>
+                <li>
+                  <a
+                    href="#"
+                    className="flex items-center p-3 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg"
+                  >
+                    <FiSettings className="mr-3" /> Settings
+                  </a>
+                </li>
               </ul>
             </nav>
-          </div>
-          <div className="absolute bottom-0 w-64 p-4 border-t dark:border-gray-700">
-            <button className="flex items-center text-gray-700 dark:text-gray-300 hover:text-red-500 transition-colors">
-              <LogOut className="w-5 h-5 mr-2" />
-              Logout
-            </button>
           </div>
         </motion.div>
 

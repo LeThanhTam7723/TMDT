@@ -27,11 +27,11 @@ import java.util.List;
 public class SecurityConfig {
     //Xác thực yêu cầu
     private final String[] PUBLIC_ENDPOINTS_POST_PERMITALL = {"users/createUser",
-            "auth/login","auth/introspect","/verifyRegister/**","users/existUser","/seller/{sellerId}/courses"};
-    private final String[] PUBLIC_ENDPOINTS_GET_PERMITALL = {"/auth/verifyAccount","users/id/**","/courses/**","/seller/{sellerId}/courses","/seller/debug/**","/order/add/**","/seller/{courseId}","/favorites/idUser/**","/users/**"};
-    private final String[] PUBLIC_ENDPOINTS_GET = {"/sendEmail","/payment/vnpay/**","/reports/**"};
-    private final String[] PUBLIC_ENDPOINTS_LOGIN = {"/auth/logout","/favorites/add","/order/**"};
-    private final String[] SELLER_MANAGEMENT_ENDPOINTS = {"/seller/{sellerId}/courses/managed","/seller/{sellerId}/stats","/seller/{sellerId}/revenue"};
+            "auth/login", "auth/introspect", "/verifyRegister/**", "users/existUser", "/seller/{sellerId}/courses"};
+    private final String[] PUBLIC_ENDPOINTS_GET_PERMITALL = {"/auth/verifyAccount", "users/id/**", "/courses/**", "/seller/{sellerId}/courses", "/seller/debug/**", "/order/add/**", "/seller/{courseId}", "/favorites/idUser/**", "/users/**"};
+    private final String[] PUBLIC_ENDPOINTS_GET = {"/sendEmail", "/payment/vnpay/**", "/reports/**"};
+    private final String[] PUBLIC_ENDPOINTS_LOGIN = {"/auth/logout", "/favorites/add", "/order/**"};
+    private final String[] SELLER_MANAGEMENT_ENDPOINTS = {"/seller/{sellerId}/courses/managed", "/seller/{sellerId}/stats", "/seller/{sellerId}/revenue"};
     private final String[] PUBLIC_ENDPOINTS_DELETE = {"/favorites/remove"};
     private final String[] SELLER_CRUD_ENDPOINTS = {"/seller/{sellerId}/courses/{courseId}"};
     @Value("${jwt.signer-key}")
@@ -52,7 +52,11 @@ public class SecurityConfig {
                             return corsConfiguration;
                         })
                 )
+                .oauth2Login(oauth2 -> oauth2
+                        .defaultSuccessUrl("/api/auth/oauth2/success", true)
+                )
                 .authorizeHttpRequests(request -> request
+                        .requestMatchers("/oauth2/**", "/login/oauth2/**").permitAll()
                         .requestMatchers(HttpMethod.POST, PUBLIC_ENDPOINTS_POST_PERMITALL).permitAll()
                         .requestMatchers(HttpMethod.GET, PUBLIC_ENDPOINTS_GET_PERMITALL).permitAll()
                         .requestMatchers(HttpMethod.GET, "/seller/{sellerId}/courses/managed").permitAll()
@@ -73,7 +77,7 @@ public class SecurityConfig {
                             System.out.println("🚫 Full URL: " + request.getRequestURL() + (request.getQueryString() != null ? "?" + request.getQueryString() : ""));
                             System.out.println("🚫 Auth exception: " + authException.getMessage());
                             System.out.println("🚫 Authorization header: " + request.getHeader("Authorization"));
-                            
+
                             response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
                             response.setContentType("application/json");
                             response.getWriter().write(objectMapper.writeValueAsString(
@@ -90,8 +94,8 @@ public class SecurityConfig {
     }
 
     @Bean
-    JwtDecoder jwtDecoder(){
-        SecretKeySpec secretKeySpec = new SecretKeySpec(SIGNER_KEY.getBytes(),"HS512");
+    JwtDecoder jwtDecoder() {
+        SecretKeySpec secretKeySpec = new SecretKeySpec(SIGNER_KEY.getBytes(), "HS512");
         return NimbusJwtDecoder
                 .withSecretKey(secretKeySpec)
                 .macAlgorithm(MacAlgorithm.HS512)

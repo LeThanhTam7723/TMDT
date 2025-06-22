@@ -3,7 +3,6 @@ import { Routes, Route } from "react-router-dom";
 import Home from "../Pages/HomePage";
 import Store from "../Pages/Store";
 
-
 import CheckoutPage from "../Pages/Payment";
 import AuthPage from "../Pages/Authentication";
 import Detail from "../Pages/Detail";
@@ -26,6 +25,7 @@ import CourseAnalytics from "../Pages/Admin/CourseAnalytics";
 import ComplaintManagement from "../Pages/Admin/ComplaintManagement";
 import AdminCourseApproval from "../Pages/Admin/AdminCourseApproval";
 import ProtectedRoute from "../component/ProtectedRoute";
+import OAuth2Callback from "../component/OAuth2Callback";
 
 const AppRoutes = () => {
   return (
@@ -36,7 +36,7 @@ const AppRoutes = () => {
         <Route path="/shop" element={<Store />} />
 
         <Route path="/favorites" element={<Favorite />} />
-        
+
         <Route path="/payment" element={<CheckoutPage />} />
         <Route path="/auth/*" element={<AuthPage />} />
         <Route path="/detail/:id" element={<Detail />} />
@@ -47,12 +47,14 @@ const AppRoutes = () => {
         <Route path="/login" element={<Login />} />
         <Route path="/register" element={<Register />} />
         <Route path="/chat" element={<ChatInterface />} />
-         <Route path="/history" element={<OrderHistory />} />
-         <Route path="/UserHistory" element={<UserHistory />} />
+        <Route path="/history" element={<OrderHistory />} />
+        <Route path="/UserHistory" element={<UserHistory />} />
 
         <Route path="/chat/:id" element={<ChatInterface />} />
 
         <Route path="/seller/:id" element={<SellerDetail />} />
+
+        <Route path="/auth/oauth2/callback" element={<OAuth2Callback />} />
 
         {/* Seller Routes - Only SELLER and ADMIN can access */}
         <Route
