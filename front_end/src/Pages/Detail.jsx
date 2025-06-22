@@ -495,7 +495,8 @@ const Detail = () => {
             .map((relatedCourse) => (
               <div
                 key={relatedCourse.id}
-                className="bg-white border rounded-lg overflow-hidden hover:shadow-lg transition-shadow"
+                className="bg-white border rounded-lg overflow-hidden hover:shadow-lg transition-shadow cursor-pointer"
+                onClick={() => navigate(`/detail/${relatedCourse.id}`)}
               >
                 <div className="aspect-video bg-gray-200">
                   <img
@@ -522,6 +523,15 @@ const Detail = () => {
                         ${relatedCourse.originalPrice}
                       </span>
                     </div>
+                    <button
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        navigate(`/detail/${relatedCourse.id}`);
+                      }}
+                      className="px-3 py-1 bg-blue-600 text-white text-sm rounded hover:bg-blue-700 transition-colors"
+                    >
+                      View
+                    </button>
                   </div>
                 </div>
               </div>
