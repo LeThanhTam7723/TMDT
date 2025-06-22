@@ -500,7 +500,8 @@ const Store = () => {
             {filteredProducts.map((product) => (
               <div 
                 key={product.id} 
-                className="flex bg-white rounded-lg shadow p-4 items-center gap-4 border border-gray-200"
+                className="flex bg-white rounded-lg shadow p-4 items-center gap-4 border border-gray-200 cursor-pointer hover:shadow-lg transition-shadow"
+                onClick={() => navigate(`/detail/${product.id}`)}
               >
                     <img src={product.image} alt={product.name} className="w-40 h-28 object-cover rounded-lg border" />
                     <div className="flex-1">
@@ -530,28 +531,45 @@ const Store = () => {
                   )}
                   <div className="text-xs text-gray-400">{product.totalHour} total hours | {product.lessons} lessons | {product.duration}</div>
                 </div>
-                <div className="flex flex-col items-end min-w-[80px]">
+                <div className="flex flex-col items-end min-w-[120px]">
                   <div className="text-xl font-bold text-blue-600 mb-2">${product.price.toFixed(2)}</div>
-                  <div className="flex gap-2">
+                  <div className="flex flex-col gap-2">
                     <button 
-                      onClick={(e) => handleToggleFavorite(product.id, e)}
-                      className={`p-2 rounded-full transition-colors ${
-                        isInFavorite(product.id)
-                            ? 'bg-red-100 text-red-500 hover:bg-red-200'
-                            : 'bg-gray-100 text-gray-500 hover:bg-gray-200'
-                      }`}
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        navigate(`/detail/${product.id}`);
+                      }}
+                      className="bg-green-500 text-white px-4 py-2 rounded-full font-semibold hover:bg-green-600 transition text-sm"
                     >
-                      <FiHeart className={`w-5 h-5 ${isInFavorite(product.id) ? 'fill-current' : ''}`} />
+                      View Details
                     </button>
-                    <button 
-                      onClick={(e) => handleAddToCart(product.id, e)}
-                      className="bg-blue-500 text-white px-4 py-2 rounded-full font-semibold hover:bg-blue-600 transition flex items-center gap-2"
-                    >
-                      <FiShoppingCart className="w-4 h-4" />
-                      Add to cart
-                    </button>
-                  </div>
+                    <div className="flex gap-2">
+                      <button 
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          handleToggleFavorite(product.id, e);
+                        }}
+                        className={`p-2 rounded-full transition-colors ${
+                          isInFavorite(product.id)
+                              ? 'bg-red-100 text-red-500 hover:bg-red-200'
+                              : 'bg-gray-100 text-gray-500 hover:bg-gray-200'
+                        }`}
+                      >
+                        <FiHeart className={`w-5 h-5 ${isInFavorite(product.id) ? 'fill-current' : ''}`} />
+                      </button>
+                      <button 
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          handleAddToCart(product.id, e);
+                        }}
+                        className="bg-blue-500 text-white px-4 py-2 rounded-full font-semibold hover:bg-blue-600 transition flex items-center gap-2 text-sm"
+                      >
+                        <FiShoppingCart className="w-4 h-4" />
+                        Cart
+                      </button>
                     </div>
+                  </div>
+                </div>
                   </div>
                 ))}
           </div>
