@@ -8,4 +8,10 @@ export default defineConfig({
     react(),
     tailwindcss(),
   ],
+  optimizeDeps: {
+    include: ['sweetalert2']
+  },
+  server: {
+    force: true
+  }
 })

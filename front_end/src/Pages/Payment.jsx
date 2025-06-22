@@ -18,8 +18,8 @@ const CheckoutPage = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [showSuccess, setShowSuccess] = useState(false);
 
-  // Keeping original cart items
-  const cartItems = [
+  // Sample course items for payment
+  const courseItems = [
     {
       id: 1,
       name: "Premium Leather Jacket",
@@ -56,7 +56,7 @@ const CheckoutPage = () => {
   };
 
   const calculateSubtotal = () => {
-    return cartItems.reduce((sum, item) => sum + item.price * item.quantity, 0);
+    return courseItems.reduce((sum, item) => sum + item.price * item.quantity, 0);
   };
 
   const discounts = 0; // Replace with actual discount calculation if needed
@@ -226,7 +226,7 @@ const CheckoutPage = () => {
             <div className="mb-6">
               <h3 className="text-base font-bold mb-3">Order Details</h3>
               <div className="space-y-2">
-                {cartItems.map((item) => (
+                {courseItems.map((item) => (
                   <div 
                     key={item.id}
                     className="flex items-center justify-between border border-gray-300 rounded p-2"

@@ -1,7 +1,7 @@
 import React, { useState } from "react";
-import { FiShoppingCart, FiHeart } from "react-icons/fi";
+import { FiHeart } from "react-icons/fi";
 import { useNavigate } from "react-router-dom";
-import favoriteService from '../API/favoriteService';
+import { useProduct } from '../context/ProductContext';
 
 // Dummy star renderer
 const renderStars = (rating) => {
@@ -27,27 +27,26 @@ const defaultImages = [
 ];
 
 const ProductCard = ({ product }) => {
-  const [isFavorited, setIsFavorited] = useState(false);
   const navigate = useNavigate();
+  const { isInFavorites, toggleFavorite: contextToggleFavorite, session } = useProduct();
 
   const handleClick = () => {
     navigate(`/detail/${product.id}`);
   };
 
-  const toggleFavorite = (e) => {
+  const handleToggleFavorite = async (e) => {
     e.preventDefault();
     e.stopPropagation();
-    setIsFavorited(!isFavorited);
+    
+    if (!session?.currentUser) {
+      alert('Please login to add favorites');
+      return;
+    }
+    
+    await contextToggleFavorite(product.id);
   };
 
-  const addToCart = (e) => {
-    e.stopPropagation();
-    console.log("Added to cart:", product.name);
-  };
-
-  const addToFavorite = () => {
-    // Add to favorite logic
-  };
+  const isFavorited = isInFavorites(product.id);
 
   return (
     <div
@@ -89,14 +88,7 @@ const ProductCard = ({ product }) => {
             )}
           </p>
           <div className="flex items-center gap-2">
-            <button
-              onClick={addToCart}
-              className="bg-gradient-to-r from-blue-600 to-blue-700 text-white px-4 py-2 rounded-lg hover:from-blue-700 hover:to-blue-800 transition-all duration-300 shadow-md"
-            >
-              <FiShoppingCart className="inline mr-1" />
-              Add
-            </button>
-            <button onClick={toggleFavorite}>
+            <button onClick={handleToggleFavorite}>
               <FiHeart
                 className={`w-5 h-5 ${isFavorited ? 'text-red-500 fill-current' : 'text-white'}`}
               />

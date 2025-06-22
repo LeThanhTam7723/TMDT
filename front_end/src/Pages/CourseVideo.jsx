@@ -1,6 +1,8 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useContext } from 'react';
+import { useParams, useNavigate } from 'react-router-dom';
 import { Star, Clock, Share2 } from 'lucide-react';
-import axiosClient from '../API/axiosClient';  // Adjust path as needed
+import axiosClient from '../API/axiosClient';
+import { ProductContext } from '../context/ProductContext';
 
 const CourseVideo = () => {
   const [activeTab, setActiveTab] = useState('Overview');
@@ -13,15 +15,12 @@ const CourseVideo = () => {
     title: 'Loading...',
     url: '',
   });
+  const [isPurchased, setIsPurchased] = useState(false);
 
-  // Get courseId from URL or use default
-  const getCourseIdFromUrl = () => {
-    const path = window.location.pathname;
-    const match = path.match(/\/course-video\/(\d+)/);
-    return match ? parseInt(match[1]) : 2; // Default to 2 if not found
-  };
-
-  const [courseId] = useState(getCourseIdFromUrl());
+  // Get courseId from URL params and context
+  const { id: courseId } = useParams();
+  const navigate = useNavigate();
+  const { session } = useContext(ProductContext);
 
   const resources = [
     { name: 'TOEIC Vocabulary List', file: '/downloads/vocabulary.pdf' },
@@ -46,6 +45,12 @@ const CourseVideo = () => {
 
   // Handle video selection
   const handleVideoSelect = (episode, index) => {
+    // Check if user has access to this episode
+    if (!isPurchased && !episode.isPreview) {
+      alert('Bạn cần mua khóa học để xem episode này. Chỉ có thể xem các episode miễn phí.');
+      return;
+    }
+
     setSelectedVideo({
       title: `Episode ${episode.episodeNumber}`,
       url: episode.link,
@@ -53,8 +58,26 @@ const CourseVideo = () => {
     setSelectedVideoIndex(index);
   };
 
+  // Handle back navigation
+  const handleBack = () => {
+    navigate(`/detail/${courseId}`);
+  };
+
   useEffect(() => {
     const fetchCourseData = async () => {
+      if (!courseId) {
+        setError("No course ID provided");
+        setLoading(false);
+        return;
+      }
+
+      // Check if user is logged in
+      if (!session) {
+        setError("Please login to access course videos");
+        setLoading(false);
+        return;
+      }
+
       console.log('Fetching course data for courseId:', courseId);
       
       setLoading(true);
@@ -115,8 +138,18 @@ const CourseVideo = () => {
           }
         ];
         
-        console.log('Using fallback data:', fallbackData);
+        // Fallback course data
+        const fallbackCourse = {
+          name: "SAMPLE COURSE",
+          description: "This is a fallback course for development",
+          rating: 4.0,
+          price: 0
+        };
+        
+        console.log('Using fallback data:', { course: fallbackCourse, details: fallbackData });
+        setCourse(fallbackCourse);
         setCourseDetails(fallbackData);
+        
         if (fallbackData.length > 0) {
           setSelectedVideo({
             title: `Episode ${fallbackData[0].episodeNumber}`,
@@ -130,7 +163,7 @@ const CourseVideo = () => {
     };
 
     fetchCourseData();
-  }, [courseId]);
+  }, [courseId, session]);
 
   if (loading) {
     return (
@@ -150,12 +183,29 @@ const CourseVideo = () => {
           <div className="text-red-600 text-lg font-semibold mb-2">Error Loading Course</div>
           <p className="text-gray-600">{error}</p>
           <p className="text-sm text-gray-500 mt-2">Course ID: {courseId}</p>
-          <button 
-            onClick={() => window.location.reload()} 
-            className="mt-4 px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700"
-          >
-            Try Again
-          </button>
+          <div className="mt-4 space-x-2">
+            {error.includes("login") ? (
+              <button 
+                onClick={() => navigate("/login")} 
+                className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700"
+              >
+                Go to Login
+              </button>
+            ) : (
+              <button 
+                onClick={() => window.location.reload()} 
+                className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700"
+              >
+                Try Again
+              </button>
+            )}
+            <button 
+              onClick={handleBack} 
+              className="px-4 py-2 bg-gray-600 text-white rounded hover:bg-gray-700"
+            >
+              Back to Course
+            </button>
+          </div>
         </div>
       </div>
     );
@@ -179,13 +229,24 @@ const CourseVideo = () => {
       <div className="flex-1 flex flex-col">
         <div className="bg-gray-400 text-white p-4 flex items-center justify-between">
           <div className="flex items-center space-x-3">
+            <button 
+              onClick={handleBack}
+              className="w-8 h-8 bg-white/20 rounded flex items-center justify-center hover:bg-white/30 transition-colors"
+              title="Back to course detail"
+            >
+              ←
+            </button>
             <div className="w-8 h-8 bg-blue-600 rounded flex items-center justify-center text-white font-bold text-sm">
               SAHARA
             </div>
-            <h1 className="text-xl font-medium">{course.name?.toUpperCase() || 'COURSE'}</h1>
-            <span className="text-sm opacity-75">(Course ID: {courseId})</span>
+            <div>
+              <h1 className="text-xl font-medium">{course.name?.toUpperCase() || 'COURSE'}</h1>
+              <span className="text-sm opacity-75">
+                {isPurchased ? '✅ Đã mua' : '🔒 Chỉ xem preview'} • Course ID: {courseId}
+              </span>
+            </div>
           </div>
-          <Share2 className="w-6 h-6 cursor-pointer" />
+          <Share2 className="w-6 h-6 cursor-pointer hover:opacity-80" />
         </div>
 
         {/* Video Player */}
@@ -198,9 +259,28 @@ const CourseVideo = () => {
               allowFullScreen
             ></iframe>
           ) : (
-            <div className="text-white text-center">
-              <p>No video available</p>
-              <p className="text-sm mt-2">Selected: {selectedVideo.title}</p>
+            <div className="text-white text-center p-8">
+              <div className="mb-4">
+                <div className="w-16 h-16 bg-red-600 rounded-full flex items-center justify-center mx-auto mb-4">
+                  🔒
+                </div>
+                <h3 className="text-xl font-semibold mb-2">Video không khả dụng</h3>
+                <p className="text-gray-300 mb-4">
+                  {!isPurchased 
+                    ? "Bạn cần mua khóa học để xem video này. Chỉ có thể xem các episode miễn phí."
+                    : "Video đang được tải hoặc không khả dụng."
+                  }
+                </p>
+                {!isPurchased && (
+                  <button
+                    onClick={() => navigate(`/detail/${courseId}`)}
+                    className="bg-blue-600 hover:bg-blue-700 text-white px-6 py-3 rounded-lg font-semibold transition-colors"
+                  >
+                    Mua khóa học ngay
+                  </button>
+                )}
+              </div>
+              <p className="text-sm mt-4 text-gray-400">Selected: {selectedVideo.title}</p>
             </div>
           )}
         </div>
@@ -287,45 +367,61 @@ const CourseVideo = () => {
         </div>
 
         <div className="overflow-y-auto h-full">
-          {courseDetails.map((episode, index) => (
-            <div
-              key={`${episode.id}-${index}`}
-              onClick={() => handleVideoSelect(episode, index)}
-              className={`p-4 border-b border-gray-100 hover:bg-gray-100 cursor-pointer transition-colors ${
-                selectedVideoIndex === index
-                  ? 'bg-blue-100 border-l-4 border-l-blue-500'
-                  : ''
-              }`}
-            >
-              <div className="flex items-center justify-between">
-                <div className="flex items-center space-x-3">
-                  <div
-                    className={`w-6 h-6 rounded-full flex items-center justify-center text-xs font-medium ${
-                      episode.isPreview 
-                        ? 'bg-green-500 text-white' 
-                        : 'bg-gray-200 text-gray-600'
-                    }`}
-                  >
-                    {episode.episodeNumber}
-                  </div>
-                  <div>
-                    <div className="font-medium text-sm text-gray-800">
-                      Episode {episode.episodeNumber}
+          {courseDetails.map((episode, index) => {
+            const hasAccess = isPurchased || episode.isPreview;
+            const isSelected = selectedVideoIndex === index;
+            
+            return (
+              <div
+                key={`${episode.id}-${index}`}
+                onClick={() => hasAccess && handleVideoSelect(episode, index)}
+                className={`p-4 border-b border-gray-100 transition-colors ${
+                  hasAccess 
+                    ? 'hover:bg-gray-100 cursor-pointer' 
+                    : 'opacity-60 cursor-not-allowed bg-gray-50'
+                } ${
+                  isSelected
+                    ? 'bg-blue-100 border-l-4 border-l-blue-500'
+                    : ''
+                }`}
+              >
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center space-x-3">
+                    <div
+                      className={`w-6 h-6 rounded-full flex items-center justify-center text-xs font-medium ${
+                        episode.isPreview 
+                          ? 'bg-green-500 text-white' 
+                          : hasAccess
+                          ? 'bg-blue-500 text-white'
+                          : 'bg-gray-300 text-gray-600'
+                      }`}
+                    >
+                      {hasAccess ? episode.episodeNumber : '🔒'}
                     </div>
-                    {episode.isPreview && (
-                      <span className="text-xs text-green-600 font-medium">
-                        Free Preview
-                      </span>
-                    )}
+                    <div>
+                      <div className="font-medium text-sm text-gray-800">
+                        Episode {episode.episodeNumber}
+                        {!hasAccess && (
+                          <span className="ml-2 text-xs text-red-600 font-medium">
+                            Cần mua khóa học
+                          </span>
+                        )}
+                      </div>
+                      {episode.isPreview && (
+                        <span className="text-xs text-green-600 font-medium">
+                          Free Preview
+                        </span>
+                      )}
+                    </div>
                   </div>
-                </div>
-                <div className="flex items-center space-x-1 text-xs text-gray-500">
-                  <Clock className="w-3 h-3" />
-                  <span>{episode.duration} mins</span>
+                  <div className="flex items-center space-x-1 text-xs text-gray-500">
+                    <Clock className="w-3 h-3" />
+                    <span>{episode.duration} mins</span>
+                  </div>
                 </div>
               </div>
-            </div>
-          ))}
+            );
+          })}
         </div>
       </div>
     </div>

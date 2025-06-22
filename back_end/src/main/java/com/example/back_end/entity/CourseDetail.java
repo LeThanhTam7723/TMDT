@@ -18,22 +18,22 @@ public class CourseDetail {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer id; // tạo ID riêng vì bảng không có khóa chính rõ ràng trong ảnh
 
-    @Column(name = "CourseID")
+    @Column(name = "courseid")
     private Integer courseId;
 
-    @Column(name = "Name")
+    @Column(name = "name")
     private String name;
 
-    @Column(name = "EpisodeNumber")
+    @Column(name = "episode_number")
     private Integer episodeNumber;
 
-    @Column(name = "Link")
+    @Column(name = "link")
     private String link;
 
-    @Column(name = "Duration")
+    @Column(name = "duration")
     private Integer duration;
 
-    @Column(name = "IsPreview")
+    @Column(name = "is_preview")
     private Boolean isPreview;
 
     @ManyToOne

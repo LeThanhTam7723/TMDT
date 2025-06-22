@@ -23,6 +23,7 @@ public class CourseListResponseDTO {
     private String sellerName;
     private String categoryName;
     private boolean isPurchased;
+    private LocalDate purchaseDate;
 
     private LocalDate datePurchased;
 

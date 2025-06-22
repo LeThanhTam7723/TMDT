@@ -1,5 +1,6 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useContext } from 'react';
 import { Play, Clock, ChevronLeft, ChevronRight, Star, Users, BookOpen, Award, ChevronDown, User, X } from 'lucide-react';
+import { FiHeart } from 'react-icons/fi';
 import { useParams, useNavigate } from 'react-router-dom';
 import axiosClient from '../API/axiosClient';
 import FacebookComment from '../component/commentFb/FacebookComment';
@@ -16,9 +17,15 @@ const Detail = () => {
   const [currentSlide, setCurrentSlide] = useState(0);
   const [showMoreInstructor, setShowMoreInstructor] = useState(false);
   const [showVideoPreview, setShowVideoPreview] = useState(false);
+
   const session = JSON.parse(localStorage.getItem("session"));
 
   // Get ID from URL params and navigation hook
+
+  
+  // Get context and ID from URL params and navigation hook
+  const { isInFavorites, toggleFavorite } = useContext(ProductContext);
+
   const { id } = useParams();
   const navigate = useNavigate();
   
@@ -116,7 +123,7 @@ const Detail = () => {
   const handleSellerClick = (sellerId) => {
     navigate(`/seller/${sellerId}`);
   };
-
+  
   // Function to handle video preview click
   const handleVideoPreviewClick = (e) => {
     e.preventDefault();
@@ -134,9 +141,24 @@ const Detail = () => {
 
   // Function to handle enrollment
   const handleEnrollment = () => {
-  
-    console.log('Enrolling in course:', id);
-    
+    if (!session) {
+      Swal.fire({
+        title: "Hãy đăng nhập để thực hiện đăng ký khóa học",
+        showClass: {
+          popup: `animate__animated animate__fadeInUp animate__faster`
+        },
+        hideClass: {
+          popup: `animate__animated animate__fadeOutDown animate__faster`
+        }
+      }).then((result) => {
+        if (result.isConfirmed) {
+          navigate("/login");
+        }
+      });
+    } else {
+      // Redirect to checkout page with course ID
+      navigate(`/checkout/${id}`);
+    }
   };
 
   // Improved function to extract YouTube video ID from various URL formats
@@ -229,39 +251,24 @@ const Detail = () => {
     };
   }, [showVideoPreview]);
   
-  const handlePaymentClick = async (price,orderId) => {
-    if (session === null) {
-      const result = await Swal.fire({
-        title: "Hãy đăng nhập để thực hiện đăng ký khóa học",
+  const handleChatClick = (sellerId) => {
+    if (!session || !session.currentUser) {
+      Swal.fire({
+        title: "Hãy đăng nhập để nhắn tin với người bán",
         showClass: {
           popup: `animate__animated animate__fadeInUp animate__faster`
         },
         hideClass: {
           popup: `animate__animated animate__fadeOutDown animate__faster`
         }
+      }).then((result) => {
+        if (result.isConfirmed) {
+          navigate("/login");
+        }
       });
-  
-      if (result.isConfirmed) {
-        window.location.href = "/auth/login";
-      }
-    } else {
-      const result = await Swal.fire({
-        title: "Bạn chắc muốn tham gia khóa học này ?",
-        showCancelButton: true,
-        confirmButtonText: "Đồng ý",
-        cancelButtonText: "Hủy"
-      });
-  
-      if (result.isConfirmed) {
-        Swal.fire("Đã tham gia!", "", "success");
-        const response= await PaymentService.vnPay(10000,session.token,orderId,session.currentUser.id);
-        const {code,result,message} = response.data;
-        console.log(result);
-        window.location.href = result;
-      }
+      return;
     }
-  };
-  const handleChatClick  =(sellerId)=>{
+
     findConversationByUsers(sellerId, session.currentUser.id).then(result => {
         if (result) {
           console.log("Conversation found:", result);
@@ -285,7 +292,6 @@ const Detail = () => {
           });
         }
     });
-    // navigate(`/chat/${sellerId}`);
   }
   
   
@@ -302,13 +308,11 @@ const Detail = () => {
 
       try {
         // Fetch course basic info
-       const session = JSON.parse(localStorage.getItem("session"));
-const userId = session?.currentUser?.id;
+        const userId = session?.currentUser?.id;
 
-const courseResponse = await axiosClient.get(`/courses/${id}`, {
-  params: { userId } // truyền userId vào query
-});
-
+        const courseResponse = await axiosClient.get(`/courses/${id}`, {
+          params: { userId } // truyền userId vào query
+        });
 
         if (
           courseResponse.data &&
@@ -357,18 +361,34 @@ const courseResponse = await axiosClient.get(`/courses/${id}`, {
             // Continue without details if this fails
           }
 
-          // Fetch seller info using the course ID
+          // Fetch seller info using the seller ID from course data
+          // TODO: Backend needs endpoint to get seller info by course ID or seller ID
           try {
-            const sellerResponse = await axiosClient.get(`/seller/${id}`);
-            if (sellerResponse.data && sellerResponse.data.id) {
-              setSeller(sellerResponse.data);
-            } else {
-              console.error("Invalid seller response format:", sellerResponse.data);
-              setError("Failed to load seller information");
+            // For now, create seller object from course data
+            if (courseData.sellerId && courseData.sellerName) {
+              const sellerInfo = {
+                id: courseData.sellerId,
+                fullname: courseData.sellerName,
+                email: `${courseData.sellerName.toLowerCase().replace(' ', '')}@example.com`,
+                introduce: `Professional English instructor with years of experience.`,
+                // Add default values for missing seller fields
+                avatar: null,
+                phone: null,
+                certificate: null,
+                gender: null
+              };
+              setSeller(sellerInfo);
             }
+            
+            // Commented out until backend has proper endpoint
+            // const sellerResponse = await axiosClient.get(`/seller/course/${id}`);
+            // if (sellerResponse.data && sellerResponse.data.code === 200 && sellerResponse.data.result) {
+            //   setSeller(sellerResponse.data.result);
+            // }
           } catch (sellerError) {
             console.error("Failed to load seller info:", sellerError);
-            setError("Failed to load seller information");
+            // Don't set error for seller info - it's not critical
+            console.warn("Seller information not available");
           }
         } else {
           throw new Error("Invalid course response format");
@@ -382,7 +402,7 @@ const courseResponse = await axiosClient.get(`/courses/${id}`, {
     };
 
     fetchCourse();
-  }, [id]);
+  }, [id, session]);
 
   if (loading) {
     return (
@@ -448,7 +468,7 @@ const courseResponse = await axiosClient.get(`/courses/${id}`, {
       <div className="flex flex-col md:flex-row border-b border-gray-200 pb-8">
         <div className="md:w-1/2 md:pr-6">
           <div className="flex items-center gap-3 mb-2">
-            <h1 className="text-3xl font-bold text-blue-600">{course.name}</h1>
+          <h1 className="text-3xl font-bold text-blue-600">{course.name}</h1>
           </div>
           
           <p className="text-gray-700 mt-3 mb-4">{course.description}</p>
@@ -479,13 +499,46 @@ const courseResponse = await axiosClient.get(`/courses/${id}`, {
 <div className="mb-6 flex flex-col sm:flex-row gap-3">
   {isPurchased ? (
     // ✅ Nếu đã mua → chỉ hiển thị nút "Continue Learning"
-    <button 
-      onClick={handleWatchCourse}
-      className="bg-green-600 hover:bg-green-700 text-white px-6 py-3 rounded-lg font-semibold transition-colors flex items-center gap-2"
-    >
-      <Play className="w-5 h-5" />
-      Continue Learning
-    </button>
+    <>
+      <button 
+        onClick={handleWatchCourse}
+        className="bg-green-600 hover:bg-green-700 text-white px-6 py-3 rounded-lg font-semibold transition-colors flex items-center gap-2"
+      >
+        <Play className="w-5 h-5" />
+        Continue Learning
+      </button>
+      {/* Favorite Button */}
+      <button
+        onClick={() => {
+          if (!session?.currentUser) {
+            Swal.fire({
+              title: "Please login to add favorites",
+              text: "You need to be logged in to save courses to your favorites",
+              icon: "info",
+              showCancelButton: true,
+              confirmButtonText: "Login",
+              cancelButtonText: "Cancel"
+            }).then((result) => {
+              if (result.isConfirmed) {
+                navigate("/login");
+              }
+            });
+            return;
+          }
+          toggleFavorite(parseInt(id));
+        }}
+        className={`px-6 py-3 rounded-lg font-semibold transition-colors flex items-center gap-2 border ${
+          isInFavorites(parseInt(id))
+            ? 'bg-red-50 border-red-300 text-red-600 hover:bg-red-100'
+            : 'bg-gray-50 border-gray-300 text-gray-600 hover:bg-gray-100'
+        }`}
+      >
+        <FiHeart 
+          className={`w-5 h-5 ${isInFavorites(parseInt(id)) ? 'fill-current' : ''}`} 
+        />
+        {isInFavorites(parseInt(id)) ? 'Remove from Favorites' : 'Add to Favorites'}
+      </button>
+    </>
   ) : (
     // ❌ Nếu chưa mua → hiển thị giá + nút Enroll Now
     <>
@@ -494,12 +547,43 @@ const courseResponse = await axiosClient.get(`/courses/${id}`, {
           ${course.price}
         </span>
       </div>
-     <button 
-  onClick={() => handlePaymentClick(course.price, course.id)} 
-  className="bg-blue-600 hover:bg-blue-700 text-white px-6 py-3 rounded-lg font-semibold transition-colors"
->
-  Enroll Now
-</button>
+      <button 
+        onClick={handleEnrollment}
+        className="bg-blue-600 hover:bg-blue-700 text-white px-6 py-3 rounded-lg font-semibold transition-colors"
+      >
+        Enroll Now
+      </button>
+      {/* Favorite Button */}
+      <button
+        onClick={() => {
+          if (!session?.currentUser) {
+            Swal.fire({
+              title: "Please login to add favorites",
+              text: "You need to be logged in to save courses to your favorites",
+              icon: "info",
+              showCancelButton: true,
+              confirmButtonText: "Login",
+              cancelButtonText: "Cancel"
+            }).then((result) => {
+              if (result.isConfirmed) {
+                navigate("/login");
+              }
+            });
+            return;
+          }
+          toggleFavorite(parseInt(id));
+        }}
+        className={`px-6 py-3 rounded-lg font-semibold transition-colors flex items-center gap-2 border ${
+          isInFavorites(parseInt(id))
+            ? 'bg-red-50 border-red-300 text-red-600 hover:bg-red-100'
+            : 'bg-gray-50 border-gray-300 text-gray-600 hover:bg-gray-100'
+        }`}
+      >
+        <FiHeart 
+          className={`w-5 h-5 ${isInFavorites(parseInt(id)) ? 'fill-current' : ''}`} 
+        />
+        {isInFavorites(parseInt(id)) ? 'Remove from Favorites' : 'Add to Favorites'}
+      </button>
     </>
   )}
 </div>
@@ -560,7 +644,7 @@ const courseResponse = await axiosClient.get(`/courses/${id}`, {
                 </div>
               </div>
             )}
-          </div>
+            </div>
 
           {/* Preview Button */}
           <div className="mt-4 text-center">
@@ -793,7 +877,7 @@ const courseResponse = await axiosClient.get(`/courses/${id}`, {
         </div>
       </div>
 
-        <div className="py-8">
+      <div className="py-8">
         <h2 className="text-2xl font-bold mb-4">Gửi khiếu nại về khoá học</h2>
         <ReusableReportForm courseId={id} />
       </div>
@@ -829,7 +913,8 @@ const courseResponse = await axiosClient.get(`/courses/${id}`, {
             .map((relatedCourse) => (
               <div
                 key={relatedCourse.id}
-                className="bg-white border rounded-lg overflow-hidden hover:shadow-lg transition-shadow"
+                className="bg-white border rounded-lg overflow-hidden hover:shadow-lg transition-shadow cursor-pointer"
+                onClick={() => navigate(`/detail/${relatedCourse.id}`)}
               >
                 <div className="aspect-video bg-gray-200">
                   <img
@@ -858,6 +943,15 @@ const courseResponse = await axiosClient.get(`/courses/${id}`, {
                         ${relatedCourse.originalPrice}
                       </span>
                     </div>
+                    <button
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        navigate(`/detail/${relatedCourse.id}`);
+                      }}
+                      className="px-3 py-1 bg-blue-600 text-white text-sm rounded hover:bg-blue-700 transition-colors"
+                    >
+                      View
+                    </button>
                   </div>
                 </div>
               </div>
