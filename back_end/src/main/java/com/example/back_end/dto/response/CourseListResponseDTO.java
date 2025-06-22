@@ -20,4 +20,6 @@ public class CourseListResponseDTO {
     private Boolean status;
     private String sellerName;
     private String categoryName;
+    private boolean isPurchased;
+
 } 

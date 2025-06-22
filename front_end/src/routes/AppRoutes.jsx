@@ -17,6 +17,8 @@ import Login from "../Pages/Login";
 import Register from "../Pages/Register";
 import ChatInterface from "../Pages/Chat";
 import SellerDetail from "../Pages/SellerDetail";
+import OrderHistory from "../Pages/Admin/OrderHistory";
+import UserHistory from "../Pages/History";
 
 import Analytics from "../Pages/Admin/AdminDashboard";
 import UserManagement from "../Pages/Admin/UserManagement";
@@ -44,7 +46,12 @@ const AppRoutes = () => {
         <Route path="/login" element={<Login />} />
         <Route path="/register" element={<Register />} />
         <Route path="/chat" element={<ChatInterface />} />
-        <Route path="/seller/:id" element={<SellerDetail />} />
+         <Route path="/history" element={<OrderHistory />} />
+         <Route path="/UserHistory" element={<UserHistory />} />
+
+        <Route path="/chat/:id" element={<ChatInterface />} />
+
+//         <Route path="/seller/:id" element={<SellerDetail />} />
 
         {/* Seller Routes - Only SELLER and ADMIN can access */}
         <Route

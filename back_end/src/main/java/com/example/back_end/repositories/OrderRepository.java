@@ -14,4 +14,6 @@ public interface OrderRepository extends JpaRepository<Order,Integer> {
     
     @Query("SELECT o FROM Order o WHERE o.idCourse.sellerId = :sellerId")
     List<Order> findBySellerIdThroughCourses(@Param("sellerId") Integer sellerId);
+
+    boolean existsByIdUser_IdAndIdCourse_Id(Integer userId, Integer courseId);
 }
