@@ -20,7 +20,7 @@ public class Course {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "CourseID")
+    @Column(name = "courseid")
     private Integer id;
 
     @Column(name = "name", nullable = false)
@@ -29,19 +29,19 @@ public class Course {
     @Column(name = "price")
     private Double price;
 
-    @Column(name = "SellerID")
+    @Column(name = "sellerid")
     private Integer sellerId;
 
-    @Column(name = "CategoryID")
+    @Column(name = "categoryid")
     private Integer categoryId;
 
-    @Column(name = "Description", columnDefinition = "TEXT")
+    @Column(name = "description", columnDefinition = "TEXT")
     private String description;
 
-    @Column(name = "Rating")
+    @Column(name = "rating")
     private Double rating;
 
-    @Column(name = "Status")
+    @Column(name = "status")
     private Boolean status;
     @JsonManagedReference
     @OneToMany(mappedBy = "course", cascade = CascadeType.ALL, fetch = FetchType.LAZY)

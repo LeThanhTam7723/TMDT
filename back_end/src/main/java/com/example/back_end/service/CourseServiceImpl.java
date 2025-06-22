@@ -12,6 +12,7 @@ import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -58,6 +59,13 @@ public class CourseServiceImpl {
     public boolean isCoursePurchasedByUser(Integer userId, Integer courseId) {
         return orderRepository.existsByIdUser_IdAndIdCourse_Id(userId, courseId);
     }
+    
+    // Lấy ngày mua khóa học - trả về null nếu chưa mua
+    public LocalDate getCoursePurchaseDate(Integer userId, Integer courseId) {
+        Optional<LocalDate> purchaseDate = orderRepository.findPurchaseDateByUserIdAndCourseId(userId, courseId);
+        return purchaseDate.orElse(null);
+    }
+
     public CourseListResponseDTO getCourseById(Integer id) {
         Course course = courseRepository.findById(id).orElse(null);
         if (course == null) {
@@ -105,8 +113,113 @@ public class CourseServiceImpl {
     }
 
     private String getCategoryName(Integer categoryId) {
-        // TODO: Implement category name lookup
-        return "Category " + categoryId;
+        // Map category IDs to names based on our data.sql
+        switch (categoryId) {
+            case 1: return "IELTS";
+            case 2: return "Business English";
+            case 3: return "Kids English";
+            case 4: return "Conversation";
+            case 5: return "Grammar";
+            case 6: return "General English";
+            default: return "Unknown Category";
+        }
+    }
+
+    // Search courses by keyword
+    public List<CourseListResponseDTO> searchCourses(String keyword) {
+        List<Course> courses = courseRepository.findByNameContainingIgnoreCaseOrDescriptionContainingIgnoreCase(
+                keyword, keyword);
+        
+        return courses.stream()
+                .filter(Course::getStatus) // Only active courses
+                .map(course -> {
+                    User seller = userRepository.findById(course.getSellerId()).orElse(null);
+                    return CourseListResponseDTO.builder()
+                            .id(course.getId())
+                            .name(course.getName())
+                            .price(course.getPrice())
+                            .sellerId(course.getSellerId())
+                            .categoryId(course.getCategoryId())
+                            .description(course.getDescription())
+                            .rating(course.getRating())
+                            .status(course.getStatus())
+                            .sellerName(seller != null ? seller.getFullname() : "Unknown")
+                            .categoryName(getCategoryName(course.getCategoryId()))
+                            .build();
+                })
+                .collect(Collectors.toList());
+    }
+
+    // Advanced search with filters
+    public List<CourseListResponseDTO> searchCoursesAdvanced(String keyword, Integer categoryId, 
+                                                           Double minPrice, Double maxPrice, 
+                                                           Double minRating, Boolean status) {
+        List<Course> courses = courseRepository.findCoursesWithFilters(
+                keyword, categoryId, minPrice, maxPrice, minRating, status);
+        
+        return courses.stream()
+                .map(course -> {
+                    User seller = userRepository.findById(course.getSellerId()).orElse(null);
+                    return CourseListResponseDTO.builder()
+                            .id(course.getId())
+                            .name(course.getName())
+                            .price(course.getPrice())
+                            .sellerId(course.getSellerId())
+                            .categoryId(course.getCategoryId())
+                            .description(course.getDescription())
+                            .rating(course.getRating())
+                            .status(course.getStatus())
+                            .sellerName(seller != null ? seller.getFullname() : "Unknown")
+                            .categoryName(getCategoryName(course.getCategoryId()))
+                            .build();
+                })
+                .collect(Collectors.toList());
+    }
+
+    // Get courses by category
+    public List<CourseListResponseDTO> getCoursesByCategory(Integer categoryId) {
+        List<Course> courses = courseRepository.findByCategoryIdAndStatusTrue(categoryId);
+        
+        return courses.stream()
+                .map(course -> {
+                    User seller = userRepository.findById(course.getSellerId()).orElse(null);
+                    return CourseListResponseDTO.builder()
+                            .id(course.getId())
+                            .name(course.getName())
+                            .price(course.getPrice())
+                            .sellerId(course.getSellerId())
+                            .categoryId(course.getCategoryId())
+                            .description(course.getDescription())
+                            .rating(course.getRating())
+                            .status(course.getStatus())
+                            .sellerName(seller != null ? seller.getFullname() : "Unknown")
+                            .categoryName(getCategoryName(course.getCategoryId()))
+                            .build();
+                })
+                .collect(Collectors.toList());
+    }
+
+    // Get courses by price range
+    public List<CourseListResponseDTO> getCoursesByPriceRange(Double minPrice, Double maxPrice) {
+        List<Course> courses = courseRepository.findByPriceBetweenAndStatusTrue(minPrice, maxPrice);
+        
+        return courses.stream()
+                .map(course -> {
+                    User seller = userRepository.findById(course.getSellerId()).orElse(null);
+                    return CourseListResponseDTO.builder()
+                            .id(course.getId())
+                            .name(course.getName())
+                            .price(course.getPrice())
+                            .sellerId(course.getSellerId())
+                            .categoryId(course.getCategoryId())
+                            .description(course.getDescription())
+                            .rating(course.getRating())
+                            .status(course.getStatus())
+                            .sellerName(seller != null ? seller.getFullname() : "Unknown")
+                            .categoryName(getCategoryName(course.getCategoryId()))
+                            .build();
+                })
+                .collect(Collectors.toList());
     }
 
     @Transactional
@@ -151,5 +264,53 @@ public class CourseServiceImpl {
                 .rating(rating.getRating())
                 .createdAt(rating.getCreatedAt().toString())
                 .build();
+    }
+    
+    // Tìm kiếm khóa học theo từ khóa
+    public List<CourseListResponseDTO> searchCoursesByKeyword(String keyword) {
+        List<Course> courses = courseRepository.findByNameOrDescriptionContainingIgnoreCase(keyword);
+        return convertToResponseDTOList(courses);
+    }
+    
+    // Tìm kiếm khóa học theo category
+    public List<CourseListResponseDTO> searchCoursesByCategory(Integer categoryId) {
+        List<Course> courses = courseRepository.findByCategoryId(categoryId);
+        return convertToResponseDTOList(courses);
+    }
+    
+    // Tìm kiếm khóa học theo khoảng giá
+    public List<CourseListResponseDTO> searchCoursesByPriceRange(Double minPrice, Double maxPrice) {
+        List<Course> courses = courseRepository.findByPriceBetween(minPrice, maxPrice);
+        return convertToResponseDTOList(courses);
+    }
+    
+    // Tìm kiếm khóa học theo rating tối thiểu
+    public List<CourseListResponseDTO> searchCoursesByMinRating(Double minRating) {
+        List<Course> courses = courseRepository.findByRatingGreaterThanEqual(minRating);
+        return convertToResponseDTOList(courses);
+    }
+    
+
+    
+    // Helper method để convert danh sách Course thành CourseListResponseDTO
+    private List<CourseListResponseDTO> convertToResponseDTOList(List<Course> courses) {
+        return courses.stream()
+                .map(course -> {
+                    User seller = userRepository.findById(course.getSellerId())
+                            .orElse(null);
+                    return CourseListResponseDTO.builder()
+                            .id(course.getId())
+                            .name(course.getName())
+                            .price(course.getPrice())
+                            .sellerId(course.getSellerId())
+                            .categoryId(course.getCategoryId())
+                            .description(course.getDescription())
+                            .rating(course.getRating())
+                            .status(course.getStatus())
+                            .sellerName(seller != null ? seller.getFullname() : "Unknown")
+                            .categoryName(getCategoryName(course.getCategoryId()))
+                            .build();
+                })
+                .collect(Collectors.toList());
     }
 }

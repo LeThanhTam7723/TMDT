@@ -1,5 +1,5 @@
 import { FaFacebookF, FaTwitter, FaInstagram } from "react-icons/fa";
-import { FiSearch, FiShoppingCart, FiUser, FiMenu, FiX, FiHeart, FiMail ,FiChevronLeft, FiChevronRight} from "react-icons/fi";
+import { FiSearch, FiUser, FiMenu, FiX, FiHeart, FiMail ,FiChevronLeft, FiChevronRight} from "react-icons/fi";
 
 const Footer = ()=> {
     return (

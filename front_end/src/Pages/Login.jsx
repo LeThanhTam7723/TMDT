@@ -142,6 +142,9 @@ const Login = () => {
         .then((res) => {
           const { code, message, result } = res.data;
           localStorage.setItem("session", JSON.stringify(result));
+          
+          // Dispatch custom event to notify other components about session update
+          window.dispatchEvent(new Event('sessionUpdated'));
 
           // Role-based redirect
           const userRole = result.role?.toUpperCase();
