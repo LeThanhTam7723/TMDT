@@ -199,6 +199,7 @@ const CoursesTab = () => {
   const [error, setError] = useState(null);
   const [selectedCourses, setSelectedCourses] = useState([]);
   const [bulkLoading, setBulkLoading] = useState(false);
+  const [openDropdown, setOpenDropdown] = useState(null); // Track dropdown đang mở
   const context = useContext(ProductContext);
   const session = context?.session;
   const navigate = useNavigate();
@@ -224,6 +225,20 @@ const CoursesTab = () => {
       </div>
     );
   }
+
+  // Close dropdown when clicking outside
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (!event.target.closest('.dropdown-container')) {
+        setOpenDropdown(null);
+      }
+    };
+
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+    };
+  }, []);
 
   // Load courses from API
   useEffect(() => {
@@ -348,6 +363,31 @@ const CoursesTab = () => {
           'error'
         );
       }
+    }
+  };
+
+  // Helper function to handle dropdown actions
+  const handleDropdownAction = (action, course) => {
+    setOpenDropdown(null); // Đóng dropdown trước
+    switch (action) {
+      case 'edit':
+        handleEditCourse(course);
+        break;
+      case 'duplicate':
+        handleDuplicateCourse(course);
+        break;
+      case 'preview':
+        navigate(`/detail/${course.id}`);
+        break;
+      case 'delete':
+        handleDeleteCourse(course.id);
+        break;
+      case 'activate':
+      case 'deactivate':
+        handleQuickAction(action, course);
+        break;
+      default:
+        break;
     }
   };
 
@@ -811,15 +851,21 @@ const CoursesTab = () => {
                 </button>
                 
                 {/* Dropdown Menu */}
-                <div className="relative group">
-                  <button className="p-2 bg-white rounded-full shadow hover:bg-gray-100 transition-colors">
+                <div className="relative dropdown-container">
+                  <button 
+                    onClick={() => setOpenDropdown(openDropdown === course.id ? null : course.id)}
+                    className="p-2 bg-white rounded-full shadow hover:bg-gray-100 transition-colors"
+                    title="Thêm tùy chọn"
+                  >
                     <FiMoreVertical className="text-gray-600" />
                   </button>
                   
                   {/* Dropdown Content */}
-                  <div className="absolute right-0 top-full mt-1 w-48 bg-white rounded-lg shadow-lg border py-1 hidden group-hover:block z-10">
+                  <div className={`absolute right-0 top-full mt-1 w-48 bg-white rounded-lg shadow-lg border py-1 z-20 transition-all duration-200 ${
+                    openDropdown === course.id ? 'opacity-100 visible transform translate-y-0' : 'opacity-0 invisible transform -translate-y-2'
+                  }`}>
                     <button
-                      onClick={() => handleEditCourse(course)}
+                      onClick={() => handleDropdownAction('edit', course)}
                       className="w-full px-4 py-2 text-left text-sm text-gray-700 hover:bg-gray-100 flex items-center gap-2"
                     >
                       <FiEdit2 className="text-blue-600" />
@@ -827,7 +873,7 @@ const CoursesTab = () => {
                     </button>
                     
                     <button
-                      onClick={() => handleDuplicateCourse(course)}
+                      onClick={() => handleDropdownAction('duplicate', course)}
                       className="w-full px-4 py-2 text-left text-sm text-gray-700 hover:bg-gray-100 flex items-center gap-2"
                     >
                       <FiCopy className="text-green-600" />
@@ -835,7 +881,7 @@ const CoursesTab = () => {
                     </button>
                     
                     <button
-                      onClick={() => navigate(`/detail/${course.id}`)}
+                      onClick={() => handleDropdownAction('preview', course)}
                       className="w-full px-4 py-2 text-left text-sm text-gray-700 hover:bg-gray-100 flex items-center gap-2"
                     >
                       <FiEye className="text-blue-600" />
@@ -849,7 +895,7 @@ const CoursesTab = () => {
                       <>
                         {course.status === "Active" ? (
                           <button
-                            onClick={() => handleQuickAction('deactivate', course)}
+                            onClick={() => handleDropdownAction('deactivate', course)}
                             className="w-full px-4 py-2 text-left text-sm text-orange-600 hover:bg-orange-50 flex items-center gap-2"
                           >
                             <FiX className="text-orange-600" />
@@ -857,7 +903,7 @@ const CoursesTab = () => {
                           </button>
                         ) : (
                           <button
-                            onClick={() => handleQuickAction('activate', course)}
+                            onClick={() => handleDropdownAction('activate', course)}
                             className="w-full px-4 py-2 text-left text-sm text-green-600 hover:bg-green-50 flex items-center gap-2"
                           >
                             <FiCheck className="text-green-600" />
@@ -870,7 +916,7 @@ const CoursesTab = () => {
                     <hr className="my-1" />
                     
                     <button
-                      onClick={() => handleDeleteCourse(course.id)}
+                      onClick={() => handleDropdownAction('delete', course)}
                       className="w-full px-4 py-2 text-left text-sm text-red-600 hover:bg-red-50 flex items-center gap-2"
                     >
                       <FiTrash2 className="text-red-600" />

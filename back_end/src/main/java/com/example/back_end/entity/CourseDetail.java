@@ -16,10 +16,7 @@ public class CourseDetail {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Integer id; // tạo ID riêng vì bảng không có khóa chính rõ ràng trong ảnh
-
-    @Column(name = "courseid")
-    private Integer courseId;
+    private Integer id;
 
     @Column(name = "name")
     private String name;
@@ -36,9 +33,13 @@ public class CourseDetail {
     @Column(name = "is_preview")
     private Boolean isPreview;
 
-    @ManyToOne
-    @JoinColumn(name = "course_id")
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "courseid")
     @JsonIgnore
-//    @JoinColumn(name = "CourseID", insertable = false, updatable = false)
     private Course course;
+    
+    // Helper method để get courseId từ course relationship
+    public Integer getCourseId() {
+        return course != null ? course.getId() : null;
+    }
 }

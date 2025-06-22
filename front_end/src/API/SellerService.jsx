@@ -93,6 +93,52 @@ const SellerService = {
       console.error('Error fetching courses by seller:', error);
       throw error;
     }
+  },
+
+  // ===== COURSE DETAILS MANAGEMENT =====
+  
+  // Tạo course detail/episode mới
+  createCourseDetail: async (sellerId, courseId, detailData) => {
+    try {
+      const response = await axiosClient.post(`/seller/${sellerId}/courses/${courseId}/details`, detailData);
+      return response.data;
+    } catch (error) {
+      console.error('Error creating course detail:', error);
+      throw error;
+    }
+  },
+
+  // Cập nhật course detail/episode
+  updateCourseDetail: async (sellerId, courseId, detailId, detailData) => {
+    try {
+      const response = await axiosClient.put(`/seller/${sellerId}/courses/${courseId}/details/${detailId}`, detailData);
+      return response.data;
+    } catch (error) {
+      console.error('Error updating course detail:', error);
+      throw error;
+    }
+  },
+
+  // Xóa course detail/episode
+  deleteCourseDetail: async (sellerId, courseId, detailId) => {
+    try {
+      const response = await axiosClient.delete(`/seller/${sellerId}/courses/${courseId}/details/${detailId}`);
+      return response.data;
+    } catch (error) {
+      console.error('Error deleting course detail:', error);
+      throw error;
+    }
+  },
+
+  // Lấy danh sách course details/episodes
+  getCourseDetails: async (sellerId, courseId) => {
+    try {
+      const response = await axiosClient.get(`/seller/${sellerId}/courses/${courseId}/details`);
+      return response.data;
+    } catch (error) {
+      console.error('Error fetching course details:', error);
+      throw error;
+    }
   }
 };
 

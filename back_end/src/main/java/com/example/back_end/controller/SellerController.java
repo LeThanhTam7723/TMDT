@@ -3,11 +3,14 @@ package com.example.back_end.controller;
 import com.example.back_end.dto.CourseSummaryDTO;
 import com.example.back_end.dto.SellerDTO;
 import com.example.back_end.dto.request.CourseCreateRequest;
+import com.example.back_end.dto.request.CourseDetailCreateRequest;
+import com.example.back_end.dto.request.CourseDetailUpdateRequest;
 import com.example.back_end.dto.request.CourseUpdateRequest;
 import com.example.back_end.dto.response.ApiResponse;
 import com.example.back_end.dto.response.SellerRevenueResponseDTO;
 import com.example.back_end.dto.response.SellerStatsResponseDTO;
 import com.example.back_end.entity.Course;
+import com.example.back_end.entity.CourseDetail;
 import com.example.back_end.entity.User;
 import com.example.back_end.repositories.CourseRepository;
 import com.example.back_end.repositories.UserRepository;
@@ -265,6 +268,95 @@ public class SellerController {
             return ResponseEntity.badRequest().body(ApiResponse.<SellerRevenueResponseDTO>builder()
                     .code(400)
                     .message("Error fetching revenue: " + e.getMessage())
+                    .build());
+        }
+    }
+
+    // ===== COURSE DETAILS MANAGEMENT APIs =====
+
+    @PostMapping("/{sellerId}/courses/{courseId}/details")
+    // @PreAuthorize("hasAuthority('SCOPE_SELLER') or hasAuthority('SCOPE_ADMIN')")
+    public ResponseEntity<ApiResponse<CourseDetail>> createCourseDetail(
+            @PathVariable Integer sellerId,
+            @PathVariable Integer courseId,
+            @RequestBody CourseDetailCreateRequest request) {
+        try {
+            CourseDetail courseDetail = sellerService.createCourseDetail(sellerId, courseId, request);
+            return ResponseEntity.ok(ApiResponse.<CourseDetail>builder()
+                    .code(200)
+                    .message("Course detail created successfully")
+                    .result(courseDetail)
+                    .build());
+        } catch (Exception e) {
+            log.error("Error creating course detail: ", e);
+            return ResponseEntity.badRequest().body(ApiResponse.<CourseDetail>builder()
+                    .code(400)
+                    .message("Error creating course detail: " + e.getMessage())
+                    .build());
+        }
+    }
+
+    @PutMapping("/{sellerId}/courses/{courseId}/details/{detailId}")
+    // @PreAuthorize("hasAuthority('SCOPE_SELLER') or hasAuthority('SCOPE_ADMIN')")
+    public ResponseEntity<ApiResponse<CourseDetail>> updateCourseDetail(
+            @PathVariable Integer sellerId,
+            @PathVariable Integer courseId,
+            @PathVariable Integer detailId,
+            @RequestBody CourseDetailUpdateRequest request) {
+        try {
+            CourseDetail courseDetail = sellerService.updateCourseDetail(sellerId, courseId, detailId, request);
+            return ResponseEntity.ok(ApiResponse.<CourseDetail>builder()
+                    .code(200)
+                    .message("Course detail updated successfully")
+                    .result(courseDetail)
+                    .build());
+        } catch (Exception e) {
+            log.error("Error updating course detail: ", e);
+            return ResponseEntity.badRequest().body(ApiResponse.<CourseDetail>builder()
+                    .code(400)
+                    .message("Error updating course detail: " + e.getMessage())
+                    .build());
+        }
+    }
+
+    @DeleteMapping("/{sellerId}/courses/{courseId}/details/{detailId}")
+    // @PreAuthorize("hasAuthority('SCOPE_SELLER') or hasAuthority('SCOPE_ADMIN')")
+    public ResponseEntity<ApiResponse<Void>> deleteCourseDetail(
+            @PathVariable Integer sellerId,
+            @PathVariable Integer courseId,
+            @PathVariable Integer detailId) {
+        try {
+            sellerService.deleteCourseDetail(sellerId, courseId, detailId);
+            return ResponseEntity.ok(ApiResponse.<Void>builder()
+                    .code(200)
+                    .message("Course detail deleted successfully")
+                    .build());
+        } catch (Exception e) {
+            log.error("Error deleting course detail: ", e);
+            return ResponseEntity.badRequest().body(ApiResponse.<Void>builder()
+                    .code(400)
+                    .message("Error deleting course detail: " + e.getMessage())
+                    .build());
+        }
+    }
+
+    @GetMapping("/{sellerId}/courses/{courseId}/details")
+    // @PreAuthorize("hasAuthority('SCOPE_SELLER') or hasAuthority('SCOPE_ADMIN')")
+    public ResponseEntity<ApiResponse<List<CourseDetail>>> getCourseDetails(
+            @PathVariable Integer sellerId,
+            @PathVariable Integer courseId) {
+        try {
+            List<CourseDetail> courseDetails = sellerService.getCourseDetails(sellerId, courseId);
+            return ResponseEntity.ok(ApiResponse.<List<CourseDetail>>builder()
+                    .code(200)
+                    .message("Success")
+                    .result(courseDetails)
+                    .build());
+        } catch (Exception e) {
+            log.error("Error fetching course details: ", e);
+            return ResponseEntity.badRequest().body(ApiResponse.<List<CourseDetail>>builder()
+                    .code(400)
+                    .message("Error fetching course details: " + e.getMessage())
                     .build());
         }
     }

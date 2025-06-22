@@ -1,9 +1,10 @@
 import React, { useState, useEffect, useContext } from 'react';
 import { useNavigate, useParams, useLocation } from 'react-router-dom';
-import { FiUpload, FiX, FiSave, FiArrowLeft } from 'react-icons/fi';
+import { FiUpload, FiX, FiSave, FiArrowLeft, FiBook, FiList } from 'react-icons/fi';
 import { motion } from 'framer-motion';
 import SellerService from '../API/SellerService';
 import { ProductContext } from '../context/ProductContext';
+import CourseContentManager from '../component/CourseContentManager';
 import Swal from 'sweetalert2';
 
 const CourseForm = () => {
@@ -14,6 +15,7 @@ const CourseForm = () => {
   const session = context?.session;
   const [loading, setLoading] = useState(false);
   const [fetchingCourse, setFetchingCourse] = useState(false);
+  const [activeTab, setActiveTab] = useState('basic'); // 'basic' or 'content'
   const [formData, setFormData] = useState({
     name: '',
     description: '',
@@ -134,6 +136,9 @@ const CourseForm = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     
+    // Only handle form submission for basic tab
+    if (activeTab !== 'basic') return;
+    
     // Validation check
     if (!formData.level) {
       await Swal.fire({
@@ -179,17 +184,47 @@ const CourseForm = () => {
       }
 
       if (response.code === 200) {
-        await Swal.fire({
-          title: 'Thành công!',
-          text: isEditMode 
-            ? `Khóa học "${formData.name}" đã được cập nhật thành công.`
-            : `Khóa học "${formData.name}" đã được tạo thành công.`,
-          icon: 'success',
-          confirmButtonText: 'OK',
-          timer: 3000,
-          timerProgressBar: true
-        });
-        navigate('/seller/dashboard');
+        if (isEditMode) {
+          await Swal.fire({
+            title: 'Thành công!',
+            text: `Khóa học "${formData.name}" đã được cập nhật thành công.`,
+            icon: 'success',
+            confirmButtonText: 'OK',
+            timer: 3000,
+            timerProgressBar: true
+          });
+          navigate('/seller/dashboard');
+        } else {
+          // Tạo mới thành công - chuyển sang tab nội dung
+          await Swal.fire({
+            title: 'Thành công!',
+            text: `Khóa học "${formData.name}" đã được tạo thành công.`,
+            html: `
+              <p>Khóa học đã được tạo thành công!</p>
+              <p>Bạn có thể thêm nội dung bài học hoặc quay về dashboard.</p>
+            `,
+            icon: 'success',
+            showCancelButton: true,
+            confirmButtonText: 'Thêm nội dung',
+            cancelButtonText: 'Về Dashboard',
+            confirmButtonColor: '#3085d6',
+            cancelButtonColor: '#6c757d'
+          }).then((result) => {
+            if (result.isConfirmed) {
+              setActiveTab('content');
+              // Update URL để reflect edit mode
+              navigate(`/seller/course/${response.result.id}/edit`, { 
+                replace: true,
+                state: { 
+                  course: response.result,
+                  sellerId 
+                }
+              });
+            } else {
+              navigate('/seller/dashboard');
+            }
+          });
+        }
       }
     } catch (error) {
       console.error('Error saving course:', error);
@@ -257,13 +292,41 @@ const CourseForm = () => {
             )}
           </div>
 
-          <motion.form 
-            variants={containerVariants}
-            initial="hidden"
-            animate="visible"
-            onSubmit={handleSubmit} 
-            className="bg-white rounded-xl shadow-lg p-8 space-y-6"
-          >
+          {/* Tabs Navigation */}
+          <div className="flex space-x-1 mb-6 border-b">
+            <button
+              onClick={() => setActiveTab('basic')}
+              className={`px-4 py-2 font-medium text-sm rounded-t-lg transition-colors flex items-center gap-2 ${
+                activeTab === 'basic'
+                  ? 'border-b-2 border-blue-500 text-blue-600 bg-blue-50'
+                  : 'text-gray-600 hover:text-gray-800 hover:bg-gray-50'
+              }`}
+            >
+              <FiBook />
+              Thông tin cơ bản
+            </button>
+            <button
+              onClick={() => setActiveTab('content')}
+              className={`px-4 py-2 font-medium text-sm rounded-t-lg transition-colors flex items-center gap-2 ${
+                activeTab === 'content'
+                  ? 'border-b-2 border-blue-500 text-blue-600 bg-blue-50'
+                  : 'text-gray-600 hover:text-gray-800 hover:bg-gray-50'
+              }`}
+            >
+              <FiList />
+              Nội dung khóa học
+            </button>
+          </div>
+
+          {/* Tab Content */}
+          {activeTab === 'basic' ? (
+            <motion.form 
+              variants={containerVariants}
+              initial="hidden"
+              animate="visible"
+              onSubmit={handleSubmit} 
+              className="bg-white rounded-xl shadow-lg p-8 space-y-6"
+            >
             {/* Course Image */}
             <div className="space-y-2">
               <label className="block text-sm font-medium text-gray-700">
@@ -468,6 +531,21 @@ const CourseForm = () => {
               </button>
             </div>
           </motion.form>
+          ) : (
+            /* Content Tab */
+            <motion.div
+              variants={containerVariants}
+              initial="hidden"
+              animate="visible"
+              className="bg-white rounded-xl shadow-lg p-8"
+            >
+              <CourseContentManager 
+                courseId={id} 
+                sellerId={sellerId} 
+                isEditMode={isEditMode}
+              />
+            </motion.div>
+          )}
         </motion.div>
       </div>
     </div>
