@@ -25,4 +25,6 @@ public class CourseListResponseDTO {
     private boolean isPurchased;
     private LocalDate purchaseDate;
 
+    private LocalDate datePurchased;
+
 } 

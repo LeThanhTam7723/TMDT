@@ -17,9 +17,9 @@ const Detail = () => {
   const [currentSlide, setCurrentSlide] = useState(0);
   const [showMoreInstructor, setShowMoreInstructor] = useState(false);
   const [showVideoPreview, setShowVideoPreview] = useState(false);
-  
-  // Get context and ID from URL params and navigation hook
-  const { session, isInFavorites, toggleFavorite } = useContext(ProductContext);
+
+  // const session = JSON.parse(localStorage.getItem("session"));
+  const {session, isInFavorites, toggleFavorite } = useContext(ProductContext);
   const { id } = useParams();
   const navigate = useNavigate();
   

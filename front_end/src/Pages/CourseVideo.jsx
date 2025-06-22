@@ -84,28 +84,23 @@ const CourseVideo = () => {
       setError(null);
 
       try {
-        // Fetch course basic info from API
-        const userId = session?.currentUser?.id;
-        const courseResponse = await axiosClient.get(`/courses/${courseId}`, {
-          params: { userId }
-        });
-
-        if (courseResponse.data && courseResponse.data.code === 200 && courseResponse.data.result) {
-          const courseData = courseResponse.data.result;
-          setCourse(courseData);
-          setIsPurchased(courseData.purchased || false);
-          console.log('Course data loaded:', courseData);
-          console.log('Purchase status:', courseData.purchased);
-        } else {
-          throw new Error("Invalid course response format");
-        }
+        // Simulate API call for course basic info
+        const mockCourse = {
+          name: "TOEIC COURSE FOR BEGINNERS",
+          description: "Complete TOEIC preparation course for beginners",
+          rating: 4.4,
+          price: 69.99
+        };
+        setCourse(mockCourse);
         
-        // Fetch course details (episodes) from API
-        const detailsResponse = await axiosClient.get(`/courses/details/${courseId}`);
-        console.log('Course details API response:', detailsResponse.data);
+        // Fetch course details using axios client
+        console.log('Fetching course details for courseId:', courseId);
         
-        if (detailsResponse.data && detailsResponse.data.code === 200 && Array.isArray(detailsResponse.data.result)) {
-          const details = detailsResponse.data.result;
+        const response = await axiosClient.get(`/courses/details/${courseId}`);
+        console.log('API Response:', response.data);
+        
+        if (response.data && response.data.code === 200 && response.data.result && Array.isArray(response.data.result)) {
+          const details = response.data.result;
           setCourseDetails(details);
           console.log('Course details set:', details);
           
@@ -118,11 +113,12 @@ const CourseVideo = () => {
             setSelectedVideoIndex(0);
           }
         } else {
-          throw new Error(`Invalid course details response format: ${JSON.stringify(detailsResponse.data)}`);
+          throw new Error(`Invalid response format: ${JSON.stringify(response.data)}`);
         }
       } catch (error) {
         console.error('API fetch failed:', error);
-        setError(error.message || 'Failed to load course');
+        const errorMessage = error.response?.data?.message || error.message || 'Failed to load course';
+        setError(errorMessage);
         
         // Fallback data for development
         const fallbackData = [

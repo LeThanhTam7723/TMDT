@@ -72,7 +72,7 @@ const ProductCard = ({ product }) => {
         <h3 className="font-semibold text-lg mb-2">{product.name}</h3>
         <p className="text-gray-300 mb-2 flex items-center">
           <span className="inline-block w-2 h-2 rounded-full bg-green-500 mr-2"></span>
-          {product.seller || "By Admin"}
+          {product.sellerName || "By Admin"}
         </p>
         <div className="flex items-center mb-3">
           {renderStars(product.rating || 4)}

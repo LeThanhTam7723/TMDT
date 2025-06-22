@@ -5,7 +5,9 @@ import com.example.back_end.dto.response.ApiResponse;
 import com.example.back_end.dto.response.CourseDetailResponseDTO;
 import com.example.back_end.dto.response.CourseListResponseDTO;
 import com.example.back_end.dto.response.CourseRatingResponseDTO;
+import com.example.back_end.repositories.OrderRepository;
 import com.example.back_end.service.CourseServiceImpl;
+import com.example.back_end.service.order.OrderService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
@@ -21,6 +23,7 @@ public class CourseController {
 
     @Autowired
     private CourseServiceImpl courseService;
+    private OrderRepository orderRepository;
 
     @GetMapping
     public ApiResponse<List<CourseListResponseDTO>> getAllCourses() {
@@ -79,6 +82,7 @@ public class CourseController {
                     .build();
         }
     }
+
 
 
     @GetMapping("/details/{id}")
