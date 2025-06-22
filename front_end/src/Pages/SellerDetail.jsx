@@ -43,10 +43,10 @@ const SellerDetail = () => {
 
       try {
         // Fetch seller information
-        const sellerResponse = await axiosClient.get(`/seller/${id}`);
+        const sellerResponse = await axiosClient.get(`/users/id/${id}`);
         
-        if (sellerResponse.data && sellerResponse.data.id) {
-          setSeller(sellerResponse.data);
+        if (sellerResponse.data && sellerResponse.data.result) {
+          setSeller(sellerResponse.data.result);
           
           // Fetch seller's courses
           try {
