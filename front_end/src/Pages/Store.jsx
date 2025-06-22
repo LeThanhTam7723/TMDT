@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { FiHeart, FiSearch, FiFilter, FiX, FiClock, FiUsers, FiBook, FiDollarSign, FiShoppingCart } from "react-icons/fi";
+import { FiHeart, FiSearch, FiFilter, FiX, FiClock, FiUsers, FiBook, FiDollarSign } from "react-icons/fi";
 import { motion } from "framer-motion";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import { useProduct } from "../context/ProductContext";
@@ -10,7 +10,6 @@ const Store = () => {
     products, 
     toggleFavorite, 
     getFavoriteProducts, 
-    addToCart, 
     loading, 
     searchResults, 
     searchCourses, 
@@ -62,16 +61,7 @@ const Store = () => {
     return getFavoriteProducts().some(p => p.id === productId);
   };
 
-  const handleAddToCart = (productId, event) => {
-    event.preventDefault();
-    event.stopPropagation();
-    
-    const product = products.find(p => p.id === productId);
-    if (product) {
-      addToCart(product);
-      showNotification(`Added "${product.name}" to cart`, 'add');
-    }
-  };
+
 
   const toggleCategory = (category) => {
     setSelectedCategories(prev => 
@@ -557,16 +547,7 @@ const Store = () => {
                       >
                         <FiHeart className={`w-5 h-5 ${isInFavorite(product.id) ? 'fill-current' : ''}`} />
                       </button>
-                      <button 
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          handleAddToCart(product.id, e);
-                        }}
-                        className="bg-blue-500 text-white px-4 py-2 rounded-full font-semibold hover:bg-blue-600 transition flex items-center gap-2 text-sm"
-                      >
-                        <FiShoppingCart className="w-4 h-4" />
-                        Cart
-                      </button>
+
                     </div>
                   </div>
                 </div>

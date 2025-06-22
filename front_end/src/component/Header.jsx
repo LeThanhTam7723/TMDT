@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useContext } from "react";
-import { FiSearch, FiShoppingCart, FiHeart, FiMenu, FiX, FiMic, FiBell, FiUser } from "react-icons/fi";
+import { FiSearch, FiHeart, FiMenu, FiX, FiMic, FiBell, FiUser } from "react-icons/fi";
 import { FaFacebookF, FaTwitter, FaInstagram, FaLinkedinIn } from "react-icons/fa";
 import { MdEmail, MdPhone, MdKeyboardArrowDown } from "react-icons/md";
 import { useNavigate, Link } from "react-router-dom";
@@ -13,7 +13,6 @@ const Header = () => {
   const [isToken, setIsToken] = useState("");
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isOpen, setIsOpen] = useState(false);
-  const [cartCount, setCartCount] = useState(0);
   const [favoriteCount, setFavoriteCount] = useState(() => {
     const savedFavorites = localStorage.getItem('favorites');
     return savedFavorites ? JSON.parse(savedFavorites).length : 0;
@@ -57,9 +56,6 @@ const Header = () => {
   };
   //
   const navigate = useNavigate(); 
-  const cartClick = () => {
-    navigate('/cart'); // Chuyển sang trang /cart
-  };
   const checkToken = async (token) => {
     try {
       const response = await introspect({token});
@@ -82,7 +78,6 @@ const Header = () => {
           setSession(session);
         } else {
           setIsLogin(false);
-          setCartCount(0);
         }
       }
     };
@@ -112,37 +107,7 @@ const Header = () => {
     };
   }, []);
 
-  const { cart } = useProduct ? useProduct() : { cart: [] };
 
-  useEffect(() => {
-    // Update cart count when cart changes
-    if (cart && Array.isArray(cart)) {
-      setCartCount(cart.reduce((sum, item) => sum + (item.quantity || 1), 0));
-    } else {
-      // Fallback: get from localStorage
-      const savedCart = localStorage.getItem('cart');
-      if (savedCart) {
-        const cartArr = JSON.parse(savedCart);
-        setCartCount(cartArr.reduce((sum, item) => sum + (item.quantity || 1), 0));
-      } else {
-        setCartCount(0);
-      }
-    }
-  }, [cart]);
-
-  useEffect(() => {
-    const updateCartCount = () => {
-      const savedCart = localStorage.getItem('cart');
-      if (savedCart) {
-        const cartArr = JSON.parse(savedCart);
-        setCartCount(cartArr.reduce((sum, item) => sum + (item.quantity || 1), 0));
-      } else {
-        setCartCount(0);
-      }
-    };
-    window.addEventListener('storage', updateCartCount);
-    return () => window.removeEventListener('storage', updateCartCount);
-  }, []);
 
   return (
      <header className="sticky top-0 z-50 bg-gray-900 shadow-md">
@@ -274,13 +239,7 @@ const Header = () => {
                       {favorites.length}
                   </span>
                 </div>
-                {/* Cart Icon */}
-                <div className="relative">
-                  <FiShoppingCart className="text-2xl text-gray-300 hover:text-blue-400 cursor-pointer" onClick={cartClick}/>
-                  <span className="absolute -top-2 -right-2 bg-blue-600 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center">
-                    {cartCount}
-                  </span>
-                </div>
+
                 {/* User Avatar */}
                 <div className="relative group">
                   <div className="w-10 h-10 rounded-full bg-gray-800 flex items-center justify-center cursor-pointer hover:bg-gray-700" 

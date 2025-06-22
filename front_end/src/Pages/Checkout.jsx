@@ -47,7 +47,7 @@ const paymentMethods = [
 ];
 
 const CheckoutPage = () => {
-  const { cart, products, addToCart } = useProduct();
+  const { products } = useProduct();
   const navigate = useNavigate();
   const [loading, setLoading] = useState(false);
   const [success, setSuccess] = useState(false);
@@ -71,7 +71,11 @@ const CheckoutPage = () => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
   };
 
-  const calculateSubtotal = () => cart.reduce((total, item) => total + item.price * item.quantity, 0);
+  // Get course from URL params or default to first course
+  const courseId = new URLSearchParams(window.location.search).get('courseId');
+  const course = products.find(p => p.id == courseId) || products[0] || { name: 'Sample Course', price: 99.99 };
+  
+  const calculateSubtotal = () => course.price || 0;
   const calculateTotal = () => {
     const subtotal = calculateSubtotal();
     const tax = subtotal * 0.1;
@@ -98,8 +102,7 @@ const CheckoutPage = () => {
     );
   }
 
-  // Helper to check if product is in cart
-  const isInCart = (id) => cart.some(item => item.id === id);
+
 
   return (
     <div className="min-h-screen bg-gray-100 flex flex-col">
@@ -187,29 +190,27 @@ const CheckoutPage = () => {
         <div className="w-full lg:w-1/3 bg-gray-50 p-8 flex flex-col items-center justify-center">
           <div className="w-full max-w-xs bg-white rounded-lg shadow p-6 mb-6">
             <h2 className="font-bold text-lg mb-4">Order summary</h2>
-            {/* Cart items list */}
+            {/* Course item */}
             <div className="mb-4 divide-y">
-              {cart.length === 0 ? (
-                <div className="text-gray-500 text-center py-4">Giỏ hàng của bạn đang trống.</div>
-              ) : (
-                cart.map(item => (
-                  <div key={item.id} className="flex items-center justify-between py-2">
-                    <div className="flex items-center gap-2">
-                      <div className="w-8 h-8 bg-gray-200 rounded flex items-center justify-center overflow-hidden">
-                        {item.image ? (
-                          <img src={item.image} alt={item.name} className="object-cover w-full h-full" />
-                        ) : (
-                          <FiDollarSign className="w-5 h-5 text-gray-400" />
-                        )}
-                      </div>
-                      <div>
-                        <div className="font-medium text-sm">{item.name}</div>
-                        <div className="text-xs text-gray-500">x{item.quantity}</div>
-                      </div>
+              {course ? (
+                <div className="flex items-center justify-between py-2">
+                  <div className="flex items-center gap-2">
+                    <div className="w-8 h-8 bg-gray-200 rounded flex items-center justify-center overflow-hidden">
+                      {course.image ? (
+                        <img src={course.image} alt={course.name} className="object-cover w-full h-full" />
+                      ) : (
+                        <FiDollarSign className="w-5 h-5 text-gray-400" />
+                      )}
                     </div>
-                    <span className="font-medium text-sm">${(item.price * item.quantity).toFixed(2)}</span>
+                    <div>
+                      <div className="font-medium text-sm">{course.name}</div>
+                      <div className="text-xs text-gray-500">x1</div>
+                    </div>
                   </div>
-                ))
+                  <span className="font-medium text-sm">${course.price.toFixed(2)}</span>
+                </div>
+              ) : (
+                <div className="text-gray-500 text-center py-4">No course selected.</div>
               )}
             </div>
             <div className="flex justify-between mb-2">

@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { FiShoppingCart, FiHeart } from "react-icons/fi";
+import { FiHeart } from "react-icons/fi";
 import { useNavigate } from "react-router-dom";
 import favoriteService from '../API/favoriteService';
 
@@ -34,10 +34,7 @@ const ProductCard = ({ product }) => {
     setIsFavorited(!isFavorited);
   };
 
-  const addToCart = (e) => {
-    e.stopPropagation();
-    console.log("Added to cart:", product.name);
-  };
+
 
   const addToFavorite = () => {
     // Add to favorite logic
@@ -81,13 +78,6 @@ const ProductCard = ({ product }) => {
             )}
           </p>
           <div className="flex items-center gap-2">
-            <button
-              onClick={addToCart}
-              className="bg-gradient-to-r from-blue-600 to-blue-700 text-white px-4 py-2 rounded-lg hover:from-blue-700 hover:to-blue-800 transition-all duration-300 shadow-md"
-            >
-              <FiShoppingCart className="inline mr-1" />
-              Add
-            </button>
             <button onClick={toggleFavorite}>
               <FiHeart
                 className={`w-5 h-5 ${isFavorited ? 'text-red-500 fill-current' : 'text-white'}`}

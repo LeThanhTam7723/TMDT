@@ -57,10 +57,6 @@ export const ProductProvider = ({ children }) => {
       window.removeEventListener('sessionUpdated', handleSessionUpdate);
     };
   }, []);
-  const [cart, setCart] = useState(() => {
-    const savedCart = localStorage.getItem('cart');
-    return savedCart ? JSON.parse(savedCart) : [];
-  });
 
   // Load courses from API
   useEffect(() => {
@@ -164,33 +160,7 @@ export const ProductProvider = ({ children }) => {
     }
   };
 
-  const addToCart = (product) => {
-    setCart(prev => {
-      const existingItem = prev.find(item => item.id === product.id);
-      if (existingItem) {
-        return prev.map(item =>
-          item.id === product.id
-            ? { ...item, quantity: item.quantity + 1 }
-            : item
-        );
-      }
-      return [...prev, { ...product, quantity: 1 }];
-    });
-  };
 
-  const removeFromCart = (productId) => {
-    setCart(prev => prev.filter(item => item.id !== productId));
-  };
-
-  const updateCartItemQuantity = (productId, quantity) => {
-    setCart(prev =>
-      prev.map(item =>
-        item.id === productId
-          ? { ...item, quantity }
-          : item
-      )
-    );
-  };
 
   // Search functions
   const searchCourses = async (keyword) => {
@@ -295,13 +265,9 @@ export const ProductProvider = ({ children }) => {
     products,
     favorites,
     setFavorites,
-    cart,
     session,setSession,
     loading,
     searchResults,
-    addToCart,
-    removeFromCart,
-    updateCartItemQuantity,
     getFavoriteProducts, 
     toggleFavorite,
     searchCourses,
