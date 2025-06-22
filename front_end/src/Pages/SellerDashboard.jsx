@@ -14,6 +14,9 @@ import {
   FiAlertCircle,
   FiCheck,
   FiX,
+  FiDownload,
+  FiCopy,
+  FiMoreVertical,
 } from "react-icons/fi";
 import { motion, AnimatePresence } from "framer-motion";
 import SellerService from "../API/SellerService";
@@ -188,16 +191,39 @@ const CoursesTab = () => {
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedLevel, setSelectedLevel] = useState("");
   const [selectedStatus, setSelectedStatus] = useState("");
+  const [selectedCategory, setSelectedCategory] = useState("");
   const [courses, setCourses] = useState([]);
   const [showModal, setShowModal] = useState(false);
   const [selectedCourse, setSelectedCourse] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-  const { session } = useContext(ProductContext);
+  const [selectedCourses, setSelectedCourses] = useState([]);
+  const [bulkLoading, setBulkLoading] = useState(false);
+  const context = useContext(ProductContext);
+  const session = context?.session;
   const navigate = useNavigate();
 
   // Get sellerId from session - user mlnhquxc has ID = 5
   const sellerId = session?.currentUser?.id || session?.user?.id || 5;
+
+  // Add safety check for context
+  if (!context) {
+    console.error('ProductContext is not available. Make sure the component is wrapped with ProductProvider.');
+    return (
+      <div className="text-center py-20">
+        <div className="text-red-600 text-lg font-semibold mb-2">
+          Lỗi hệ thống
+        </div>
+        <p className="text-gray-600 mb-4">Không thể kết nối với context. Vui lòng tải lại trang.</p>
+        <button
+          onClick={() => window.location.reload()}
+          className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700"
+        >
+          Tải lại
+        </button>
+      </div>
+    );
+  }
 
   // Load courses from API
   useEffect(() => {
@@ -259,7 +285,8 @@ const CoursesTab = () => {
     const matchesLevel = !selectedLevel || course.level === selectedLevel;
     const matchesStatus =
       !selectedStatus || course.approvalStatus === selectedStatus;
-    return matchesSearch && matchesLevel && matchesStatus;
+    const matchesCategory = !selectedCategory || course.categoryId.toString() === selectedCategory;
+    return matchesSearch && matchesLevel && matchesStatus && matchesCategory;
   });
 
   const getStatusColor = (approvalStatus) => {
@@ -326,7 +353,7 @@ const CoursesTab = () => {
 
   const handleEditCourse = (course) => {
     // Navigate to edit form
-    navigate(`/seller/course/edit/${course.id}`, { 
+    navigate(`/seller/course/${course.id}/edit`, { 
       state: { 
         course,
         sellerId 
@@ -354,6 +381,225 @@ const CoursesTab = () => {
       )
     );
     alert("Khóa học đã được gửi lại để phê duyệt!");
+  };
+
+  // New CRUD functions
+  const handleDuplicateCourse = async (course) => {
+    const result = await Swal.fire({
+      title: 'Nhân bản khóa học',
+      text: 'Bạn có muốn tạo bản sao của khóa học này?',
+      icon: 'question',
+      showCancelButton: true,
+      confirmButtonColor: '#3085d6',
+      cancelButtonColor: '#d33',
+      confirmButtonText: 'Nhân bản',
+      cancelButtonText: 'Hủy'
+    });
+
+    if (result.isConfirmed) {
+      try {
+        const duplicatedCourse = {
+          ...course,
+          name: `${course.name} (Copy)`,
+          id: undefined, // Remove ID for new course
+          approvalStatus: "pending",
+          status: "Pending Review"
+        };
+        
+        const response = await SellerService.createCourse(sellerId, duplicatedCourse);
+        if (response.code === 200) {
+          // Refresh courses list
+          const coursesResponse = await SellerService.getSellerCourses(sellerId);
+          if (coursesResponse.code === 200) {
+            const transformedCourses = coursesResponse.result.map(course => ({
+              id: course.id,
+              name: course.name,
+              price: course.price,
+              description: course.description,
+              rating: course.rating || 0,
+              episodeCount: course.episodeCount || 0,
+              duration: course.duration || 0,
+              categoryId: course.categoryId,
+              image: "https://images.unsplash.com/photo-1513258496099-48168024aec0?auto=format&fit=crop&w=600&q=80",
+              category: "General English",
+              level: "Intermediate", 
+              status: course.status ? "Active" : "Pending Review",
+              approvalStatus: course.status ? "approved" : "pending",
+              totalHour: Math.floor((course.duration || 0) / 60),
+              lessons: course.episodeCount || 0,
+              students: Math.floor(Math.random() * 500) + 50,
+              createdAt: new Date().toISOString().split('T')[0],
+              lastModified: new Date().toISOString().split('T')[0]
+            }));
+            setCourses(transformedCourses);
+          }
+          
+          Swal.fire(
+            'Đã nhân bản!',
+            'Khóa học đã được nhân bản thành công.',
+            'success'
+          );
+        }
+      } catch (error) {
+        console.error("Error duplicating course:", error);
+        Swal.fire(
+          'Lỗi!',
+          'Có lỗi xảy ra khi nhân bản khóa học.',
+          'error'
+        );
+      }
+    }
+  };
+
+  const handleBulkDelete = async () => {
+    if (selectedCourses.length === 0) return;
+
+    const result = await Swal.fire({
+      title: 'Xóa nhiều khóa học',
+      text: `Bạn có chắc chắn muốn xóa ${selectedCourses.length} khóa học đã chọn?`,
+      icon: 'warning',
+      showCancelButton: true,
+      confirmButtonColor: '#d33',
+      cancelButtonColor: '#3085d6',
+      confirmButtonText: 'Xóa tất cả',
+      cancelButtonText: 'Hủy'
+    });
+
+    if (result.isConfirmed) {
+      setBulkLoading(true);
+      try {
+        const deletePromises = selectedCourses.map(courseId => 
+          SellerService.deleteCourse(sellerId, courseId)
+        );
+        
+        await Promise.all(deletePromises);
+        
+        // Remove deleted courses from local state
+        setCourses(prev => prev.filter(course => !selectedCourses.includes(course.id)));
+        setSelectedCourses([]);
+        
+        Swal.fire(
+          'Đã xóa!',
+          `${selectedCourses.length} khóa học đã được xóa thành công.`,
+          'success'
+        );
+      } catch (error) {
+        console.error("Error bulk deleting courses:", error);
+        Swal.fire(
+          'Lỗi!',
+          'Có lỗi xảy ra khi xóa khóa học.',
+          'error'
+        );
+      } finally {
+        setBulkLoading(false);
+      }
+    }
+  };
+
+  const handleSelectCourse = (courseId) => {
+    setSelectedCourses(prev => {
+      if (prev.includes(courseId)) {
+        return prev.filter(id => id !== courseId);
+      } else {
+        return [...prev, courseId];
+      }
+    });
+  };
+
+  const handleSelectAll = () => {
+    if (selectedCourses.length === filteredCourses.length) {
+      setSelectedCourses([]);
+    } else {
+      setSelectedCourses(filteredCourses.map(course => course.id));
+    }
+  };
+
+  const handleExportCourses = () => {
+    if (filteredCourses.length === 0) {
+      Swal.fire('Thông báo', 'Không có khóa học nào để xuất.', 'info');
+      return;
+    }
+
+    const exportData = filteredCourses.map(course => ({
+      'Tên khóa học': course.name,
+      'Mô tả': course.description,
+      'Giá': course.price,
+      'Cấp độ': course.level,
+      'Trạng thái': course.approvalStatus,
+      'Số giờ': course.totalHour,
+      'Số bài học': course.lessons,
+      'Học viên': course.students,
+      'Ngày tạo': course.createdAt
+    }));
+
+    const csvContent = [
+      Object.keys(exportData[0]).join(','),
+      ...exportData.map(row => Object.values(row).join(','))
+    ].join('\n');
+
+    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+    const link = document.createElement('a');
+    const url = URL.createObjectURL(blob);
+    link.setAttribute('href', url);
+    link.setAttribute('download', `courses_${new Date().toISOString().split('T')[0]}.csv`);
+    link.style.visibility = 'hidden';
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+
+    Swal.fire('Thành công!', `Đã xuất ${filteredCourses.length} khóa học.`, 'success');
+  };
+
+  const handleQuickAction = async (action, course) => {
+    switch (action) {
+      case 'activate':
+        // Quick activate course
+        try {
+          // Update course status to active
+          const response = await SellerService.updateCourse(sellerId, course.id, {
+            ...course,
+            status: true,
+            approvalStatus: 'approved'
+          });
+          if (response.code === 200) {
+            setCourses(prev => prev.map(c => 
+              c.id === course.id 
+                ? { ...c, status: 'Active', approvalStatus: 'approved' }
+                : c
+            ));
+            Swal.fire('Thành công!', 'Khóa học đã được kích hoạt.', 'success');
+          }
+        } catch (error) {
+          console.error('Error activating course:', error);
+          Swal.fire('Lỗi!', 'Không thể kích hoạt khóa học.', 'error');
+        }
+        break;
+        
+      case 'deactivate':
+        // Quick deactivate course
+        try {
+          const response = await SellerService.updateCourse(sellerId, course.id, {
+            ...course,
+            status: false,
+            approvalStatus: 'pending'
+          });
+          if (response.code === 200) {
+            setCourses(prev => prev.map(c => 
+              c.id === course.id 
+                ? { ...c, status: 'Pending Review', approvalStatus: 'pending' }
+                : c
+            ));
+            Swal.fire('Thành công!', 'Khóa học đã được tạm dừng.', 'success');
+          }
+        } catch (error) {
+          console.error('Error deactivating course:', error);
+          Swal.fire('Lỗi!', 'Không thể tạm dừng khóa học.', 'error');
+        }
+        break;
+        
+      default:
+        break;
+    }
   };
 
   // Loading state
@@ -394,55 +640,141 @@ const CoursesTab = () => {
           <span className="px-3 py-1 bg-blue-100 text-blue-600 rounded-full text-sm font-medium">
             {filteredCourses.length} khóa học
           </span>
+          {selectedCourses.length > 0 && (
+            <span className="px-3 py-1 bg-red-100 text-red-600 rounded-full text-sm font-medium">
+              {selectedCourses.length} đã chọn
+            </span>
+          )}
         </div>
-        <Link
-          to="/seller/course/new"
-          state={{ sellerId }}
-          className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 flex items-center gap-2 transition-colors"
-        >
-          <FaBook />
-          Thêm khóa học mới
-        </Link>
+        <div className="flex items-center gap-2">
+          {selectedCourses.length > 0 && (
+            <button
+              onClick={handleBulkDelete}
+              disabled={bulkLoading}
+              className="bg-red-600 text-white px-4 py-2 rounded-lg hover:bg-red-700 flex items-center gap-2 transition-colors disabled:opacity-50"
+            >
+              <FiTrash2 />
+              {bulkLoading ? 'Đang xóa...' : `Xóa ${selectedCourses.length} khóa học`}
+            </button>
+          )}
+          <button
+            onClick={handleExportCourses}
+            className="bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700 flex items-center gap-2 transition-colors"
+          >
+            <FiDownload />
+            Xuất Excel
+          </button>
+          <Link
+            to="/seller/course/new"
+            state={{ sellerId }}
+            className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 flex items-center gap-2 transition-colors"
+          >
+            <FaBook />
+            Thêm khóa học mới
+          </Link>
+        </div>
       </div>
 
       {/* Enhanced Search and Filter */}
-      <div className="mb-6 flex items-center gap-4">
-        <div className="relative flex-1">
-          <input
-            type="text"
-            placeholder="Tìm kiếm khóa học..."
-            value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
-            className="w-full px-4 py-2 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-          />
-          <FiSearch className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400" />
+      <div className="mb-6 space-y-4">
+        <div className="flex items-center gap-4">
+          <div className="relative flex-1">
+            <input
+              type="text"
+              placeholder="Tìm kiếm khóa học..."
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              className="w-full px-4 py-2 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+            />
+            <FiSearch className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400" />
+          </div>
+          <select
+            value={selectedCategory}
+            onChange={(e) => setSelectedCategory(e.target.value)}
+            className="px-4 py-2 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+          >
+            <option value="">Tất cả danh mục</option>
+            <option value="1">IELTS</option>
+            <option value="2">Business English</option>
+            <option value="3">Kids English</option>
+            <option value="4">Conversation</option>
+            <option value="5">Grammar</option>
+            <option value="6">General English</option>
+          </select>
+          <select
+            value={selectedLevel}
+            onChange={(e) => setSelectedLevel(e.target.value)}
+            className="px-4 py-2 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+          >
+            <option value="">Tất cả cấp độ</option>
+            <option value="Beginner">Beginner</option>
+            <option value="Intermediate">Intermediate</option>
+            <option value="Upper Intermediate">Upper Intermediate</option>
+            <option value="Advanced">Advanced</option>
+          </select>
+          <select
+            value={selectedStatus}
+            onChange={(e) => setSelectedStatus(e.target.value)}
+            className="px-4 py-2 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+          >
+            <option value="">Tất cả trạng thái</option>
+            <option value="approved">Đã phê duyệt</option>
+            <option value="pending">Chờ phê duyệt</option>
+            <option value="rejected">Bị từ chối</option>
+          </select>
         </div>
-        <select
-          value={selectedLevel}
-          onChange={(e) => setSelectedLevel(e.target.value)}
-          className="px-4 py-2 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-        >
-          <option value="">Tất cả cấp độ</option>
-          <option value="Beginner">Beginner</option>
-          <option value="Intermediate">Intermediate</option>
-          <option value="Upper Intermediate">Upper Intermediate</option>
-          <option value="Advanced">Advanced</option>
-        </select>
-        <select
-          value={selectedStatus}
-          onChange={(e) => setSelectedStatus(e.target.value)}
-          className="px-4 py-2 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-        >
-          <option value="">Tất cả trạng thái</option>
-          <option value="approved">Đã phê duyệt</option>
-          <option value="pending">Chờ phê duyệt</option>
-          <option value="rejected">Bị từ chối</option>
-        </select>
+        
+        {/* Bulk Selection */}
+        {filteredCourses.length > 0 && (
+          <div className="flex items-center gap-4">
+            <label className="flex items-center gap-2 cursor-pointer">
+              <input
+                type="checkbox"
+                checked={selectedCourses.length === filteredCourses.length}
+                onChange={handleSelectAll}
+                className="w-4 h-4 text-blue-600 rounded focus:ring-blue-500"
+              />
+              <span className="text-sm text-gray-600">
+                Chọn tất cả ({filteredCourses.length} khóa học)
+              </span>
+            </label>
+            {selectedCourses.length > 0 && (
+              <span className="text-sm text-blue-600">
+                Đã chọn {selectedCourses.length}/{filteredCourses.length} khóa học
+              </span>
+            )}
+          </div>
+        )}
       </div>
 
       {/* Enhanced Course Grid */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-        {filteredCourses.map((course) => (
+      {filteredCourses.length === 0 ? (
+        <div className="text-center py-16">
+          <div className="mx-auto w-24 h-24 bg-gray-100 rounded-full flex items-center justify-center mb-4">
+            <FaBook className="w-8 h-8 text-gray-400" />
+          </div>
+          <h3 className="text-xl font-semibold text-gray-600 mb-2">
+            {courses.length === 0 ? 'Chưa có khóa học nào' : 'Không tìm thấy khóa học'}
+          </h3>
+          <p className="text-gray-500 mb-6">
+            {courses.length === 0 
+              ? 'Hãy tạo khóa học đầu tiên của bạn để bắt đầu.' 
+              : 'Thử điều chỉnh bộ lọc để tìm khóa học bạn cần.'}
+          </p>
+          {courses.length === 0 && (
+            <Link
+              to="/seller/course/new"
+              state={{ sellerId }}
+              className="inline-flex items-center gap-2 bg-blue-600 text-white px-6 py-3 rounded-lg hover:bg-blue-700 transition-colors"
+            >
+              <FaBook />
+              Tạo khóa học đầu tiên
+            </Link>
+          )}
+        </div>
+      ) : (
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          {filteredCourses.map((course) => (
           <motion.div
             key={course.id}
             initial={{ opacity: 0, y: 20 }}
@@ -455,27 +787,97 @@ const CoursesTab = () => {
                 alt={course.name}
                 className="w-full h-48 object-cover"
               />
+              
+              {/* Selection Checkbox */}
+              <div className="absolute top-2 left-2">
+                <label className="flex items-center cursor-pointer">
+                  <input
+                    type="checkbox"
+                    checked={selectedCourses.includes(course.id)}
+                    onChange={() => handleSelectCourse(course.id)}
+                    className="w-4 h-4 text-blue-600 rounded focus:ring-blue-500 bg-white"
+                  />
+                </label>
+              </div>
+
+              {/* Action Buttons */}
               <div className="absolute top-2 right-2 flex gap-2">
                 <button
                   onClick={() => handleViewCourse(course)}
                   className="p-2 bg-white rounded-full shadow hover:bg-gray-100 transition-colors"
+                  title="Xem chi tiết"
                 >
                   <FiEye className="text-gray-600" />
                 </button>
-                {course.approvalStatus === "approved" && (
-                  <button
-                    onClick={() => handleEditCourse(course)}
-                    className="p-2 bg-white rounded-full shadow hover:bg-gray-100 transition-colors"
-                  >
-                    <FiEdit2 className="text-blue-600" />
+                
+                {/* Dropdown Menu */}
+                <div className="relative group">
+                  <button className="p-2 bg-white rounded-full shadow hover:bg-gray-100 transition-colors">
+                    <FiMoreVertical className="text-gray-600" />
                   </button>
-                )}
-                <button
-                  onClick={() => handleDeleteCourse(course.id)}
-                  className="p-2 bg-white rounded-full shadow hover:bg-gray-100 transition-colors"
-                >
-                  <FiTrash2 className="text-red-600" />
-                </button>
+                  
+                  {/* Dropdown Content */}
+                  <div className="absolute right-0 top-full mt-1 w-48 bg-white rounded-lg shadow-lg border py-1 hidden group-hover:block z-10">
+                    <button
+                      onClick={() => handleEditCourse(course)}
+                      className="w-full px-4 py-2 text-left text-sm text-gray-700 hover:bg-gray-100 flex items-center gap-2"
+                    >
+                      <FiEdit2 className="text-blue-600" />
+                      Chỉnh sửa
+                    </button>
+                    
+                    <button
+                      onClick={() => handleDuplicateCourse(course)}
+                      className="w-full px-4 py-2 text-left text-sm text-gray-700 hover:bg-gray-100 flex items-center gap-2"
+                    >
+                      <FiCopy className="text-green-600" />
+                      Nhân bản
+                    </button>
+                    
+                    <button
+                      onClick={() => navigate(`/detail/${course.id}`)}
+                      className="w-full px-4 py-2 text-left text-sm text-gray-700 hover:bg-gray-100 flex items-center gap-2"
+                    >
+                      <FiEye className="text-blue-600" />
+                      Xem trước
+                    </button>
+                    
+                    <hr className="my-1" />
+                    
+                    {/* Quick Status Actions - Only for approved courses */}
+                    {course.approvalStatus === "approved" && (
+                      <>
+                        {course.status === "Active" ? (
+                          <button
+                            onClick={() => handleQuickAction('deactivate', course)}
+                            className="w-full px-4 py-2 text-left text-sm text-orange-600 hover:bg-orange-50 flex items-center gap-2"
+                          >
+                            <FiX className="text-orange-600" />
+                            Tạm dừng
+                          </button>
+                        ) : (
+                          <button
+                            onClick={() => handleQuickAction('activate', course)}
+                            className="w-full px-4 py-2 text-left text-sm text-green-600 hover:bg-green-50 flex items-center gap-2"
+                          >
+                            <FiCheck className="text-green-600" />
+                            Kích hoạt
+                          </button>
+                        )}
+                      </>
+                    )}
+                    
+                    <hr className="my-1" />
+                    
+                    <button
+                      onClick={() => handleDeleteCourse(course.id)}
+                      className="w-full px-4 py-2 text-left text-sm text-red-600 hover:bg-red-50 flex items-center gap-2"
+                    >
+                      <FiTrash2 className="text-red-600" />
+                      Xóa khóa học
+                    </button>
+                  </div>
+                </div>
               </div>
             </div>
 
@@ -574,8 +976,9 @@ const CoursesTab = () => {
               </div>
             </div>
           </motion.div>
-        ))}
-      </div>
+                  ))}
+        </div>
+      )}
 
       {/* Course Detail Modal */}
       <AnimatePresence>
@@ -704,10 +1107,30 @@ const RevenueTab = () => {
   const [sellerStats, setSellerStats] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-  const { session } = useContext(ProductContext);
+  const context = useContext(ProductContext);
+  const session = context?.session;
   
   // Get sellerId from session - user mlnhquxc has ID = 5
   const sellerId = session?.currentUser?.id || session?.user?.id || 5;
+
+  // Add safety check for context
+  if (!context) {
+    console.error('ProductContext is not available in RevenueTab.');
+    return (
+      <div className="text-center py-20">
+        <div className="text-red-600 text-lg font-semibold mb-2">
+          Lỗi hệ thống
+        </div>
+        <p className="text-gray-600 mb-4">Không thể kết nối với context.</p>
+        <button
+          onClick={() => window.location.reload()}
+          className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700"
+        >
+          Tải lại
+        </button>
+      </div>
+    );
+  }
 
   useEffect(() => {
     const fetchRevenueData = async () => {

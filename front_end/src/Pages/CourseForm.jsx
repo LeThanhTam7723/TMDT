@@ -10,8 +10,10 @@ const CourseForm = () => {
   const { id } = useParams();
   const navigate = useNavigate();
   const location = useLocation();
-  const { session } = useContext(ProductContext);
+  const context = useContext(ProductContext);
+  const session = context?.session;
   const [loading, setLoading] = useState(false);
+  const [fetchingCourse, setFetchingCourse] = useState(false);
   const [formData, setFormData] = useState({
     name: '',
     description: '',
@@ -21,30 +23,91 @@ const CourseForm = () => {
     totalHour: '',
     lessons: '',
     age: '',
-    level: 'Intermediate'
+    level: ''
   });
 
   // Get sellerId from location state or context
   const sellerId = location.state?.sellerId || session?.user?.id || 1;
   const isEditMode = !!id;
 
+  // Add safety check for context
+  if (!context) {
+    return (
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+        <div className="text-center">
+          <div className="text-red-600 text-lg font-semibold mb-2">
+            Lỗi hệ thống
+          </div>
+          <p className="text-gray-600 mb-4">Không thể kết nối với context. Vui lòng tải lại trang.</p>
+          <button
+            onClick={() => window.location.reload()}
+            className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700"
+          >
+            Tải lại
+          </button>
+        </div>
+      </div>
+    );
+  }
+
   useEffect(() => {
-    if (isEditMode && location.state?.course) {
-      // Use course data from navigation state
-      const course = location.state.course;
-      setFormData({
-        name: course.name || '',
-        description: course.description || '',
-        price: course.price || '',
-        categoryId: course.categoryId || '',
-        image: course.image || '',
-        totalHour: course.totalHour || '',
-        lessons: course.lessons || '',
-        age: course.age || '18+ year old',
-        level: course.level || 'Intermediate'
-      });
-    }
-  }, [isEditMode, location.state]);
+    const loadCourseData = async () => {
+      if (isEditMode) {
+        if (location.state?.course) {
+          // Use course data from navigation state
+          const course = location.state.course;
+          setFormData({
+            name: course.name || '',
+            description: course.description || '',
+            price: course.price || '',
+            categoryId: course.categoryId || '',
+            image: course.image || '',
+            totalHour: course.totalHour || '',
+            lessons: course.lessons || '',
+            age: course.age || '',
+            level: course.level || ''
+          });
+        } else {
+          // If no course data in state (e.g., page refresh), fetch from API
+          setFetchingCourse(true);
+          try {
+            const courses = await SellerService.getSellerCourses(sellerId);
+            if (courses.code === 200) {
+              const course = courses.result.find(c => c.id.toString() === id);
+              if (course) {
+                setFormData({
+                  name: course.name || '',
+                  description: course.description || '',
+                  price: course.price || '',
+                  categoryId: course.categoryId || '',
+                  image: course.image || '',
+                  totalHour: Math.floor((course.duration || 0) / 60) || '',
+                  lessons: course.episodeCount || '',
+                  age: course.age || '',
+                  level: course.level || ''
+                });
+              } else {
+                throw new Error('Course not found');
+              }
+            }
+          } catch (error) {
+            console.error('Error fetching course data:', error);
+            await Swal.fire({
+              title: 'Lỗi!',
+              text: 'Không thể tải thông tin khóa học. Vui lòng thử lại.',
+              icon: 'error',
+              confirmButtonText: 'OK'
+            });
+            navigate('/seller/dashboard');
+          } finally {
+            setFetchingCourse(false);
+          }
+        }
+      }
+    };
+
+    loadCourseData();
+  }, [isEditMode, location.state, id, sellerId, navigate]);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -70,6 +133,28 @@ const CourseForm = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    
+    // Validation check
+    if (!formData.level) {
+      await Swal.fire({
+        title: 'Lỗi!',
+        text: 'Vui lòng chọn cấp độ khóa học.',
+        icon: 'error',
+        confirmButtonText: 'OK'
+      });
+      return;
+    }
+    
+    if (!formData.age) {
+      await Swal.fire({
+        title: 'Lỗi!',
+        text: 'Vui lòng chọn độ tuổi phù hợp.',
+        icon: 'error',
+        confirmButtonText: 'OK'
+      });
+      return;
+    }
+    
     setLoading(true);
     
     try {
@@ -96,17 +181,24 @@ const CourseForm = () => {
       if (response.code === 200) {
         await Swal.fire({
           title: 'Thành công!',
-          text: `Khóa học đã được ${isEditMode ? 'cập nhật' : 'tạo'} thành công.`,
+          text: isEditMode 
+            ? `Khóa học "${formData.name}" đã được cập nhật thành công.`
+            : `Khóa học "${formData.name}" đã được tạo thành công.`,
           icon: 'success',
-          confirmButtonText: 'OK'
+          confirmButtonText: 'OK',
+          timer: 3000,
+          timerProgressBar: true
         });
         navigate('/seller/dashboard');
       }
     } catch (error) {
       console.error('Error saving course:', error);
+      const errorMessage = error.response?.data?.message || 
+        (isEditMode ? 'Có lỗi xảy ra khi cập nhật khóa học.' : 'Có lỗi xảy ra khi tạo khóa học.');
+      
       await Swal.fire({
         title: 'Lỗi!',
-        text: `Có lỗi xảy ra khi ${isEditMode ? 'cập nhật' : 'tạo'} khóa học.`,
+        text: errorMessage,
         icon: 'error',
         confirmButtonText: 'OK'
       });
@@ -126,6 +218,18 @@ const CourseForm = () => {
     }
   };
 
+  // Show loading spinner while fetching course data
+  if (fetchingCourse) {
+    return (
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-16 w-16 border-b-2 border-blue-600 mx-auto mb-4"></div>
+          <div className="text-lg font-semibold text-gray-700">Đang tải thông tin khóa học...</div>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="min-h-screen bg-gray-50 py-8">
       <div className="container mx-auto px-4">
@@ -134,16 +238,23 @@ const CourseForm = () => {
           animate={{ opacity: 1, y: 0 }}
           className="max-w-4xl mx-auto"
         >
-          <div className="flex items-center mb-6">
-            <button
-              onClick={() => navigate('/seller/dashboard')}
-              className="mr-4 p-2 rounded-full hover:bg-gray-100 transition-colors duration-200"
-            >
-              <FiArrowLeft size={24} className="text-gray-600" />
-            </button>
-            <h1 className="text-3xl font-bold text-gray-800">
-              {isEditMode ? 'Chỉnh sửa khóa học' : 'Tạo khóa học mới'}
-            </h1>
+          <div className="flex items-center justify-between mb-6">
+            <div className="flex items-center">
+              <button
+                onClick={() => navigate('/seller/dashboard')}
+                className="mr-4 p-2 rounded-full hover:bg-gray-100 transition-colors duration-200"
+              >
+                <FiArrowLeft size={24} className="text-gray-600" />
+              </button>
+              <h1 className="text-3xl font-bold text-gray-800">
+                {isEditMode ? 'Chỉnh sửa khóa học' : 'Tạo khóa học mới'}
+              </h1>
+            </div>
+            {isEditMode && (
+              <div className="bg-blue-100 text-blue-800 px-3 py-1 rounded-full text-sm font-medium">
+                Đang chỉnh sửa: {formData.name || 'Khóa học'}
+              </div>
+            )}
           </div>
 
           <motion.form 
@@ -310,6 +421,7 @@ const CourseForm = () => {
                   required
                   className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200"
                 >
+                  <option value="">Select level</option>
                   <option value="Beginner">Beginner</option>
                   <option value="Intermediate">Intermediate</option>
                   <option value="Upper Intermediate">Upper Intermediate</option>

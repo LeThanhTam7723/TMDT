@@ -20,7 +20,28 @@ const CourseVideo = () => {
   // Get courseId from URL params and context
   const { id: courseId } = useParams();
   const navigate = useNavigate();
-  const { session } = useContext(ProductContext);
+  const context = useContext(ProductContext);
+  const session = context?.session;
+
+  // Add safety check for context
+  if (!context) {
+    return (
+      <div className="flex h-screen bg-gray-100 items-center justify-center">
+        <div className="text-center">
+          <div className="text-red-600 text-lg font-semibold mb-2">
+            Lỗi hệ thống
+          </div>
+          <p className="text-gray-600 mb-4">Không thể kết nối với context. Vui lòng tải lại trang.</p>
+          <button
+            onClick={() => window.location.reload()}
+            className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700"
+          >
+            Tải lại
+          </button>
+        </div>
+      </div>
+    );
+  }
 
   const resources = [
     { name: 'TOEIC Vocabulary List', file: '/downloads/vocabulary.pdf' },

@@ -41,9 +41,34 @@ const Detail = () => {
 
   // const session = JSON.parse(localStorage.getItem("session"));
  
-  const { session, isInFavorites, toggleFavorite } = useContext(ProductContext);
+  const context = useContext(ProductContext);
+  const session = context?.session;
+  const isInFavorites = context?.isInFavorites;
+  const toggleFavorite = context?.toggleFavorite;
   const { id } = useParams();
   const navigate = useNavigate();
+
+  // Add safety check for context
+  if (!context) {
+    return (
+      <div className="max-w-6xl mx-auto px-4 bg-white">
+        <div className="flex items-center justify-center py-20">
+          <div className="text-center">
+            <div className="text-red-600 text-lg font-semibold mb-2">
+              Lỗi hệ thống
+            </div>
+            <p className="text-gray-600 mb-4">Không thể kết nối với context. Vui lòng tải lại trang.</p>
+            <button
+              onClick={() => window.location.reload()}
+              className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700"
+            >
+              Tải lại
+            </button>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   const [course, setCourse] = useState(null);
   const [courseDetails, setCourseDetails] = useState([]);

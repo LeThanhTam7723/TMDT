@@ -58,7 +58,6 @@ export const ProductProvider = ({ children }) => {
         if (sessionStr) {
           const sessionData = JSON.parse(sessionStr);
           setSession(sessionData);
-          console.log('Session loaded:', sessionData);
         } else {
           setSession(null);
         }
@@ -112,21 +111,21 @@ export const ProductProvider = ({ children }) => {
             sellerId: course.sellerId,
             sellerName: course.sellerName,
             status: course.status,
-            // Add default values for frontend compatibility
+            // Add default values for frontend compatibility - cached to avoid repeated calculations
             image: getCourseImage(course),
             category: course.categoryName || "General",
             age: "18+ year old",
-            ratingCount: Math.floor(Math.random() * 500) + 50,
+            ratingCount: (course.id * 47) % 500 + 50, // Deterministic instead of random
             owner: {
               name: course.sellerName || "Unknown",
-              avatar: "https://randomuser.me/api/portraits/women/1.jpg",
+              avatar: `https://i.pravatar.cc/150?img=${(course.id % 70) + 1}`,
               experience: "5+ years teaching",
               qualifications: ["TEFL", "Teaching Specialist"],
-              students: Math.floor(Math.random() * 1000) + 100,
+              students: (course.id * 73) % 1000 + 100, // Deterministic instead of random
               rating: 4.5
             },
-            totalHour: Math.floor(Math.random() * 30) + 10,
-            lessons: Math.floor(Math.random() * 20) + 5,
+            totalHour: (course.id * 31) % 30 + 10, // Deterministic instead of random
+            lessons: (course.id * 19) % 20 + 5, // Deterministic instead of random
             level: "Intermediate",
             duration: "Medium-term (3-6 months)",
             features: ["Live classes", "Study materials", "Personal feedback"]
@@ -151,7 +150,6 @@ export const ProductProvider = ({ children }) => {
       try {
         const response = await favoriteService.getUserFavorites(session.currentUser.id,session.token);
         setFavorites(response.data.result || []);
-        console.log(response.data.result);
       } catch (error) {
         console.error('Lỗi khi fetch danh sách yêu thích:', error);
       }
@@ -221,21 +219,21 @@ export const ProductProvider = ({ children }) => {
           sellerId: course.sellerId,
           sellerName: course.sellerName,
           status: course.status,
-          // Add default values for frontend compatibility
+          // Add default values for frontend compatibility - cached
           image: getCourseImage(course),
           category: course.categoryName || "General",
           age: "18+ year old",
-          ratingCount: Math.floor(Math.random() * 500) + 50,
+          ratingCount: (course.id * 47) % 500 + 50,
           owner: {
             name: course.sellerName || "Unknown",
-            avatar: "https://randomuser.me/api/portraits/women/1.jpg",
+            avatar: `https://i.pravatar.cc/150?img=${(course.id % 70) + 1}`,
             experience: "5+ years teaching",
             qualifications: ["TEFL", "Teaching Specialist"],
-            students: Math.floor(Math.random() * 1000) + 100,
+            students: (course.id * 73) % 1000 + 100,
             rating: 4.5
           },
-          totalHour: Math.floor(Math.random() * 30) + 10,
-          lessons: Math.floor(Math.random() * 20) + 5,
+          totalHour: (course.id * 31) % 30 + 10,
+          lessons: (course.id * 19) % 20 + 5,
           level: "Intermediate",
           duration: "Medium-term (3-6 months)",
           features: ["Live classes", "Study materials", "Personal feedback"]
@@ -268,21 +266,21 @@ export const ProductProvider = ({ children }) => {
           sellerId: course.sellerId,
           sellerName: course.sellerName,
           status: course.status,
-          // Add default values for frontend compatibility
+          // Add default values for frontend compatibility - cached
           image: getCourseImage(course),
           category: course.categoryName || "General",
           age: "18+ year old",
-          ratingCount: Math.floor(Math.random() * 500) + 50,
+          ratingCount: (course.id * 47) % 500 + 50,
           owner: {
             name: course.sellerName || "Unknown",
-            avatar: "https://randomuser.me/api/portraits/women/1.jpg",
+            avatar: `https://i.pravatar.cc/150?img=${(course.id % 70) + 1}`,
             experience: "5+ years teaching",
             qualifications: ["TEFL", "Teaching Specialist"],
-            students: Math.floor(Math.random() * 1000) + 100,
+            students: (course.id * 73) % 1000 + 100,
             rating: 4.5
           },
-          totalHour: Math.floor(Math.random() * 30) + 10,
-          lessons: Math.floor(Math.random() * 20) + 5,
+          totalHour: (course.id * 31) % 30 + 10,
+          lessons: (course.id * 19) % 20 + 5,
           level: "Intermediate",
           duration: "Medium-term (3-6 months)",
           features: ["Live classes", "Study materials", "Personal feedback"]
