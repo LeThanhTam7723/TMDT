@@ -93,6 +93,7 @@ const Header = () => {
   const menuItems = [
     { name: "Home", link: "/" },
     { name: "Shop", link: "/shop", hasDropdown: true },
+
     { name: "Pages", link: "#", hasDropdown: true },
     { name: "Blog", link: "#" },
     { name: "Contact", link: "/video" },
@@ -225,8 +226,23 @@ const Header = () => {
                   type="text"
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
-                  placeholder="Search..."
-                  className="w-60 px-4 py-2 rounded-full bg-gray-800 border border-gray-700 text-gray-300 focus:outline-none focus:border-blue-500"
+                  onKeyPress={(e) => {
+                    if (e.key === 'Enter' && searchQuery.trim()) {
+                      navigate(`/shop?q=${encodeURIComponent(searchQuery.trim())}`);
+                    }
+                  }}
+                  placeholder="Search courses..."
+                  className="w-60 px-4 py-2 pl-10 rounded-full bg-gray-800 border border-gray-700 text-gray-300 focus:outline-none focus:border-blue-500"
+                />
+                <FiSearch 
+                  className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4 cursor-pointer"
+                  onClick={() => {
+                    if (searchQuery.trim()) {
+                      navigate(`/shop?q=${encodeURIComponent(searchQuery.trim())}`);
+                    } else {
+                      navigate('/shop');
+                    }
+                  }}
                 />
                 <button onClick={handleVoiceSearch}
                   className={`absolute right-2 top-1/2 transform -translate-y-1/2 p-2 rounded-full ${isListening ? "text-red-500" : "text-gray-400"} hover:bg-gray-800`}

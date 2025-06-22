@@ -1,12 +1,22 @@
 import React, { useState, useEffect } from "react";
 import { FiHeart, FiSearch, FiFilter, FiX, FiClock, FiUsers, FiBook, FiDollarSign, FiShoppingCart } from "react-icons/fi";
 import { motion } from "framer-motion";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useSearchParams } from "react-router-dom";
 import { useProduct } from "../context/ProductContext";
 import favoriteService from '../API/favoriteService';
 
 const Store = () => {
-  const { products, toggleFavorite, getFavoriteProducts, addToCart } = useProduct();
+  const { 
+    products, 
+    toggleFavorite, 
+    getFavoriteProducts, 
+    addToCart, 
+    loading, 
+    searchResults, 
+    searchCourses, 
+    searchCoursesAdvanced, 
+    clearSearchResults 
+  } = useProduct();
   const [searchTerm, setSearchTerm] = useState("");
   const [notification, setNotification] = useState({ show: false, message: '', type: '' });
   const [showFilters, setShowFilters] = useState(false);
@@ -17,7 +27,12 @@ const Store = () => {
   const [selectedPrices, setSelectedPrices] = useState([]);
   const [selectedFeatures, setSelectedFeatures] = useState([]);
   const [selectedRatings, setSelectedRatings] = useState([]);
+  const [isSearching, setIsSearching] = useState(false);
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
+  
+  // Get initial search term from URL
+  const initialSearchTerm = searchParams.get('q') || '';
 
   const showNotification = (message, type) => {
     setNotification({ show: true, message, type });
@@ -122,9 +137,97 @@ const Store = () => {
     setSelectedPrices([]);
     setSelectedFeatures([]);
     setSelectedRatings([]);
+    setSearchTerm("");
+    clearSearchResults();
+    setIsSearching(false);
   };
 
-  const filteredProducts = products.filter(product => {
+  // Handle search
+  const handleSearch = async (keyword) => {
+    if (!keyword.trim()) {
+      clearSearchResults();
+      setIsSearching(false);
+      return;
+    }
+    
+    setIsSearching(true);
+    await searchCourses(keyword.trim());
+  };
+
+  // Handle advanced search with filters
+  const handleAdvancedSearch = async () => {
+    const searchParams = {};
+    
+    if (searchTerm.trim()) {
+      searchParams.keyword = searchTerm.trim();
+    }
+    
+    if (selectedCategories.length > 0) {
+      // For now, we'll use the first selected category
+      // In a real app, you might want to handle multiple categories differently
+      const categoryMap = {
+        'IELTS': 1,
+        'Business English': 2,
+        'Kids English': 3,
+        'Conversation': 4,
+        'Grammar': 5,
+        'General English': 6
+      };
+      searchParams.categoryId = categoryMap[selectedCategories[0]];
+    }
+    
+    if (selectedPrices.length > 0) {
+      const priceRange = selectedPrices[0].split('-');
+      searchParams.minPrice = parseFloat(priceRange[0]);
+      searchParams.maxPrice = parseFloat(priceRange[1]);
+    }
+    
+    if (selectedRatings.length > 0) {
+      searchParams.minRating = parseFloat(selectedRatings[0]);
+    }
+    
+    searchParams.status = true; // Only show active courses
+    
+    setIsSearching(true);
+    await searchCoursesAdvanced(searchParams);
+  };
+
+  // Handle initial search term from URL
+  useEffect(() => {
+    if (initialSearchTerm && initialSearchTerm !== searchTerm) {
+      setSearchTerm(initialSearchTerm);
+    }
+  }, [initialSearchTerm]);
+
+  // Debounced search
+  useEffect(() => {
+    const timeoutId = setTimeout(() => {
+      if (searchTerm) {
+        handleSearch(searchTerm);
+      } else {
+        clearSearchResults();
+        setIsSearching(false);
+      }
+    }, 500);
+
+    return () => clearTimeout(timeoutId);
+  }, [searchTerm]);
+
+  // Apply advanced filters when they change
+  useEffect(() => {
+    if (selectedCategories.length > 0 || selectedPrices.length > 0 || selectedRatings.length > 0) {
+      handleAdvancedSearch();
+    } else if (!searchTerm.trim()) {
+      clearSearchResults();
+      setIsSearching(false);
+    }
+  }, [selectedCategories, selectedPrices, selectedRatings]);
+
+  // Use search results if searching, otherwise use all products
+  const displayProducts = isSearching ? searchResults : products;
+  
+  // Apply local filters only if not using API search
+  const filteredProducts = isSearching ? displayProducts : products.filter(product => {
     const matchesSearch = product.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
                          product.description.toLowerCase().includes(searchTerm.toLowerCase());
     const matchesCategory = selectedCategories.length === 0 || selectedCategories.includes(product.category);
@@ -136,7 +239,7 @@ const Store = () => {
       return product.price >= min && product.price <= max;
     });
     const matchesFeatures = selectedFeatures.length === 0 || 
-      selectedFeatures.every(feature => product.features.includes(feature));
+      selectedFeatures.every(feature => product.features && product.features.includes(feature));
     const matchesRating = selectedRatings.length === 0 || 
       selectedRatings.some(rating => product.rating >= Number(rating));
 
@@ -148,7 +251,7 @@ const Store = () => {
   const levels = [...new Set(products.map(p => p.level))];
   const ages = [...new Set(products.map(p => p.age))];
   const durations = [...new Set(products.map(p => p.duration))];
-  const allFeatures = [...new Set(products.flatMap(p => p.features))];
+  const allFeatures = [...new Set(products.flatMap(p => p.features || []))];
   const priceRanges = [
     { label: 'Under $20', value: '0-20' },
     { label: '$20 - $50', value: '20-50' },
@@ -364,7 +467,35 @@ const Store = () => {
           </motion.div>
         )}
 
-        {filteredProducts.length > 0 ? (
+        {/* Loading indicator */}
+        {loading && (
+          <div className="flex justify-center items-center py-12">
+            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
+            <span className="ml-3 text-gray-600">
+              {isSearching ? 'Searching courses...' : 'Loading courses...'}
+            </span>
+          </div>
+        )}
+
+        {/* Search status */}
+        {isSearching && !loading && (
+          <div className="mb-4 p-3 bg-blue-50 border border-blue-200 rounded-lg">
+            <div className="flex items-center gap-2">
+              <FiSearch className="text-blue-600" />
+              <span className="text-blue-800">
+                {searchTerm ? `Search results for "${searchTerm}"` : 'Advanced search results'}
+              </span>
+              <button
+                onClick={clearFilters}
+                className="ml-auto text-blue-600 hover:text-blue-800 text-sm underline"
+              >
+                Clear search
+              </button>
+            </div>
+          </div>
+        )}
+
+        {!loading && filteredProducts.length > 0 ? (
           <div className="grid grid-cols-1 gap-4">
             {filteredProducts.map((product) => (
               <div 
@@ -424,19 +555,28 @@ const Store = () => {
                   </div>
                 ))}
           </div>
-        ) : (
+        ) : !loading ? (
           <div className="text-center py-12 bg-white rounded-lg shadow">
             <FiSearch className="w-16 h-16 mx-auto text-gray-400 mb-4" />
-            <h3 className="text-xl font-semibold text-gray-900 mb-2">No courses found</h3>
-            <p className="text-gray-500 mb-4">Try adjusting your filters or search term</p>
-            <button
-              onClick={clearFilters}
-              className="px-4 py-2 bg-blue-500 text-white rounded-full hover:bg-blue-600 transition"
-            >
-              Clear Filters
-            </button>
-        </div>
-        )}
+            <h3 className="text-xl font-semibold text-gray-900 mb-2">
+              {isSearching ? 'No courses found' : 'No courses available'}
+            </h3>
+            <p className="text-gray-500 mb-4">
+              {isSearching 
+                ? 'Try adjusting your search term or filters' 
+                : 'Please check back later for new courses'
+              }
+            </p>
+            {isSearching && (
+              <button
+                onClick={clearFilters}
+                className="px-4 py-2 bg-blue-500 text-white rounded-full hover:bg-blue-600 transition"
+              >
+                Clear Search
+              </button>
+            )}
+          </div>
+        ) : null}
       </div>
     </div>
   );

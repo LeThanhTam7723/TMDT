@@ -114,4 +114,96 @@ public class CourseController {
                     .build();
         }
     }
+    
+    // Tìm kiếm khóa học theo từ khóa
+    @GetMapping("/search")
+    public ApiResponse<List<CourseListResponseDTO>> searchCourses(@RequestParam(required = false) String keyword) {
+        try {
+            List<CourseListResponseDTO> courses;
+            if (keyword == null || keyword.trim().isEmpty()) {
+                courses = courseService.getAllCourses();
+            } else {
+                courses = courseService.searchCourses(keyword.trim());
+            }
+            return ApiResponse.<List<CourseListResponseDTO>>builder()
+                    .code(200)
+                    .message("Search completed successfully")
+                    .result(courses)
+                    .build();
+        } catch (Exception e) {
+            log.error("Error searching courses: ", e);
+            return ApiResponse.<List<CourseListResponseDTO>>builder()
+                    .code(500)
+                    .message("Error searching courses: " + e.getMessage())
+                    .build();
+        }
+    }
+    
+    // Tìm kiếm khóa học theo category
+    @GetMapping("/search/category/{categoryId}")
+    public ApiResponse<List<CourseListResponseDTO>> searchCoursesByCategory(@PathVariable Integer categoryId) {
+        try {
+            List<CourseListResponseDTO> courses = courseService.getCoursesByCategory(categoryId);
+            return ApiResponse.<List<CourseListResponseDTO>>builder()
+                    .code(200)
+                    .message("Search by category completed successfully")
+                    .result(courses)
+                    .build();
+        } catch (Exception e) {
+            log.error("Error searching courses by category: ", e);
+            return ApiResponse.<List<CourseListResponseDTO>>builder()
+                    .code(500)
+                    .message("Error searching courses by category: " + e.getMessage())
+                    .build();
+        }
+    }
+    
+    // Tìm kiếm khóa học theo khoảng giá
+    @GetMapping("/search/price")
+    public ApiResponse<List<CourseListResponseDTO>> searchCoursesByPriceRange(
+            @RequestParam Double minPrice, 
+            @RequestParam Double maxPrice) {
+        try {
+            List<CourseListResponseDTO> courses = courseService.getCoursesByPriceRange(minPrice, maxPrice);
+            return ApiResponse.<List<CourseListResponseDTO>>builder()
+                    .code(200)
+                    .message("Search by price range completed successfully")
+                    .result(courses)
+                    .build();
+        } catch (Exception e) {
+            log.error("Error searching courses by price range: ", e);
+            return ApiResponse.<List<CourseListResponseDTO>>builder()
+                    .code(500)
+                    .message("Error searching courses by price range: " + e.getMessage())
+                    .build();
+        }
+    }
+    
+
+    
+    // Tìm kiếm nâng cao với nhiều tiêu chí
+    @GetMapping("/search/advanced")
+    public ApiResponse<List<CourseListResponseDTO>> searchCoursesAdvanced(
+            @RequestParam(required = false) String keyword,
+            @RequestParam(required = false) Integer categoryId,
+            @RequestParam(required = false) Double minPrice,
+            @RequestParam(required = false) Double maxPrice,
+            @RequestParam(required = false) Double minRating,
+            @RequestParam(required = false) Boolean status) {
+        try {
+            List<CourseListResponseDTO> courses = courseService.searchCoursesAdvanced(
+                keyword, categoryId, minPrice, maxPrice, minRating, status);
+            return ApiResponse.<List<CourseListResponseDTO>>builder()
+                    .code(200)
+                    .message("Advanced search completed successfully")
+                    .result(courses)
+                    .build();
+        } catch (Exception e) {
+            log.error("Error in advanced search: ", e);
+            return ApiResponse.<List<CourseListResponseDTO>>builder()
+                    .code(500)
+                    .message("Error in advanced search: " + e.getMessage())
+                    .build();
+        }
+    }
 }

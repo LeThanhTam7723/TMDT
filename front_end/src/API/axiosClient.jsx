@@ -12,9 +12,12 @@ axiosClient.interceptors.request.use(
   (config) => {
     const skipAuthEndpoints = [
       "auth/login",
+      "auth/introspect",
+      "auth/logout",
       "users/createUser",
       "users/existUser",
       "verifyRegister",
+      "courses",
     ];
     const shouldSkipAuth = skipAuthEndpoints.some((endpoint) =>
       config.url?.includes(endpoint)

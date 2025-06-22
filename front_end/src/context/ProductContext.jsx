@@ -1,5 +1,6 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import favoriteService from '../API/favoriteService';
+import CourseService from '../API/CourseService';
 
 export const ProductContext = createContext();
 
@@ -8,158 +9,67 @@ export const useProduct = () => {
 };
 
 export const ProductProvider = ({ children }) => {
-  const [products] = useState([
-    {
-      id: 1,
-      name: "IELTS Intensive",
-      price: 79.99,
-      image: "https://images.unsplash.com/photo-1513258496099-48168024aec0?auto=format&fit=crop&w=600&q=80",
-      category: "IELTS",
-      age: "13-18 year old",
-      rating: 4.8,
-      ratingCount: 320,
-      owner: {
-        name: "Ms. Emma",
-        avatar: "https://randomuser.me/api/portraits/women/1.jpg",
-        experience: "8 years teaching IELTS",
-        qualifications: ["CELTA", "DELTA", "MA in TESOL"],
-        students: 1200,
-        rating: 4.9
-      },
-      description: "Boost your IELTS score with intensive practice and expert tips.",
-      totalHour: 30,
-      lessons: 20,
-      level: "Intermediate",
-      duration: "Medium-term (3-6 months)",
-      features: ["Live classes", "Mock tests", "Personal feedback", "Study materials"]
-    },
-    {
-      id: 2,
-      name: "Business English Pro",
-      price: 89.99,
-      image: "https://images.unsplash.com/photo-1503676382389-4809596d5290?auto=format&fit=crop&w=600&q=80",
-      category: "Business English",
-      age: "18+ year old",
-      rating: 4.7,
-      ratingCount: 210,
-      owner: {
-        name: "Mr. John",
-        avatar: "https://randomuser.me/api/portraits/men/1.jpg",
-        experience: "10 years in corporate training",
-        qualifications: ["MBA", "TEFL", "Business Communication Specialist"],
-        students: 800,
-        rating: 4.8
-      },
-      description: "Master business communication and professional English skills.",
-      totalHour: 28,
-      lessons: 18,
-      level: "Upper Intermediate",
-      duration: "Short-term (1-3 months)",
-      features: ["Business case studies", "Role-plays", "Industry-specific vocabulary"]
-    },
-    {
-      id: 3,
-      name: "English for Kids",
-      price: 59.99,
-      image: "https://images.unsplash.com/photo-1522075469751-3a6694fb2f61?auto=format&fit=crop&w=600&q=80",
-      category: "Kids English",
-      age: "4-12 year old",
-      rating: 4.9,
-      ratingCount: 400,
-      owner: {
-        name: "Ms. Linda",
-        avatar: "https://randomuser.me/api/portraits/women/2.jpg",
-        experience: "6 years teaching young learners",
-        qualifications: ["TEFL", "Young Learners Specialist"],
-        students: 950,
-        rating: 4.9
-      },
-      description: "Fun and interactive English lessons for children.",
-      totalHour: 22,
-      lessons: 15,
-      level: "Beginner",
-      duration: "Long-term (6+ months)",
-      features: ["Interactive games", "Songs and stories", "Parent progress reports", "Small group classes"]
-    },
-    {
-      id: 4,
-      name: "Conversation Mastery",
-      price: 69.99,
-      image: "https://images.unsplash.com/photo-1464983953574-0892a716854b?auto=format&fit=crop&w=600&q=80",
-      category: "Conversation",
-      age: "18+ year old",
-      rating: 4.6,
-      ratingCount: 180,
-      owner: {
-        name: "Mr. David",
-        avatar: "https://randomuser.me/api/portraits/men/2.jpg",
-        experience: "7 years in conversation teaching",
-        qualifications: ["CELTA", "Conversation Specialist"],
-        students: 650,
-        rating: 4.7
-      },
-      description: "Speak English confidently in daily and travel situations.",
-      totalHour: 20,
-      lessons: 12,
-      level: "Elementary",
-      duration: "Short-term (1-3 months)",
-      features: ["Daily conversation practice", "Cultural insights", "Pronunciation focus", "Travel vocabulary"]
-    },
-    {
-      id: 5,
-      name: "Grammar Essentials",
-      price: 49.99,
-      image: "https://images.unsplash.com/photo-1519125323398-675f0ddb6308?auto=format&fit=crop&w=600&q=80",
-      category: "Grammar",
-      age: "13-18 year old",
-      rating: 4.5,
-      ratingCount: 150,
-      owner: {
-        name: "Ms. Sarah",
-        avatar: "https://randomuser.me/api/portraits/women/3.jpg",
-        experience: "5 years teaching grammar",
-        qualifications: ["MA in Linguistics", "Grammar Specialist"],
-        students: 500,
-        rating: 4.6
-      },
-      description: "Solidify your English grammar foundation with easy explanations.",
-      totalHour: 18,
-      lessons: 10,
-      level: "Intermediate",
-      duration: "Medium-term (3-6 months)",
-      features: ["Clear explanations", "Practice exercises", "Grammar quizzes", "Writing practice"]
-    },
-    {
-      id: 6,
-      name: "General English Skills",
-      price: 64.99,
-      image: "https://images.unsplash.com/photo-1503676382389-4809596d5290?auto=format&fit=crop&w=600&q=80",
-      category: "General English",
-      age: "18+ year old",
-      rating: 4.7,
-      ratingCount: 220,
-      owner: {
-        name: "Mr. Alex",
-        avatar: "https://randomuser.me/api/portraits/men/3.jpg",
-        experience: "9 years teaching general English",
-        qualifications: ["DELTA", "General English Specialist"],
-        students: 1100,
-        rating: 4.8
-      },
-      description: "Improve your overall English for work, study, and life.",
-      totalHour: 25,
-      lessons: 14,
-      level: "Upper Intermediate",
-      duration: "Long-term (6+ months)",
-      features: ["Comprehensive curriculum", "Speaking practice", "Reading comprehension", "Writing skills"]
-    }
-  ]);
+  const [products, setProducts] = useState([]);
+  const [loading, setLoading] = useState(false);
+  const [searchResults, setSearchResults] = useState([]);
   const [session, setSession] = useState(null);
   const [favorites, setFavorites] = useState([]);
   const [cart, setCart] = useState(() => {
     const savedCart = localStorage.getItem('cart');
     return savedCart ? JSON.parse(savedCart) : [];
   });
+
+  // Load courses from API
+  useEffect(() => {
+    const fetchCourses = async () => {
+      setLoading(true);
+      try {
+        const response = await CourseService.getAllCourses();
+        if (response.code === 200) {
+          // Transform API data to match frontend format
+          const transformedCourses = response.result.map(course => ({
+            id: course.id,
+            name: course.name,
+            price: course.price,
+            description: course.description,
+            rating: course.rating || 0,
+            categoryId: course.categoryId,
+            categoryName: course.categoryName,
+            sellerId: course.sellerId,
+            sellerName: course.sellerName,
+            status: course.status,
+            // Add default values for frontend compatibility
+            image: "https://images.unsplash.com/photo-1513258496099-48168024aec0?auto=format&fit=crop&w=600&q=80",
+            category: course.categoryName || "General",
+            age: "18+ year old",
+            ratingCount: Math.floor(Math.random() * 500) + 50,
+            owner: {
+              name: course.sellerName || "Unknown",
+              avatar: "https://randomuser.me/api/portraits/women/1.jpg",
+              experience: "5+ years teaching",
+              qualifications: ["TEFL", "Teaching Specialist"],
+              students: Math.floor(Math.random() * 1000) + 100,
+              rating: 4.5
+            },
+            totalHour: Math.floor(Math.random() * 30) + 10,
+            lessons: Math.floor(Math.random() * 20) + 5,
+            level: "Intermediate",
+            duration: "Medium-term (3-6 months)",
+            features: ["Live classes", "Study materials", "Personal feedback"]
+          }));
+          setProducts(transformedCourses);
+        }
+      } catch (error) {
+        console.error('Error fetching courses:', error);
+        // Fallback to empty array if API fails
+        setProducts([]);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchCourses();
+  }, []);
 
   useEffect(() => {
     const fetchFavorites = async () => {
@@ -239,16 +149,121 @@ export const ProductProvider = ({ children }) => {
     );
   };
 
+  // Search functions
+  const searchCourses = async (keyword) => {
+    setLoading(true);
+    try {
+      const response = await CourseService.searchCourses(keyword);
+      if (response.code === 200) {
+        const transformedResults = response.result.map(course => ({
+          id: course.id,
+          name: course.name,
+          price: course.price,
+          description: course.description,
+          rating: course.rating || 0,
+          categoryId: course.categoryId,
+          categoryName: course.categoryName,
+          sellerId: course.sellerId,
+          sellerName: course.sellerName,
+          status: course.status,
+          // Add default values for frontend compatibility
+          image: "https://images.unsplash.com/photo-1513258496099-48168024aec0?auto=format&fit=crop&w=600&q=80",
+          category: course.categoryName || "General",
+          age: "18+ year old",
+          ratingCount: Math.floor(Math.random() * 500) + 50,
+          owner: {
+            name: course.sellerName || "Unknown",
+            avatar: "https://randomuser.me/api/portraits/women/1.jpg",
+            experience: "5+ years teaching",
+            qualifications: ["TEFL", "Teaching Specialist"],
+            students: Math.floor(Math.random() * 1000) + 100,
+            rating: 4.5
+          },
+          totalHour: Math.floor(Math.random() * 30) + 10,
+          lessons: Math.floor(Math.random() * 20) + 5,
+          level: "Intermediate",
+          duration: "Medium-term (3-6 months)",
+          features: ["Live classes", "Study materials", "Personal feedback"]
+        }));
+        setSearchResults(transformedResults);
+        return transformedResults;
+      }
+    } catch (error) {
+      console.error('Error searching courses:', error);
+      setSearchResults([]);
+      return [];
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const searchCoursesAdvanced = async (searchParams) => {
+    setLoading(true);
+    try {
+      const response = await CourseService.searchCoursesAdvanced(searchParams);
+      if (response.code === 200) {
+        const transformedResults = response.result.map(course => ({
+          id: course.id,
+          name: course.name,
+          price: course.price,
+          description: course.description,
+          rating: course.rating || 0,
+          categoryId: course.categoryId,
+          categoryName: course.categoryName,
+          sellerId: course.sellerId,
+          sellerName: course.sellerName,
+          status: course.status,
+          // Add default values for frontend compatibility
+          image: "https://images.unsplash.com/photo-1513258496099-48168024aec0?auto=format&fit=crop&w=600&q=80",
+          category: course.categoryName || "General",
+          age: "18+ year old",
+          ratingCount: Math.floor(Math.random() * 500) + 50,
+          owner: {
+            name: course.sellerName || "Unknown",
+            avatar: "https://randomuser.me/api/portraits/women/1.jpg",
+            experience: "5+ years teaching",
+            qualifications: ["TEFL", "Teaching Specialist"],
+            students: Math.floor(Math.random() * 1000) + 100,
+            rating: 4.5
+          },
+          totalHour: Math.floor(Math.random() * 30) + 10,
+          lessons: Math.floor(Math.random() * 20) + 5,
+          level: "Intermediate",
+          duration: "Medium-term (3-6 months)",
+          features: ["Live classes", "Study materials", "Personal feedback"]
+        }));
+        setSearchResults(transformedResults);
+        return transformedResults;
+      }
+    } catch (error) {
+      console.error('Error in advanced search:', error);
+      setSearchResults([]);
+      return [];
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const clearSearchResults = () => {
+    setSearchResults([]);
+  };
+
   const value = {
     products,
     favorites,
     setFavorites,
     cart,
     session,setSession,
+    loading,
+    searchResults,
     addToCart,
     removeFromCart,
     updateCartItemQuantity,
-    getFavoriteProducts, toggleFavorite,
+    getFavoriteProducts, 
+    toggleFavorite,
+    searchCourses,
+    searchCoursesAdvanced,
+    clearSearchResults,
   };
 
   return (

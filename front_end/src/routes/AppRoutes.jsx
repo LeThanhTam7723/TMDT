@@ -2,6 +2,7 @@ import React, { Suspense } from "react";
 import { Routes, Route } from "react-router-dom";
 import Home from "../Pages/HomePage";
 import Store from "../Pages/Store";
+
 import Cart from "../Pages/Cart";
 import CheckoutPage from "../Pages/Payment";
 import AuthPage from "../Pages/Authentication";
@@ -31,6 +32,7 @@ const AppRoutes = () => {
         {/* Public Routes */}
         <Route path="/" element={<Home />} />
         <Route path="/shop" element={<Store />} />
+
         <Route path="/favorites" element={<Favorite />} />
         <Route path="/cart" element={<Cart />} />
         <Route path="/payment" element={<CheckoutPage />} />
