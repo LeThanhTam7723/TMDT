@@ -18,14 +18,8 @@ const Detail = () => {
   const [showMoreInstructor, setShowMoreInstructor] = useState(false);
   const [showVideoPreview, setShowVideoPreview] = useState(false);
 
-  const session = JSON.parse(localStorage.getItem("session"));
-
-  // Get ID from URL params and navigation hook
-
-  
-  // Get context and ID from URL params and navigation hook
-  const { isInFavorites, toggleFavorite } = useContext(ProductContext);
-
+  // const session = JSON.parse(localStorage.getItem("session"));
+  const {session, isInFavorites, toggleFavorite } = useContext(ProductContext);
   const { id } = useParams();
   const navigate = useNavigate();
   
