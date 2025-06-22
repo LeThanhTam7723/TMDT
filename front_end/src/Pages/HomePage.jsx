@@ -27,7 +27,7 @@ const HomePage = () => {
       title: "Master English with Native Speakers",
       description: "Learn from experienced native speakers and improve your English skills. Special offer: 25% off!",
       image: "https://keithspeakingacademy.com/wp-content/uploads/2024/10/Understand-native-English-speaker.jpg",
-      // bgGradient: "from-purple-900 to-indigo-800"
+      bgGradient: "from-purple-900 to-indigo-800"
     },
     {
       title: "Professional IELTS Training",
@@ -245,30 +245,30 @@ const HomePage = () => {
             const names = ["Nguyễn Văn An", "Trần Thị Bình", "Lê Hoàng Nam", "Phạm Minh Anh"];
             
             return (
-              <div 
+            <div 
                 key={product.id} 
                 className="bg-gradient-to-b from-gray-800 to-gray-900 rounded-xl p-6 shadow-lg hover:shadow-2xl transition-all duration-300 border border-gray-700 relative overflow-hidden cursor-pointer"
                 onClick={() => handleProductClick(product.id)}
-              >
-                <div className="absolute top-0 right-0 w-16 h-16 bg-blue-600 transform rotate-45 translate-x-8 -translate-y-8"></div>
-                <div className="text-gray-100 mb-8 relative">
-                  <span className="text-blue-400 text-4xl absolute -top-4 -left-2">"</span>
-                  <p className="pt-4">
+            >
+              <div className="absolute top-0 right-0 w-16 h-16 bg-blue-600 transform rotate-45 translate-x-8 -translate-y-8"></div>
+              <div className="text-gray-100 mb-8 relative">
+                <span className="text-blue-400 text-4xl absolute -top-4 -left-2">"</span>
+                <p className="pt-4">
                     {testimonials[index % testimonials.length]}
-                  </p>
-                </div>
-                <div className="flex items-center relative z-10">
-                  <div className="w-12 h-12 rounded-full overflow-hidden mr-4 border-2 border-blue-400">
-                    <img
+                </p>
+              </div>
+              <div className="flex items-center relative z-10">
+                <div className="w-12 h-12 rounded-full overflow-hidden mr-4 border-2 border-blue-400">
+                  <img
                       src={`https://i.pravatar.cc/150?img=${index + 1}`}
-                      alt="Avatar"
-                      className="w-full h-full object-cover"
-                    />
-                  </div>
-                  <div>
-                    <p className="font-semibold text-white">
+                    alt="Avatar"
+                    className="w-full h-full object-cover"
+                  />
+                </div>
+                <div>
+                  <p className="font-semibold text-white">
                       {names[index % names.length]}
-                    </p>
+                  </p>
                     <p className="text-gray-400 text-sm">{product.name} • 2024</p>
                   </div>
                 </div>
@@ -279,12 +279,12 @@ const HomePage = () => {
                   }}
                   className="text-blue-400 text-sm mt-4 hover:text-blue-300 transition-colors flex items-center"
                 >
-                  View courses 
-                  <svg className="w-4 h-4 ml-1" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                    <path d="M9 18L15 12L9 6" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-                  </svg>
-                </button>
-              </div>
+                View courses 
+                <svg className="w-4 h-4 ml-1" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                  <path d="M9 18L15 12L9 6" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                </svg>
+              </button>
+            </div>
             );
           })}
         </div>

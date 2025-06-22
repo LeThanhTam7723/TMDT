@@ -43,6 +43,7 @@ const AppRoutes = () => {
         <Route path="/user-info" element={<UserInfo />} />
         <Route path="/course-video/:id" element={<CourseVideo />} />
         <Route path="/checkout" element={<Checkout />} />
+        <Route path="/checkout/:id" element={<Checkout />} />
         <Route path="/login" element={<Login />} />
         <Route path="/register" element={<Register />} />
         <Route path="/chat" element={<ChatInterface />} />
@@ -51,7 +52,7 @@ const AppRoutes = () => {
 
         <Route path="/chat/:id" element={<ChatInterface />} />
 
-//         <Route path="/seller/:id" element={<SellerDetail />} />
+        <Route path="/seller/:id" element={<SellerDetail />} />
 
         {/* Seller Routes - Only SELLER and ADMIN can access */}
         <Route

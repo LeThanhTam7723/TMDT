@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
 import { useProduct } from "../context/ProductContext";
 import { FiCreditCard, FiLock, FiCheck, FiDollarSign } from 'react-icons/fi';
 import { FaCcVisa, FaCcPaypal, FaCcMastercard, FaCcApplePay } from 'react-icons/fa';
@@ -49,6 +49,7 @@ const paymentMethods = [
 const CheckoutPage = () => {
   const { products } = useProduct();
   const navigate = useNavigate();
+  const { id } = useParams(); // Get courseId from URL params
   const [loading, setLoading] = useState(false);
   const [success, setSuccess] = useState(false);
   const [formData, setFormData] = useState({
@@ -71,9 +72,13 @@ const CheckoutPage = () => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
   };
 
-  // Get course from URL params or default to first course
-  const courseId = new URLSearchParams(window.location.search).get('courseId');
-  const course = products.find(p => p.id == courseId) || products[0] || { name: 'Sample Course', price: 99.99 };
+  // Get course from URL params or fallback
+  const course = products.find(p => p.id == id) || {
+    id: id,
+    name: 'Course not found',
+    price: 0,
+    image: null
+  };
   
   const calculateSubtotal = () => course.price || 0;
   const calculateTotal = () => {
@@ -101,8 +106,6 @@ const CheckoutPage = () => {
       </div>
     );
   }
-
-
 
   return (
     <div className="min-h-screen bg-gray-100 flex flex-col">

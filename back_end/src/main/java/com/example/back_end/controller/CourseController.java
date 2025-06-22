@@ -53,12 +53,18 @@ public class CourseController {
                         .build();
             }
 
-            // Kiểm tra xem người dùng đã mua chưa
+            // Kiểm tra xem người dùng đã mua chưa và lấy ngày mua
             boolean isPurchased = false;
+            java.time.LocalDate purchaseDate = null;
+            
             if (userId != null) {
-                isPurchased = courseService.isCoursePurchasedByUser(userId, id);
+                // Sử dụng method mới để lấy ngày mua
+                purchaseDate = courseService.getCoursePurchaseDate(userId, id);
+                isPurchased = (purchaseDate != null);
             }
+            
             course.setPurchased(isPurchased);
+            course.setPurchaseDate(purchaseDate);
 
             return ApiResponse.<CourseListResponseDTO>builder()
                     .code(200)

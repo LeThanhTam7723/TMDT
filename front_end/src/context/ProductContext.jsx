@@ -8,6 +8,41 @@ export const useProduct = () => {
   return useContext(ProductContext);
 };
 
+// Array of course images for different categories/types
+const courseImages = [
+  "https://study4.com/media/courses/CourseSeries/files/2023/10/11/ielts_band_0_7.webp",
+  "https://m.media-amazon.com/images/I/51yBYmDJPNL._SL500_.jpg", 
+  "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSzaxe4xnXoGduxVSFzSGrNYLjK4vKfmtr4fg&s",
+  "https://www.lingobest.com/free-online-english-course/wp-content/uploads/2021/03/Blog-Banners-Bruna-S-15-1.jpg",
+  "https://images.unsplash.com/photo-1513258496099-48168024aec0?auto=format&fit=crop&w=600&q=80",
+  "https://images.unsplash.com/photo-1434030216411-0b793f4b4173?auto=format&fit=crop&w=600&q=80",
+  "https://images.unsplash.com/photo-1503676382389-4809596d5290?auto=format&fit=crop&w=600&q=80",
+  "https://images.unsplash.com/photo-1516321318423-f06f85e504b3?auto=format&fit=crop&w=600&q=80",
+  "https://images.unsplash.com/photo-1522202176988-66273c2fd55f?auto=format&fit=crop&w=600&q=80",
+  "https://images.unsplash.com/photo-1546410531-bb4caa6b424d?auto=format&fit=crop&w=600&q=80"
+];
+
+// Function to get image based on course category or ID
+const getCourseImage = (course) => {
+  // If course has image from backend, use it
+  if (course.image) {
+    return course.image;
+  }
+  
+  // Otherwise assign based on category or ID for variety
+  const categoryImageMap = {
+    1: courseImages[0], // IELTS
+    2: courseImages[1], // Business English  
+    3: courseImages[2], // Kids English
+    4: courseImages[3], // Conversation
+    5: courseImages[4], // Grammar
+    6: courseImages[5], // General English
+  };
+  
+  // Use category-based image if available, otherwise use ID-based rotation
+  return categoryImageMap[course.categoryId] || courseImages[course.id % courseImages.length];
+};
+
 export const ProductProvider = ({ children }) => {
   const [products, setProducts] = useState([]);
   const [loading, setLoading] = useState(false);
@@ -78,7 +113,7 @@ export const ProductProvider = ({ children }) => {
             sellerName: course.sellerName,
             status: course.status,
             // Add default values for frontend compatibility
-            image: "https://images.unsplash.com/photo-1513258496099-48168024aec0?auto=format&fit=crop&w=600&q=80",
+            image: getCourseImage(course),
             category: course.categoryName || "General",
             age: "18+ year old",
             ratingCount: Math.floor(Math.random() * 500) + 50,
@@ -126,15 +161,22 @@ export const ProductProvider = ({ children }) => {
 
   const toggleFavorite = async (productId) => {
     try {
-      const userId = 1; // TODO: Get from auth context
-      const isInFavorites = favorites.some(item => item.course && item.course.id === productId);
+      if (!session?.currentUser?.id) {
+        console.error('User not logged in');
+        return;
+      }
+
+      const userId = session.currentUser.id;
+      const isInFavorites = favorites.some(course => course.id === productId);
       
       if (isInFavorites) {
         await favoriteService.removeFromFavorites(userId, productId);
-        setFavorites(prev => prev.filter(item => item.course && item.course.id !== productId));
+        setFavorites(prev => prev.filter(course => course.id !== productId));
       } else {
-        const response = await favoriteService.addToFavorites(userId, productId);
-        setFavorites(prev => [...prev, response.data.result]);
+        await favoriteService.addToFavorites(userId, productId);
+        // Refresh favorites list to get updated data
+        const response = await favoriteService.getUserFavorites(userId, session.token);
+        setFavorites(response.data.result || []);
       }
     } catch (error) {
       console.error('Error toggling favorite:', error);
@@ -143,12 +185,12 @@ export const ProductProvider = ({ children }) => {
 
   const isInFavorites = (productId) => {
     if (!Array.isArray(favorites)) return false;
-    return favorites.some(item => item.course && item.course.id === productId);
+    return favorites.some(course => course.id === productId);
   };
 
   const getFavoriteProducts = () => {
     if (!Array.isArray(favorites)) return [];
-    return favorites.map(item => item.course).filter(course => course != null);
+    return favorites.filter(course => course != null);
   };
 
   const loadUserFavorites = async (userId) => {
@@ -180,7 +222,7 @@ export const ProductProvider = ({ children }) => {
           sellerName: course.sellerName,
           status: course.status,
           // Add default values for frontend compatibility
-          image: "https://images.unsplash.com/photo-1513258496099-48168024aec0?auto=format&fit=crop&w=600&q=80",
+          image: getCourseImage(course),
           category: course.categoryName || "General",
           age: "18+ year old",
           ratingCount: Math.floor(Math.random() * 500) + 50,
@@ -227,7 +269,7 @@ export const ProductProvider = ({ children }) => {
           sellerName: course.sellerName,
           status: course.status,
           // Add default values for frontend compatibility
-          image: "https://images.unsplash.com/photo-1513258496099-48168024aec0?auto=format&fit=crop&w=600&q=80",
+          image: getCourseImage(course),
           category: course.categoryName || "General",
           age: "18+ year old",
           ratingCount: Math.floor(Math.random() * 500) + 50,
@@ -270,6 +312,7 @@ export const ProductProvider = ({ children }) => {
     searchResults,
     getFavoriteProducts, 
     toggleFavorite,
+    isInFavorites,
     searchCourses,
     searchCoursesAdvanced,
     clearSearchResults,
