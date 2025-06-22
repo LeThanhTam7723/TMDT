@@ -313,6 +313,38 @@ const Detail = () => {
       }
     });
   };
+  const handlePaymentClick = async (price,orderId) => {
+    if (session === null) {
+      const result = await Swal.fire({
+        title: "Hãy đăng nhập để thực hiện đăng ký khóa học",
+        showClass: {
+          popup: `animate__animated animate__fadeInUp animate__faster`
+        },
+        hideClass: {
+          popup: `animate__animated animate__fadeOutDown animate__faster`
+        }
+      });
+  
+      if (result.isConfirmed) {
+        window.location.href = "/auth/login";
+      }
+    } else {
+      const result = await Swal.fire({
+        title: "Bạn chắc muốn tham gia khóa học này ?",
+        showCancelButton: true,
+        confirmButtonText: "Đồng ý",
+        cancelButtonText: "Hủy"
+      });
+  
+      if (result.isConfirmed) {
+        Swal.fire("Đã tham gia!", "", "success");
+        const response= await PaymentService.vnPay(10000,session.token,orderId,session.currentUser.id);
+        const {code,result,message} = response.data;
+        console.log(result);
+        window.location.href = result;
+      }
+    }
+     };
 
   useEffect(() => {
     const fetchCourse = async () => {
@@ -578,7 +610,7 @@ const Detail = () => {
                   </span>
                 </div>
                 <button
-                  onClick={handleEnrollment}
+                  onClick={() => handlePaymentClick(course.price, course.id)} 
                   className="bg-blue-600 hover:bg-blue-700 text-white px-6 py-3 rounded-lg font-semibold transition-colors"
                 >
                   Enroll Now
