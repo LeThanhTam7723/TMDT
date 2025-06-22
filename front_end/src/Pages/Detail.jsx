@@ -185,8 +185,8 @@ const Detail = () => {
           // Fetch seller info using the course ID
           try {
             const sellerResponse = await axiosClient.get(`/seller/${id}`);
-            if (sellerResponse.data && sellerResponse.data.id) {
-              setSeller(sellerResponse.data);
+            if (sellerResponse.data && sellerResponse.data.code === 200 && sellerResponse.data.result) {
+              setSeller(sellerResponse.data.result);
             } else {
               console.error("Invalid seller response format:", sellerResponse.data);
               setError("Failed to load seller information");

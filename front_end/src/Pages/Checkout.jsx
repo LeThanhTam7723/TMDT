@@ -88,7 +88,7 @@ const CheckoutPage = () => {
           <h2 className="text-2xl font-bold mb-2">Payment Successful!</h2>
           <p className="text-gray-600 mb-6">Thank you for your purchase. You will receive a confirmation email shortly.</p>
           <button
-            onClick={() => navigate('/courses')}
+            onClick={() => navigate('/shop')}
             className="w-full px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600"
           >
             Start Learning

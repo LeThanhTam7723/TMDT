@@ -44,9 +44,9 @@ CREATE TABLE IF NOT EXISTS `course` (
   KEY `FK_course_users` (`sellerid`),
   CONSTRAINT `FK_course_category` FOREIGN KEY (`categoryid`) REFERENCES `category` (`CategoryID`) ON DELETE NO ACTION ON UPDATE NO ACTION,
   CONSTRAINT `FK_course_users` FOREIGN KEY (`sellerid`) REFERENCES `users` (`id`) ON DELETE NO ACTION ON UPDATE NO ACTION
-) ENGINE=InnoDB AUTO_INCREMENT=5 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=21 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
--- Dumping data for table tmdt.course: ~15 rows (approximately)
+-- Dumping data for table tmdt.course: ~20 rows (approximately)
 INSERT IGNORE INTO `course` (`courseid`, `categoryid`, `description`, `name`, `price`, `rating`, `sellerid`, `status`) VALUES
 	(1, 1, 'Master each IELTS skill with expert tips. Comprehensive preparation for all four skills: listening, reading, writing, and speaking.', 'IELTS 7.0+ Intensive Course', 199.99, 4.8, 1, b'1'),
 	(2, 1, 'Improve your TOEIC score in 30 days with focused practice and strategies.', 'TOEIC Listening & Reading Pro', 149.99, 4.7, 3, b'1'),
@@ -62,7 +62,12 @@ INSERT IGNORE INTO `course` (`courseid`, `categoryid`, `description`, `name`, `p
 	(12, 6, 'Comprehensive English course covering all skills for intermediate learners.', 'General English Intermediate', 139.99, 4.7, 2, b'1'),
 	(13, 6, 'Advanced English course for upper-intermediate to advanced learners.', 'General English Advanced', 169.99, 4.8, 4, b'1'),
 	(14, 2, 'English for international business, negotiations, and professional communication.', 'International Business English', 199.99, 4.7, 3, b'1'),
-	(15, 4, 'Practice English pronunciation and accent reduction with expert guidance.', 'Pronunciation & Accent Training', 89.99, 4.3, 1, b'1');
+	(15, 4, 'Practice English pronunciation and accent reduction with expert guidance.', 'Pronunciation & Accent Training', 89.99, 4.3, 1, b'1'),
+	(16, 1, 'Comprehensive IELTS Speaking preparation with mock tests and detailed feedback from certified examiner.', 'IELTS Speaking Mastery 2024', 159.99, 4.9, 5, b'1'),
+	(17, 1, 'Advanced IELTS Writing Task 1 & 2 strategies and techniques for band 8+ score.', 'IELTS Writing Excellence', 179.99, 4.8, 5, b'1'),
+	(18, 2, 'Essential business English for presentations, meetings, and professional communication.', 'Business English Fundamentals', 139.99, 4.7, 5, b'1'),
+	(19, 4, 'Improve fluency and confidence in everyday English conversations with native speakers.', 'English Conversation Mastery', 99.99, 4.6, 5, b'1'),
+	(20, 5, 'Complete English grammar course from basic to advanced level with practical exercises.', 'English Grammar Complete Guide', 119.99, 4.5, 5, b'1');
 
 -- Dumping structure for table tmdt.coursedetail
 CREATE TABLE IF NOT EXISTS `coursedetail` (
@@ -77,9 +82,9 @@ CREATE TABLE IF NOT EXISTS `coursedetail` (
   PRIMARY KEY (`id`),
   KEY `FK_coursedetail_course` (`course_id`) USING BTREE,
   CONSTRAINT `FKthsgs79olf7laaprmy6qqydb4` FOREIGN KEY (`course_id`) REFERENCES `course` (`courseid`)
-) ENGINE=InnoDB AUTO_INCREMENT=10 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=25 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
--- Dumping data for table tmdt.coursedetail: ~9 rows (approximately)
+-- Dumping data for table tmdt.coursedetail: ~24 rows (approximately)
 INSERT IGNORE INTO `coursedetail` (`id`, `duration`, `episode_number`, `is_preview`, `link`, `course_id`, `courseid`, `name`) VALUES
 	(1, 15, 1, b'1', 'https://www.youtube.com/embed/xNRJwmlRBNU?si=Uoyi6kzsoDLtvVZ9', 1, NULL, '1. Intro to TOEIC'),
 	(2, 22, 2, b'0', 'https://www.youtube.com/embed/5MgBikgcWnY', 1, NULL, 'Part 4: Lectures'),
@@ -89,7 +94,22 @@ INSERT IGNORE INTO `coursedetail` (`id`, `duration`, `episode_number`, `is_previ
 	(6, 10, 1, b'1', 'https://www.youtube.com/embed/HZQb34t9BzE', 3, NULL, 'Part 2: Q&A'),
 	(7, 15, 2, b'0', 'https://www.youtube.com/embed/bJzb-RuUcMU', 3, NULL, 'Part 6: Fill Blanks'),
 	(8, 17, 1, b'1', 'https://www.youtube.com/embed/ZVznzY7EjuY', 4, NULL, 'Part 3: Talks'),
-	(9, 25, 2, b'0', 'https://www.youtube.com/embed/QH2-TGUlwu4', 4, NULL, 'Part 7: Reading');
+	(9, 25, 2, b'0', 'https://www.youtube.com/embed/QH2-TGUlwu4', 4, NULL, 'Part 7: Reading'),
+	(10, 18, 1, b'1', 'https://www.youtube.com/embed/hS2x1zl4rn0', 16, NULL, 'IELTS Speaking Introduction'),
+	(11, 22, 2, b'0', 'https://www.youtube.com/embed/NhFE63cvl_s', 16, NULL, 'Part 1: Personal Questions'),
+	(12, 25, 3, b'0', 'https://www.youtube.com/embed/YrwaFbSLSYI', 16, NULL, 'Part 2: Cue Card Topics'),
+	(13, 30, 4, b'0', 'https://www.youtube.com/embed/lGrI5u6s6kM', 16, NULL, 'Part 3: Discussion'),
+	(14, 20, 1, b'1', 'https://www.youtube.com/embed/YVvhzUGJzwk', 17, NULL, 'Task 1: Academic Writing'),
+	(15, 28, 2, b'0', 'https://www.youtube.com/embed/3V7d0pDGg_g', 17, NULL, 'Task 2: Essay Writing'),
+	(16, 35, 3, b'0', 'https://www.youtube.com/embed/fRJGZo46fxI', 17, NULL, 'Writing Band 8+ Strategies'),
+	(17, 15, 1, b'1', 'https://www.youtube.com/embed/aFe4gkgpKzA', 18, NULL, 'Business Email Writing'),
+	(18, 20, 2, b'0', 'https://www.youtube.com/embed/dWL0IELDqDo', 18, NULL, 'Meeting English'),
+	(19, 18, 3, b'0', 'https://www.youtube.com/embed/KnZ0S7HyRK8', 18, NULL, 'Presentation Skills'),
+	(20, 12, 1, b'1', 'https://www.youtube.com/embed/W1EYb_vyJlQ', 19, NULL, 'Daily Conversation Basics'),
+	(21, 16, 2, b'0', 'https://www.youtube.com/embed/47bRgqpHCv4', 19, NULL, 'Small Talk Mastery'),
+	(22, 20, 3, b'0', 'https://www.youtube.com/embed/wQKKj_qeOBQ', 19, NULL, 'Advanced Discussions'),
+	(23, 14, 1, b'1', 'https://www.youtube.com/embed/EGp5GFMwdKE', 20, NULL, 'Grammar Fundamentals'),
+	(24, 18, 2, b'0', 'https://www.youtube.com/embed/CfCdxSrNJxs', 20, NULL, 'Advanced Grammar Rules');
 
 -- Dumping structure for table tmdt.course_ratings
 CREATE TABLE IF NOT EXISTS `course_ratings` (
@@ -99,12 +119,17 @@ CREATE TABLE IF NOT EXISTS `course_ratings` (
   `rating` int(11) DEFAULT NULL,
   `user_id` int(11) DEFAULT NULL,
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=3 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=8 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
--- Dumping data for table tmdt.course_ratings: ~2 rows (approximately)
+-- Dumping data for table tmdt.course_ratings: ~7 rows (approximately)
 INSERT IGNORE INTO `course_ratings` (`id`, `course_id`, `created_at`, `rating`, `user_id`) VALUES
 	(1, 1, NULL, 4, 4),
-	(2, 2, NULL, 5, 4);
+	(2, 2, NULL, 5, 4),
+	(3, 16, '2024-12-01 10:30:00.000000', 5, 6),
+	(4, 17, '2024-12-02 14:15:00.000000', 5, 6),
+	(5, 18, '2024-12-03 09:45:00.000000', 4, 7),
+	(6, 19, '2024-12-04 16:20:00.000000', 5, 7),
+	(7, 20, '2024-12-05 11:10:00.000000', 4, 6);
 
 -- Dumping structure for table tmdt.favorite
 CREATE TABLE IF NOT EXISTS `favorite` (
@@ -116,12 +141,15 @@ CREATE TABLE IF NOT EXISTS `favorite` (
   KEY `FKe8hnatflq4vaedin0dlkbjp2l` (`id_user`),
   CONSTRAINT `FKe8hnatflq4vaedin0dlkbjp2l` FOREIGN KEY (`id_user`) REFERENCES `users` (`id`),
   CONSTRAINT `FKm6fwp0ekfhkebulnggy3qa1xo` FOREIGN KEY (`id_course`) REFERENCES `course` (`courseid`)
-) ENGINE=InnoDB AUTO_INCREMENT=3 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=6 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
--- Dumping data for table tmdt.favorite: ~2 rows (approximately)
+-- Dumping data for table tmdt.favorite: ~5 rows (approximately)
 INSERT IGNORE INTO `favorite` (`id`, `id_course`, `id_user`) VALUES
 	(1, 1, 1),
-	(2, 2, 1);
+	(2, 2, 1),
+	(3, 16, 6),
+	(4, 17, 7),
+	(5, 18, 6);
 
 -- Dumping structure for table tmdt.invalidated_token
 CREATE TABLE IF NOT EXISTS `invalidated_token` (
@@ -151,14 +179,21 @@ CREATE TABLE IF NOT EXISTS `orders` (
   KEY `FKtb6jdc061vu6ydv1445lrigtb` (`id_user`),
   CONSTRAINT `FKmbmh1nnks3isuyeuw7grhix56` FOREIGN KEY (`id_course`) REFERENCES `course` (`courseid`),
   CONSTRAINT `FKtb6jdc061vu6ydv1445lrigtb` FOREIGN KEY (`id_user`) REFERENCES `users` (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=5 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=12 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
--- Dumping data for table tmdt.orders: ~4 rows (approximately)
+-- Dumping data for table tmdt.orders: ~11 rows (approximately)
 INSERT IGNORE INTO `orders` (`id`, `id_course`, `id_user`) VALUES
 	(1, 1, 4),
 	(2, 2, 4),
 	(3, 3, 4),
-	(4, 4, 4);
+	(4, 4, 4),
+	(5, 16, 6),
+	(6, 17, 6),
+	(7, 18, 7),
+	(8, 19, 7),
+	(9, 20, 6),
+	(10, 16, 7),
+	(11, 18, 6);
 
 -- Dumping structure for table tmdt.report
 CREATE TABLE IF NOT EXISTS `report` (
@@ -212,14 +247,17 @@ CREATE TABLE IF NOT EXISTS `users` (
   `introduce` varchar(225) DEFAULT NULL,
   PRIMARY KEY (`id`),
   UNIQUE KEY `UK6dotkott2kjsp8vw4d0m25fb7` (`email`)
-) ENGINE=InnoDB AUTO_INCREMENT=6 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=8 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
--- Dumping data for table tmdt.users: ~4 rows (approximately)
+-- Dumping data for table tmdt.users: ~7 rows (approximately)
 INSERT IGNORE INTO `users` (`id`, `active`, `avatar`, `email`, `fullname`, `password`, `phone`, `username`, `certificate`, `gender`, `introduce`) VALUES
-	(1, b'0', 'https://media.them.us/photos/66d08156698a9d7d109eaf13/4:3/w_900,h_675,c_limit/english-teacher.jpg', 'tamle7723@gmail.com', 'Tâm Lê', '$2a$10$UW74OxRZgZpJ5QhjgY37Iucd6KN4jQL9whcqOJobxo0P3eEod2.aS', '0911281672', 'admin', 'ielts 8.0,Toeic 900', 'Male', 'Tôi là giáo viên tiếng Anh với chứng chỉ IELTS 8.0 và TOEIC 900, có nhiều kinh nghiệm trong việc giảng dạy luyện thi và giao tiếp cho học viên ở nhiều trình độ khác nhau. Phương pháp giảng dạy của tôi tập trung vào tư duy'),
-	(2, b'1', NULL, 'thuho@121mple.com', 'Nguyen', '$2a$10$93Uf2ab1kEs1cc9UB6.pd.i6D9YNwFPejpteRpTg..dkAcmB9KR.K', '0911281672', 'thao duvy', 'TOEIC 1000', 'Female', '"Tôi là giáo viên tiếng Anh với chứng chỉ TOEIC 1000/990, có kinh nghiệm giảng dạy và luyện thi TOEIC hiệu quả cho nhiều đối tượng học viên."'),
-	(3, b'1', NULL, 'quoc@gmail.com', 'Thao Tran', '$2a$10$SDYIb.mG4WT6IOcWwBPXXOX7sqo2LVNzyqK9ns3YE7lTSXeRxJJFS', '0911281672', 'quocthai261', 'ILET 8.0', 'Male', '"Tôi là giáo viên tiếng Anh với chứng chỉ TOEIC 1000/990, có kinh nghiệm giảng dạy và luyện thi TOEIC hiệu quả cho nhiều đối tượng học viên."'),
-	(4, b'1', NULL, 'quoc2612003@gmail.com', 'Quốc Thái', '$2a$10$.Ztr.3pfAvySVVXjQi8IPeXy73plvp1c2Gm12LV3fgjZ4NiuKIO5y', '0879582604', 'quoc@gmail.com', NULL, NULL, NULL);
+	(1, b'1', 'https://media.them.us/photos/66d08156698a9d7d109eaf13/4:3/w_900,h_675,c_limit/english-teacher.jpg', 'tamle7723@gmail.com', 'Tâm Lê', '$2a$10$UW74OxRZgZpJ5QhjgY37Iucd6KN4jQL9whcqOJobxo0P3eEod2.aS', '0911281672', 'admin', 'ielts 8.0,Toeic 900', 'Male', 'Tôi là giáo viên tiếng Anh với chứng chỉ IELTS 8.0 và TOEIC 900, có nhiều kinh nghiệm trong việc giảng dạy luyện thi và giao tiếp cho học viên ở nhiều trình độ khác nhau. Phương pháp giảng dạy của tôi tập trung vào tư duy'),
+	(2, b'1', NULL, 'thuho@121mple.com', 'Nguyen', '$2a$10$93Uf2ab1kEs1cc9UB6.pd.i6D9YNwFPejpteRpTg..dkAcmB9KR.K', '0911281672', 'thao duvy', 'TOEIC 1000', 'Female', 'Tôi là giáo viên tiếng Anh với chứng chỉ TOEIC 1000/990, có kinh nghiệm giảng dạy và luyện thi TOEIC hiệu quả cho nhiều đối tượng học viên.'),
+	(3, b'1', NULL, 'quoc@gmail.com', 'Thao Tran', '$2a$10$SDYIb.mG4WT6IOcWwBPXXOX7sqo2LVNzyqK9ns3YE7lTSXeRxJJFS', '0911281672', 'quocthai261', 'ILET 8.0', 'Male', 'Tôi là giáo viên tiếng Anh với chứng chỉ TOEIC 1000/990, có kinh nghiệm giảng dạy và luyện thi TOEIC hiệu quả cho nhiều đối tượng học viên.'),
+	(4, b'1', NULL, 'quoc2612003@gmail.com', 'Quốc Thái', '$2a$10$.Ztr.3pfAvySVVXjQi8IPeXy73plvp1c2Gm12LV3fgjZ4NiuKIO5y', '0879582604', 'quoc@gmail.com', NULL, NULL, NULL),
+	(5, b'1', 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=400&h=400&fit=crop&crop=face', 'quangminhnguyn26@gmail.com', 'Quang Minh Nguyễn', '$2a$10$ysUMZrzTiyiyQfcGp7QP6e9xPHcZDF0.fkzGzpnD6F4A2FE3czqoi', '0903456789', 'mlnhquxc', 'IELTS 8.5, TOEIC 950, TESOL Certificate', 'Male', 'Tôi là giáo viên tiếng Anh với hơn 5 năm kinh nghiệm giảng dạy, có chứng chỉ IELTS 8.5, TOEIC 950 và TESOL. Chuyên môn của tôi là luyện thi IELTS, TOEIC và giao tiếp tiếng Anh thực tế. Phương pháp giảng dạy tập trung vào thực hành và ứng dụng trong cuộc sống.'),
+	(6, b'1', NULL, 'student1@test.com', 'Nguyễn Văn A', '$2a$10$EixZt7XkQzK6g5vY8wL8..L5rQ9YPqY8zK6r3vPsL8H5YqC3zK8L.', '0912345678', 'student1', NULL, 'Male', NULL),
+	(7, b'1', NULL, 'student2@test.com', 'Trần Thị B', '$2a$10$EixZt7XkQzK6g5vY8wL8..L5rQ9YPqY8zK6r3vPsL8H5YqC3zK8L.', '0987654321', 'student2', NULL, 'Female', NULL);
 
 -- Dumping structure for table tmdt.users_roles
 CREATE TABLE IF NOT EXISTS `users_roles` (
@@ -231,12 +269,15 @@ CREATE TABLE IF NOT EXISTS `users_roles` (
   CONSTRAINT `FKmi9sfx618v14gm89cyw408hqu` FOREIGN KEY (`roles_name`) REFERENCES `roles` (`name`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
--- Dumping data for table tmdt.users_roles: ~4 rows (approximately)
+-- Dumping data for table tmdt.users_roles: ~7 rows (approximately)
 INSERT IGNORE INTO `users_roles` (`user_id`, `roles_name`) VALUES
 	(1, 'ADMIN'),
 	(2, 'SELLER'),
 	(3, 'USER'),
-	(4, 'ADMIN');
+	(4, 'ADMIN'),
+	(5, 'SELLER'),
+	(6, 'USER'),
+	(7, 'USER');
 
 /*!40103 SET TIME_ZONE=IFNULL(@OLD_TIME_ZONE, 'system') */;
 /*!40101 SET SQL_MODE=IFNULL(@OLD_SQL_MODE, '') */;

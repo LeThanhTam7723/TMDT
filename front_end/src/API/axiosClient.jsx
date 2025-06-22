@@ -10,18 +10,27 @@ const axiosClient = axios.create({
 
 axiosClient.interceptors.request.use(
   (config) => {
-    const skipAuthEndpoints = [
-      "auth/login",
-      "auth/introspect",
-      "auth/logout",
-      "users/createUser",
-      "users/existUser",
-      "verifyRegister",
-      "courses",
+    // Define public endpoints that don't need authentication
+    const publicEndpoints = [
+      "/auth/login",
+      "/auth/introspect", 
+      "/auth/logout",
+      "/users/createUser",
+      "/users/existUser",
+      "/verifyRegister",
+      "/courses/", // Public course APIs
+      "/courses/search",
+      "/courses/details",
     ];
-    const shouldSkipAuth = skipAuthEndpoints.some((endpoint) =>
-      config.url?.includes(endpoint)
-    );
+    
+    // Define public seller endpoints (only these specific ones)
+    const publicSellerEndpoints = [
+      /\/seller\/\d+$/, // GET /seller/{courseId} - get seller by course
+      /\/seller\/\d+\/courses$/, // GET /seller/{sellerId}/courses - public course list
+    ];
+    
+    const shouldSkipAuth = publicEndpoints.some(endpoint => config.url?.includes(endpoint)) ||
+                          publicSellerEndpoints.some(pattern => pattern.test(config.url || ""));
 
     if (shouldSkipAuth) {
       console.log("🔓 Skipping auth for:", config.url);
@@ -30,16 +39,20 @@ axiosClient.interceptors.request.use(
 
     try {
       const sessionStr = localStorage.getItem("session");
-      if (!sessionStr) return config;
+      if (!sessionStr) {
+        console.warn("⚠️ No session found in localStorage for:", config.url);
+        return config;
+      }
 
       const session = JSON.parse(sessionStr);
+      console.log("📋 Session data:", session);
       const token = session?.token;
 
       if (token) {
         config.headers.Authorization = `Bearer ${token}`;
-        console.log("✅ Token attached:", token);
+        console.log("✅ Token attached for:", config.url, "Token:", token.substring(0, 20) + "...");
       } else {
-        console.warn("⚠️ No token found in session");
+        console.warn("⚠️ No token found in session for:", config.url, "Session:", session);
       }
     } catch (err) {
       console.error("❌ Error parsing session from localStorage:", err);
@@ -49,6 +62,24 @@ axiosClient.interceptors.request.use(
   },
   (error) => {
     console.error("❌ Request error:", error);
+    return Promise.reject(error);
+  }
+);
+
+// Response interceptor to handle authentication errors
+axiosClient.interceptors.response.use(
+  (response) => {
+    return response;
+  },
+  (error) => {
+    if (error.response?.status === 401) {
+      console.error("🚫 Authentication failed for:", error.config?.url);
+      console.error("🚫 Response:", error.response?.data);
+      
+      // Optionally clear session and redirect to login
+      // localStorage.removeItem('session');
+      // window.location.href = '/auth/login';
+    }
     return Promise.reject(error);
   }
 );

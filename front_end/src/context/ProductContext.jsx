@@ -14,6 +14,49 @@ export const ProductProvider = ({ children }) => {
   const [searchResults, setSearchResults] = useState([]);
   const [session, setSession] = useState(null);
   const [favorites, setFavorites] = useState([]);
+
+  // Load session from localStorage on initialization and listen for changes
+  useEffect(() => {
+    const loadSession = () => {
+      try {
+        const sessionStr = localStorage.getItem('session');
+        if (sessionStr) {
+          const sessionData = JSON.parse(sessionStr);
+          setSession(sessionData);
+          console.log('Session loaded:', sessionData);
+        } else {
+          setSession(null);
+        }
+      } catch (error) {
+        console.error('Error loading session from localStorage:', error);
+        setSession(null);
+      }
+    };
+
+    // Load session initially
+    loadSession();
+
+    // Listen for storage changes (when session is updated in other tabs/components)
+    const handleStorageChange = (e) => {
+      if (e.key === 'session') {
+        loadSession();
+      }
+    };
+
+    window.addEventListener('storage', handleStorageChange);
+    
+    // Also listen for custom session update events
+    const handleSessionUpdate = () => {
+      loadSession();
+    };
+    
+    window.addEventListener('sessionUpdated', handleSessionUpdate);
+
+    return () => {
+      window.removeEventListener('storage', handleStorageChange);
+      window.removeEventListener('sessionUpdated', handleSessionUpdate);
+    };
+  }, []);
   const [cart, setCart] = useState(() => {
     const savedCart = localStorage.getItem('cart');
     return savedCart ? JSON.parse(savedCart) : [];
