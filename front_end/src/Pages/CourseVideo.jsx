@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Star, Clock, Share2 } from 'lucide-react';
+import axiosClient from '../API/axiosClient';  // Adjust path as needed
 
 const CourseVideo = () => {
   const [activeTab, setActiveTab] = useState('Overview');
@@ -69,21 +70,14 @@ const CourseVideo = () => {
         };
         setCourse(mockCourse);
         
-        // Fetch course details from API
-        const apiUrl = `http://localhost:8080/api/courses/details/${courseId}`;
-        console.log('Fetching from:', apiUrl);
+        // Fetch course details using axios client
+        console.log('Fetching course details for courseId:', courseId);
         
-        const response = await fetch(apiUrl);
+        const response = await axiosClient.get(`/courses/details/${courseId}`);
+        console.log('API Response:', response.data);
         
-        if (!response.ok) {
-          throw new Error(`HTTP error! status: ${response.status}`);
-        }
-        
-        const data = await response.json();
-        console.log('API Response:', data);
-        
-        if (data.code === 200 && data.result && Array.isArray(data.result)) {
-          const details = data.result;
+        if (response.data && response.data.code === 200 && response.data.result && Array.isArray(response.data.result)) {
+          const details = response.data.result;
           setCourseDetails(details);
           console.log('Course details set:', details);
           
@@ -96,11 +90,12 @@ const CourseVideo = () => {
             setSelectedVideoIndex(0);
           }
         } else {
-          throw new Error(`Invalid response format: ${JSON.stringify(data)}`);
+          throw new Error(`Invalid response format: ${JSON.stringify(response.data)}`);
         }
       } catch (error) {
         console.error('API fetch failed:', error);
-        setError(error.message || 'Failed to load course');
+        const errorMessage = error.response?.data?.message || error.message || 'Failed to load course';
+        setError(errorMessage);
         
         // Fallback data for development
         const fallbackData = [

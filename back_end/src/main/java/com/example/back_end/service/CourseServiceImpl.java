@@ -38,8 +38,9 @@ public class CourseServiceImpl {
     public List<CourseListResponseDTO> getAllCourses() {
         return courseRepository.findAll().stream()
                 .map(course -> {
-                    User seller = userRepository.findById(course.getSellerId())
-                            .orElse(null);
+                    // 👇 Lấy thông tin người bán
+                    User seller = userRepository.findById(course.getSellerId()).orElse(null);
+
                     return CourseListResponseDTO.builder()
                             .id(course.getId())
                             .name(course.getName())
@@ -49,12 +50,16 @@ public class CourseServiceImpl {
                             .description(course.getDescription())
                             .rating(course.getRating())
                             .status(course.getStatus())
+
+                            // 👇 Thêm tên người bán vào đây
                             .sellerName(seller != null ? seller.getFullname() : "Unknown")
+
                             .categoryName(getCategoryName(course.getCategoryId()))
                             .build();
                 })
                 .collect(Collectors.toList());
     }
+
     public boolean isCoursePurchasedByUser(Integer userId, Integer courseId) {
         return orderRepository.existsByIdUser_IdAndIdCourse_Id(userId, courseId);
     }
