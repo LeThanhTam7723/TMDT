@@ -174,6 +174,7 @@ CREATE TABLE IF NOT EXISTS `orders` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
   `id_course` int(11) NOT NULL,
   `id_user` int(11) NOT NULL,
+  `date_order` date DEFAULT NULL,
   PRIMARY KEY (`id`),
   KEY `FKmbmh1nnks3isuyeuw7grhix56` (`id_course`),
   KEY `FKtb6jdc061vu6ydv1445lrigtb` (`id_user`),
@@ -182,18 +183,18 @@ CREATE TABLE IF NOT EXISTS `orders` (
 ) ENGINE=InnoDB AUTO_INCREMENT=12 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 -- Dumping data for table tmdt.orders: ~11 rows (approximately)
-INSERT IGNORE INTO `orders` (`id`, `id_course`, `id_user`) VALUES
-	(1, 1, 4),
-	(2, 2, 4),
-	(3, 3, 4),
-	(4, 4, 4),
-	(5, 16, 6),
-	(6, 17, 6),
-	(7, 18, 7),
-	(8, 19, 7),
-	(9, 20, 6),
-	(10, 16, 7),
-	(11, 18, 6);
+INSERT IGNORE INTO `orders` (`id`, `id_course`, `id_user`, `date_order`) VALUES
+	(1, 1, 4, '2024-11-15'),
+	(2, 2, 4, '2024-11-16'),
+	(3, 3, 4, '2024-11-17'),
+	(4, 4, 4, '2024-11-18'),
+	(5, 16, 6, '2024-12-01'),
+	(6, 17, 6, '2024-12-02'),
+	(7, 18, 7, '2024-12-03'),
+	(8, 19, 7, '2024-12-04'),
+	(9, 20, 6, '2024-12-05'),
+	(10, 16, 7, '2024-12-06'),
+	(11, 18, 6, '2024-12-07');
 
 -- Dumping structure for table tmdt.report
 CREATE TABLE IF NOT EXISTS `report` (

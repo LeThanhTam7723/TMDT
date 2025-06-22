@@ -308,6 +308,16 @@ const Detail = () => {
           params: { userId } // truyền userId vào query
         });
 
+        // Debug logging
+        console.log('🔍 Course API Response:', courseResponse);
+        console.log('🔍 Response Data:', courseResponse.data);
+        console.log('🔍 Response Structure:', {
+          hasData: !!courseResponse.data,
+          code: courseResponse.data?.code,
+          hasResult: !!courseResponse.data?.result,
+          result: courseResponse.data?.result
+        });
+
         if (
           courseResponse.data &&
           courseResponse.data.code === 200 &&
@@ -385,6 +395,12 @@ const Detail = () => {
             console.warn("Seller information not available");
           }
         } else {
+          console.error('❌ Invalid response format:', {
+            hasData: !!courseResponse.data,
+            code: courseResponse.data?.code,
+            hasResult: !!courseResponse.data?.result,
+            fullResponse: courseResponse
+          });
           throw new Error("Invalid course response format");
         }
       } catch (error) {

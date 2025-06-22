@@ -25,7 +25,7 @@ public class Order {
     @JoinColumn(name = "id_course", nullable = false, referencedColumnName = "CourseID")
     private Course idCourse;
 
-    @Column(name = "date_order", nullable = false)
+    @Column(name = "date_order")
     private LocalDate dateOrder;
 
 }
