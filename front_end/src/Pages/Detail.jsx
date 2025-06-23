@@ -23,6 +23,8 @@ import { ProductContext } from "../context/ProductContext";
 import PaymentService from "../API/PaymentService";
 import { db } from "../firebase/config";
 import { findConversationByUsers } from "./Chat";
+import { getAvatarUrl, handleAvatarError } from "../utils/avatarUtils";
+import { createConsistentSellerData, generateConsistentCourseCount, generateConsistentStudentCount, generateConsistentRating } from "../utils/sellerUtils";
 import {
   push,
   ref,
@@ -456,23 +458,19 @@ const Detail = () => {
           // Fetch seller info using the seller ID from course data
           // TODO: Backend needs endpoint to get seller info by course ID or seller ID
           try {
-            // For now, create seller object from course data
-            if (courseData.sellerId && courseData.sellerName) {
-              const sellerInfo = {
-                id: courseData.sellerId,
-                fullname: courseData.sellerName,
-                email: `${courseData.sellerName
-                  .toLowerCase()
-                  .replace(" ", "")}@example.com`,
-                introduce: `Professional English instructor with years of experience.`,
-                // Add default values for missing seller fields
-                avatar: null,
-                phone: null,
-                certificate: null,
-                gender: null,
-              };
-              setSeller(sellerInfo);
-            }
+                      // For now, create seller object from course data
+          if (courseData.sellerId && courseData.sellerName) {
+            const sellerData = createConsistentSellerData(
+              courseData.sellerId, 
+              courseData.sellerName, 
+              courseData.categoryName || 'language education'
+            );
+            
+            // Add avatar using avatar utils
+            sellerData.avatar = getAvatarUrl(null, courseData.sellerName, courseData.sellerId);
+            
+            setSeller(sellerData);
+          }
 
             // Commented out until backend has proper endpoint
             // const sellerResponse = await axiosClient.get(`/seller/course/${id}`);
@@ -855,17 +853,18 @@ const Detail = () => {
                 className="flex-shrink-0 cursor-pointer hover:opacity-80 transition-opacity"
                 onClick={() => handleSellerClick(seller.id)}
               >
-                {seller.avatar ? (
+                <div className="relative">
                   <img
-                    src={seller.avatar}
+                    src={getAvatarUrl(seller.avatar, seller.fullname, seller.id, 200)}
                     alt={seller.fullname}
-                    className="w-20 h-20 rounded-full object-cover border-2 border-gray-200"
+                    className="w-20 h-20 rounded-full object-cover border-2 border-gray-200 shadow-md"
+                    onError={(e) => handleAvatarError(e, seller.fullname, seller.id, 200)}
                   />
-                ) : (
-                  <div className="w-20 h-20 bg-gradient-to-br from-blue-500 to-purple-600 rounded-full flex items-center justify-center">
-                    <User className="w-8 h-8 text-white" />
+                  {/* Online indicator (optional) */}
+                  <div className="absolute bottom-0 right-0 w-6 h-6 bg-green-500 border-2 border-white rounded-full flex items-center justify-center">
+                    <div className="w-2 h-2 bg-white rounded-full"></div>
                   </div>
-                )}
+                </div>
               </div>
 
               {/* Seller Info */}
@@ -905,7 +904,32 @@ const Detail = () => {
                   </div>
                 )}
 
-                {/* Seller Details */}
+                {/* Seller Stats & Info */}
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm mb-4">
+                  <div className="bg-blue-50 p-3 rounded-lg">
+                    <div className="flex items-center gap-2 mb-1">
+                      <BookOpen className="w-4 h-4 text-blue-600" />
+                      <span className="text-blue-600 font-medium">Khóa học</span>
+                    </div>
+                    <div className="text-2xl font-bold text-blue-700">
+                      {seller.courseCount}+
+                    </div>
+                    <div className="text-xs text-blue-600">Khóa học đã tạo</div>
+                  </div>
+
+                  <div className="bg-green-50 p-3 rounded-lg">
+                    <div className="flex items-center gap-2 mb-1">
+                      <Users className="w-4 h-4 text-green-600" />
+                      <span className="text-green-600 font-medium">Học viên</span>
+                    </div>
+                    <div className="text-2xl font-bold text-green-700">
+                      {seller.studentCount}+
+                    </div>
+                    <div className="text-xs text-green-600">Học viên đã đăng ký</div>
+                  </div>
+                </div>
+
+                {/* Seller Contact Details */}
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
                   <div className="flex items-center gap-2">
                     <Users className="w-4 h-4 text-gray-500" />
@@ -923,41 +947,40 @@ const Detail = () => {
 
                   {seller.certificate && (
                     <div className="flex items-center gap-2 md:col-span-2">
-                      <Award className="w-4 h-4 text-gray-500" />
+                      <Award className="w-4 h-4 text-gold-500" />
                       <span className="text-gray-600">Chứng chỉ: </span>
-                      <span className="font-medium text-green-600">
+                      <span className="font-medium text-green-600 flex items-center gap-1">
                         {seller.certificate}
+                        <Award className="w-3 h-3" />
                       </span>
                     </div>
                   )}
 
-                  {seller.gender && (
-                    <div className="flex items-center gap-2">
-                      <User className="w-4 h-4 text-gray-500" />
-                      <span className="text-gray-600">Giới tính: </span>
-                      <span className="font-medium">
-                        {seller.gender === "male"
-                          ? "Nam"
-                          : seller.gender === "female"
-                          ? "Nữ"
-                          : "Khác"}
+                                      <div className="flex items-center gap-2">
+                      <Star className="w-4 h-4 text-yellow-500" />
+                      <span className="text-gray-600">Đánh giá: </span>
+                      <span className="font-medium text-yellow-600">
+                        {seller.rating}/5.0 ⭐
                       </span>
                     </div>
-                  )}
                 </div>
 
-                {/* View Profile Button */}
-                <div className="mt-4 flex gap-82">
+                {/* Action Buttons */}
+                <div className="mt-6 flex flex-wrap gap-3">
                   <button
                     onClick={() => handleSellerClick(seller.id)}
-                    className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg text-sm font-medium transition-colors"
+                    className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg text-sm font-medium transition-colors flex items-center gap-2"
                   >
+                    <User className="w-4 h-4" />
                     Xem hồ sơ người bán
                   </button>
                   <button
                     onClick={() => handleChatClick(seller.id)}
-                    className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg text-sm font-medium transition-colors"
+                    className="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg text-sm font-medium transition-colors flex items-center gap-2"
                   >
+                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-3.582 8-8 8a9.863 9.863 0 01-4.906-1.298L3 21l2.298-5.094A9.863 9.863 0 013 12c0-4.418 3.582-8 8-8s8 3.582 8 8z" />
+                    </svg>
                     Nhắn tin cho người bán
                   </button>
                 </div>
