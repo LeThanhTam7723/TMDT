@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, memo, useCallback } from "react";
 import { FiHeart } from "react-icons/fi";
 import { useNavigate } from "react-router-dom";
 import { useProduct } from '../context/ProductContext';
@@ -26,15 +26,15 @@ const defaultImages = [
   "https://www.lingobest.com/free-online-english-course/wp-content/uploads/2021/03/Blog-Banners-Bruna-S-15-1.jpg",
 ];
 
-const ProductCard = ({ product }) => {
+const ProductCard = memo(({ product }) => {
   const navigate = useNavigate();
   const { isInFavorites, toggleFavorite: contextToggleFavorite, session } = useProduct();
 
-  const handleClick = () => {
+  const handleClick = useCallback(() => {
     navigate(`/detail/${product.id}`);
-  };
+  }, [navigate, product.id]);
 
-  const handleToggleFavorite = async (e) => {
+  const handleToggleFavorite = useCallback(async (e) => {
     e.preventDefault();
     e.stopPropagation();
     
@@ -44,7 +44,7 @@ const ProductCard = ({ product }) => {
     }
     
     await contextToggleFavorite(product.id);
-  };
+  }, [session?.currentUser, contextToggleFavorite, product.id]);
 
   const isFavorited = isInFavorites(product.id);
 
@@ -60,6 +60,8 @@ const ProductCard = ({ product }) => {
   }
   alt={product.name}
   className="w-full h-48 object-cover"
+  loading="lazy"
+  decoding="async"
 />
         <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black to-transparent h-20"></div>
         {product.discount > 0 && (
@@ -98,6 +100,6 @@ const ProductCard = ({ product }) => {
       </div>
     </div>
   );
-};
+});
 
 export default ProductCard;

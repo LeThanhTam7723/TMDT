@@ -1,22 +1,35 @@
 import React, { useState, useEffect, useContext } from "react";
-import { FiSearch, FiHeart, FiMenu, FiX, FiMic, FiBell, FiUser } from "react-icons/fi";
+import { FiSearch, FiHeart, FiMenu, FiX, FiMic, FiUser } from "react-icons/fi";
 import { FaFacebookF, FaTwitter, FaInstagram, FaLinkedinIn } from "react-icons/fa";
-import { MdEmail, MdPhone, MdKeyboardArrowDown } from "react-icons/md";
+import { MdEmail, MdPhone } from "react-icons/md";
 import { useNavigate, Link } from "react-router-dom";
 import logo from "../assets/images/logo.jpg";
 import { introspect, logOutApi } from "../API/AuthService";
-import { ProductContext, useProduct } from '../context/ProductContext';
+import { ProductContext } from '../context/ProductContext';
 
 
 const Header = () => {
-  const {favorites,setSession}= useContext(ProductContext);
+  const context = useContext(ProductContext);
+  const favorites = context?.favorites || [];
+  const setSession = context?.setSession;
   const [isToken, setIsToken] = useState("");
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isOpen, setIsOpen] = useState(false);
-  const [favoriteCount, setFavoriteCount] = useState(() => {
-    const savedFavorites = localStorage.getItem('favorites');
-    return savedFavorites ? JSON.parse(savedFavorites).length : 0;
-  });
+
+  // Add safety check for context
+  if (!context) {
+    return (
+      <header className="sticky top-0 z-50 bg-gray-900 shadow-md">
+        <div className="bg-gray-800 py-2">
+          <div className="container mx-auto px-4 text-center">
+            <div className="text-red-600 text-sm font-semibold">
+              Lỗi hệ thống - Không thể kết nối với context
+            </div>
+          </div>
+        </div>
+      </header>
+    );
+  }
   //Tìm kiếm giọng nói
   const [isListening, setIsListening] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
@@ -83,31 +96,44 @@ const Header = () => {
     };
     check();
   }, [isLogin]);
-  const [notificationCount, setNotificationCount] = useState(3); // Add notification count state
 
-  const menuItems = [
-    { name: "Home", link: "/" },
-    { name: "Shop", link: "/shop", hasDropdown: true },
-
-    { name: "Pages", link: "#", hasDropdown: true },
-    { name: "Blog", link: "/history" },
-    { name: "Contact", link: "/UserHistory" },
-  ];
-
-  const updateFavoriteCount = () => {
-    const savedFavorites = localStorage.getItem('favorites');
-    setFavoriteCount(savedFavorites ? JSON.parse(savedFavorites).length : 0);
+  // Handle logout function
+  const handleLogout = async () => {
+    try {
+      console.log("Logging out with token:", isToken);
+      
+      // Call logout API
+      await logOutApi({token: isToken});
+      
+      // Clear all localStorage data
+      localStorage.clear();
+      
+      // Update states
+      setIsLogin(false);
+      setIsOpen(false);
+      setSession(null);
+      
+      // Navigate to home page
+      navigate('/');
+      
+      // Reload the page after a short delay
+      setTimeout(() => {
+        window.location.reload();
+      }, 100);
+      
+    } catch (error) {
+      console.error("Logout error:", error);
+      // Even if API fails, still clear local data and redirect
+      localStorage.clear();
+      setIsLogin(false);
+      setIsOpen(false);
+      setSession(null);
+      navigate('/');
+      setTimeout(() => {
+        window.location.reload();
+      }, 100);
+    }
   };
-
-  useEffect(() => {
-    window.addEventListener('storage', updateFavoriteCount);
-    updateFavoriteCount();
-    return () => {
-      window.removeEventListener('storage', updateFavoriteCount);
-    };
-  }, []);
-
-
 
   return (
      <header className="sticky top-0 z-50 bg-gray-900 shadow-md">
@@ -162,29 +188,7 @@ const Header = () => {
             {/* Desktop Menu */}
             <div className="hidden lg:flex items-center space-x-8">
               <a href="/" className="text-gray-300 hover:text-blue-400 flex items-center">Home</a>
-              
-              
-
-              {menuItems.slice(1).map((item, index) => (
-                <div key={index} className="relative group">
-                  <a
-                    href={item.link}
-                    className="text-gray-300 hover:text-blue-400 flex items-center"
-                  >
-                    {item.name}
-                    {item.hasDropdown && (
-                      <MdKeyboardArrowDown className="ml-1" />
-                    )}
-                  </a>
-                  {item.hasDropdown && (
-                    <div className="absolute top-full left-0 w-48 bg-gray-800 shadow-lg rounded-md py-2 hidden group-hover:block">
-                      <a href="#" className="block px-4 py-2 text-sm text-gray-300 hover:bg-gray-700">Submenu 1</a>
-                      <a href="#" className="block px-4 py-2 text-sm text-gray-300 hover:bg-gray-700">Submenu 2</a>
-                      <a href="#" className="block px-4 py-2 text-sm text-gray-300 hover:bg-gray-700">Submenu 3</a>
-                    </div>
-                  )}
-                </div>
-              ))}
+              <a href="/shop" className="text-gray-300 hover:text-blue-400 flex items-center">Shop</a>
               {/* Search Bar */}
               <div className="relative">
                 <input
@@ -220,15 +224,6 @@ const Header = () => {
             {/* Search and Cart */}
             <div className="flex items-center space-x-6">
               <div className="flex items-center space-x-4">
-                {/* Notification Icon */}
-                <div className="relative">
-                  <FiBell className="text-2xl text-gray-300 hover:text-blue-400 cursor-pointer" />
-                  {notificationCount > 0 && (
-                    <span className="absolute -top-2 -right-2 bg-blue-600 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center">
-                      {notificationCount}
-                    </span>
-                  )}
-                </div>
                 {/* Favorite Icon */}
                 <div className="relative">
                   <FiHeart 
@@ -251,12 +246,7 @@ const Header = () => {
                     <div className="absolute top-full right-0 w-48 bg-gray-800 shadow-lg rounded-md py-2 mt-2">
                       <a href="/user-info" className="block px-4 py-2 text-sm text-gray-300 hover:bg-gray-700">Profile</a>
                       <a href="/UserHistory" className="block px-4 py-2 text-sm text-gray-300 hover:bg-gray-700">History</a>
-                      <a onClick={async() => {
-                        console.log(isToken);
-                        await logOutApi({token:isToken});localStorage.clear();
-                        setIsLogin(false);
-                        setIsOpen(false);
-                      }} className="block px-4 py-2 text-sm text-gray-300 hover:bg-gray-700">Logout</a>
+                      <a onClick={handleLogout} className="block px-4 py-2 text-sm text-gray-300 hover:bg-gray-700 cursor-pointer">Logout</a>
                     </div>
                   )}
                 </div>
@@ -284,16 +274,8 @@ const Header = () => {
                 </button>
               </div>
               <div className="mt-8 space-y-4">
-                {menuItems.map((item, index) => (
-                  <div key={index}>
-                    <a
-                      href={item.link}
-                      className="block text-gray-300 hover:text-blue-400 py-2"
-                    >
-                      {item.name}
-                    </a>
-                  </div>
-                ))}
+                <a href="/" className="block text-gray-300 hover:text-blue-400 py-2">Home</a>
+                <a href="/shop" className="block text-gray-300 hover:text-blue-400 py-2">Shop</a>
               </div>
             </div>
           </div>

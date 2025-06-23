@@ -14,4 +14,5 @@ public class CourseSummaryDTO {
     private Double rating;
     private Integer episodeCount;
     private Integer duration;
+    private Boolean status; // Thêm trạng thái duyệt
 }

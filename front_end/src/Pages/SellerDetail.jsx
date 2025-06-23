@@ -18,6 +18,8 @@ import {
 } from 'lucide-react';
 import axiosClient from '../API/axiosClient';
 import StarRating from "../component/StarRating";
+import { getAvatarUrl, handleAvatarError } from "../utils/avatarUtils";
+import { generateConsistentCourseCount, generateConsistentStudentCount, generateConsistentRating } from "../utils/sellerUtils";
 
 const SellerDetail = () => {
   const { id } = useParams();
@@ -29,6 +31,26 @@ const SellerDetail = () => {
   const [error, setError] = useState(null);
   const [showFullIntro, setShowFullIntro] = useState(false);
   const [activeTab, setActiveTab] = useState('about');
+
+  // Function to get course image based on category or course data
+  const getCourseImage = (course) => {
+    const categoryImages = {
+      1: "https://images.unsplash.com/photo-1513258496099-48168024aec0?auto=format&fit=crop&w=600&q=80", // IELTS
+      2: "https://images.unsplash.com/photo-1503676382389-4809596d5290?auto=format&fit=crop&w=600&q=80", // Business English
+      3: "https://images.unsplash.com/photo-1522075469751-3a6694fb2f61?auto=format&fit=crop&w=600&q=80", // Kids English
+      4: "https://images.unsplash.com/photo-1516321318423-f06f85e504b3?auto=format&fit=crop&w=600&q=80", // Conversation
+      5: "https://images.unsplash.com/photo-1434030216411-0b793f4b4173?auto=format&fit=crop&w=600&q=80", // Grammar
+      6: "https://images.unsplash.com/photo-1551288049-bebda4e38f71?auto=format&fit=crop&w=600&q=80"  // General English
+    };
+    
+    // If course has an image field, use it
+    if (course.image) {
+      return course.image;
+    }
+    
+    // Otherwise, use category-based image
+    return categoryImages[course.categoryId] || categoryImages[6];
+  };
 
   useEffect(() => {
     const fetchSellerData = async () => {
@@ -43,10 +65,10 @@ const SellerDetail = () => {
 
       try {
         // Fetch seller information
-        const sellerResponse = await axiosClient.get(`/seller/${id}`);
+        const sellerResponse = await axiosClient.get(`/users/id/${id}`);
         
-        if (sellerResponse.data && sellerResponse.data.id) {
-          setSeller(sellerResponse.data);
+        if (sellerResponse.data && sellerResponse.data.result) {
+          setSeller(sellerResponse.data.result);
           
           // Fetch seller's courses
           try {
@@ -134,10 +156,10 @@ const SellerDetail = () => {
     );
   }
 
-  const totalCourses = sellerCourses.length;
+  const totalCourses = sellerCourses.length > 0 ? sellerCourses.length : generateConsistentCourseCount(id);
   const averageRating = sellerCourses.length > 0 
     ? (sellerCourses.reduce((sum, course) => sum + (course.rating || 0), 0) / sellerCourses.length).toFixed(1)
-    : 0;
+    : generateConsistentRating(id);
 
   return (
     <div className="max-w-6xl mx-auto px-4 bg-white min-h-screen">
@@ -157,17 +179,12 @@ const SellerDetail = () => {
         <div className="flex flex-col md:flex-row items-center gap-6">
           {/* Avatar */}
           <div className="flex-shrink-0">
-            {seller.avatar ? (
-              <img
-                src={seller.avatar}
-                alt={seller.fullname}
-                className="w-32 h-32 rounded-full object-cover border-4 border-white shadow-lg"
-              />
-            ) : (
-              <div className="w-32 h-32 bg-white bg-opacity-20 rounded-full flex items-center justify-center border-4 border-white">
-                <User className="w-16 h-16 text-white" />
-              </div>
-            )}
+            <img
+              src={getAvatarUrl(seller.avatar, seller.fullname, seller.id, 256)}
+              alt={seller.fullname}
+              className="w-32 h-32 rounded-full object-cover border-4 border-white shadow-lg"
+              onError={(e) => handleAvatarError(e, seller.fullname, seller.id, 256)}
+            />
           </div>
 
           {/* Seller Info */}
@@ -357,8 +374,20 @@ const SellerDetail = () => {
                   onClick={() => handleCourseClick(course.id)}
                 >
                   {/* Course Image */}
-                  <div className="aspect-video bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center">
-                    <Play className="w-12 h-12 text-white opacity-80" />
+                  <div className="aspect-video bg-gray-200 dark:bg-gray-700 overflow-hidden relative group">
+                    <img
+                      src={getCourseImage(course)}
+                      alt={course.name}
+                      className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+                      onError={(e) => {
+                        e.target.src = "https://images.unsplash.com/photo-1513258496099-48168024aec0?auto=format&fit=crop&w=600&q=80";
+                      }}
+                      loading="lazy"
+                    />
+                    {/* Overlay for better text readability */}
+                    <div className="absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-20 transition-all duration-300 flex items-center justify-center">
+                      <Play className="text-white opacity-0 group-hover:opacity-100 transition-opacity duration-300 w-12 h-12" />
+                    </div>
                   </div>
                   
                   {/* Course Info */}

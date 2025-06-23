@@ -65,13 +65,13 @@ const HomePage = () => {
     fetchAllCourses();
   }, []);
 
-  // Auto-rotate banners
+  // Auto-rotate banners - reduced frequency to improve performance
   useEffect(() => {
     const interval = setInterval(() => {
       if (!isAnimating) {
         setCurrentSlide((prev) => (prev + 1) % banners.length);
       }
-    }, 5000);
+    }, 8000); // Increased from 5000ms to 8000ms
     return () => clearInterval(interval);
   }, [isAnimating, banners.length]);
 
@@ -82,7 +82,7 @@ const HomePage = () => {
     } else {
       setCurrentSlide((prev) => (prev - 1 + banners.length) % banners.length);
     }
-    setTimeout(() => setIsAnimating(false), 500);
+    setTimeout(() => setIsAnimating(false), 300); // Reduced animation time
   };
 
   const handleProductClick = (courseId) => {
@@ -129,6 +129,8 @@ const HomePage = () => {
               src={banners[currentSlide].image}
               alt="Banner"
               className="w-full h-full object-cover opacity-60 scale-105"
+              loading="lazy"
+              decoding="async"
             />
           </div>
           
@@ -176,7 +178,7 @@ const HomePage = () => {
     <a href="#" className="text-blue-400 hover:text-blue-300 transition">View all</a>
   </div>
   <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-    {products.map((product) => (
+    {products.slice(0, 4).map((product) => (
       <ProductCard key={product.id} product={product} />
     ))}
   </div>
@@ -189,7 +191,7 @@ const HomePage = () => {
           <a href="#" className="text-blue-400 hover:text-blue-300 transition">View all</a>
         </div>
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-          {products.slice(0, 4).map((product) => (
+          {products.slice(4, 8).map((product) => (
             <div 
               key={product.id} 
               className="bg-gradient-to-b from-gray-800 to-gray-900 rounded-xl overflow-hidden shadow-lg hover:shadow-2xl transition-all duration-300 border border-gray-700 cursor-pointer"
@@ -235,7 +237,7 @@ const HomePage = () => {
       <section className="container mx-auto px-4 py-12">
         <h2 className="text-3xl font-bold mb-8">See others' learning achievements</h2>
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-          {products.slice(0, 4).map((product, index) => {
+          {products.slice(8, 12).map((product, index) => {
             const testimonials = [
               "Khóa học này rất chi tiết và dễ hiểu. Giảng viên giảng dạy rất nhiệt tình và có phương pháp. Sau khóa học, tôi tự tin hơn rất nhiều!",
               "Khóa học giúp tôi tự tin hơn trong giao tiếp. Các tình huống thực tế trong khóa học rất hữu ích cho công việc.",

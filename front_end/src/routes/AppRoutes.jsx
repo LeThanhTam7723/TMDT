@@ -9,6 +9,9 @@ import Detail from "../Pages/Detail";
 import UserInfo from "../Pages/UserInfo";
 import CourseVideo from "../Pages/CourseVideo";
 import SellerDashboard from "../Pages/SellerDashboard";
+import SellerCourses from "../Pages/SellerCourses";
+import SellerRevenue from "../Pages/SellerRevenue";
+import SellerAnalytics from "../Pages/SellerAnalytics";
 import CourseForm from "../Pages/CourseForm";
 import Favorite from "../Pages/Favorite";
 import Checkout from "../Pages/Checkout";
@@ -62,6 +65,30 @@ const AppRoutes = () => {
           element={
             <ProtectedRoute allowedRoles={["SELLER", "ADMIN"]}>
               <SellerDashboard />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/seller/courses"
+          element={
+            <ProtectedRoute allowedRoles={["SELLER", "ADMIN"]}>
+              <SellerCourses />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/seller/revenue"
+          element={
+            <ProtectedRoute allowedRoles={["SELLER", "ADMIN"]}>
+              <SellerRevenue />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/seller/analytics"
+          element={
+            <ProtectedRoute allowedRoles={["SELLER", "ADMIN"]}>
+              <SellerAnalytics />
             </ProtectedRoute>
           }
         />

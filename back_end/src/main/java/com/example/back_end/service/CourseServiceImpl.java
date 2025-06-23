@@ -70,6 +70,19 @@ public class CourseServiceImpl {
         Optional<LocalDate> purchaseDate = orderRepository.findPurchaseDateByUserIdAndCourseId(userId, courseId);
         return purchaseDate.orElse(null);
     }
+    
+    // Kiểm tra xem khóa học đã được mở khóa hoàn toàn sau 3 ngày chưa
+    public boolean isCourseFullyUnlocked(Integer userId, Integer courseId) {
+        LocalDate purchaseDate = getCoursePurchaseDate(userId, courseId);
+        if (purchaseDate == null) {
+            return false; // Chưa mua thì không thể mở khóa
+        }
+        
+        LocalDate currentDate = LocalDate.now();
+        long daysSincePurchase = java.time.temporal.ChronoUnit.DAYS.between(purchaseDate, currentDate);
+        
+        return daysSincePurchase >= 3; // Mở khóa sau 3 ngày
+    }
 
     public CourseListResponseDTO getCourseById(Integer id) {
         Course course = courseRepository.findById(id).orElse(null);
@@ -317,5 +330,123 @@ public class CourseServiceImpl {
                             .build();
                 })
                 .collect(Collectors.toList());
+    }
+
+    // ADMIN METHODS FOR COURSE APPROVAL
+
+    // Lấy tất cả khóa học cho admin (bao gồm cả chờ phê duyệt và đã phê duyệt)
+    public List<CourseListResponseDTO> getAllCoursesForAdmin() {
+        return courseRepository.findAll().stream()
+                .map(course -> {
+                    User seller = userRepository.findById(course.getSellerId()).orElse(null);
+                    return CourseListResponseDTO.builder()
+                            .id(course.getId())
+                            .name(course.getName())
+                            .price(course.getPrice())
+                            .sellerId(course.getSellerId())
+                            .categoryId(course.getCategoryId())
+                            .description(course.getDescription())
+                            .rating(course.getRating())
+                            .status(course.getStatus())
+                            .sellerName(seller != null ? seller.getFullname() : "Unknown")
+                            .categoryName(getCategoryName(course.getCategoryId()))
+                            .build();
+                })
+                .collect(Collectors.toList());
+    }
+
+    // Lấy danh sách khóa học chờ phê duyệt (status = false)
+    public List<CourseListResponseDTO> getPendingCourses() {
+        return courseRepository.findAll().stream()
+                .filter(course -> !course.getStatus()) // status = false means pending
+                .map(course -> {
+                    User seller = userRepository.findById(course.getSellerId()).orElse(null);
+                    return CourseListResponseDTO.builder()
+                            .id(course.getId())
+                            .name(course.getName())
+                            .price(course.getPrice())
+                            .sellerId(course.getSellerId())
+                            .categoryId(course.getCategoryId())
+                            .description(course.getDescription())
+                            .rating(course.getRating())
+                            .status(course.getStatus())
+                            .sellerName(seller != null ? seller.getFullname() : "Unknown")
+                            .categoryName(getCategoryName(course.getCategoryId()))
+                            .build();
+                })
+                .collect(Collectors.toList());
+    }
+
+    // Phê duyệt khóa học
+    @Transactional
+    public boolean approveCourse(Integer courseId) {
+        Optional<Course> courseOpt = courseRepository.findById(courseId);
+        if (courseOpt.isPresent()) {
+            Course course = courseOpt.get();
+            if (!course.getStatus()) { // Only approve if currently pending (status = false)
+                course.setStatus(true);
+                courseRepository.save(course);
+                return true;
+            }
+        }
+        return false;
+    }
+
+    // Từ chối khóa học (có thể xóa hoặc đánh dấu là rejected)
+    @Transactional
+    public boolean rejectCourse(Integer courseId, String reason) {
+        Optional<Course> courseOpt = courseRepository.findById(courseId);
+        if (courseOpt.isPresent()) {
+            Course course = courseOpt.get();
+            // For now, we'll delete the course when rejected
+            // In a more complex system, you might want to keep it with a "rejected" status
+            courseRepository.delete(course);
+            // Log the rejection reason
+            System.out.println("Course " + courseId + " rejected. Reason: " + reason);
+            return true;
+        }
+        return false;
+    }
+
+    // Lấy thống kê khóa học cho admin dashboard
+    public java.util.Map<String, Object> getCourseStatistics() {
+        List<Course> allCourses = courseRepository.findAll();
+        
+        long totalCourses = allCourses.size();
+        long approvedCourses = allCourses.stream().filter(Course::getStatus).count();
+        long pendingCourses = allCourses.stream().filter(course -> !course.getStatus()).count();
+        
+        // Thống kê theo category
+        java.util.Map<String, Long> coursesByCategory = allCourses.stream()
+                .filter(Course::getStatus) // Only approved courses
+                .collect(Collectors.groupingBy(
+                        course -> getCategoryName(course.getCategoryId()),
+                        Collectors.counting()
+                ));
+        
+        // Thống kê theo giá
+        double averagePrice = allCourses.stream()
+                .filter(Course::getStatus)
+                .mapToDouble(Course::getPrice)
+                .average()
+                .orElse(0.0);
+        
+        // Thống kê theo rating
+        double averageRating = allCourses.stream()
+                .filter(Course::getStatus)
+                .filter(course -> course.getRating() != null && course.getRating() > 0)
+                .mapToDouble(Course::getRating)
+                .average()
+                .orElse(0.0);
+        
+        java.util.Map<String, Object> statistics = new java.util.HashMap<>();
+        statistics.put("totalCourses", totalCourses);
+        statistics.put("approvedCourses", approvedCourses);
+        statistics.put("pendingCourses", pendingCourses);
+        statistics.put("coursesByCategory", coursesByCategory);
+        statistics.put("averagePrice", Math.round(averagePrice * 100.0) / 100.0);
+        statistics.put("averageRating", Math.round(averageRating * 100.0) / 100.0);
+        
+        return statistics;
     }
 }

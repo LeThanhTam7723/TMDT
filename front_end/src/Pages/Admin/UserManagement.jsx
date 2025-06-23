@@ -1,33 +1,26 @@
 import React, { useState, useEffect } from "react";
 import { motion } from "framer-motion";
+import AdminLayout from "../../component/AdminLayout";
 import {
-  FiMenu,
-  FiBell,
-  FiSearch,
   FiUser,
-  FiSettings,
   FiEdit3,
   FiTrash2,
   FiPlus,
   FiEye,
   FiEyeOff,
-  FiMail,
-  FiPhone,
   FiUserCheck,
   FiUserX,
 } from "react-icons/fi";
-import { MdDashboard, MdAnalytics, MdPeople, MdReport } from "react-icons/md";
-import { BsSun, BsMoon } from "react-icons/bs";
 import axiosClient from "../../API/axiosClient";
 
 const UserManagement = () => {
   const [darkMode, setDarkMode] = useState(false);
-  const [sidebarOpen, setSidebarOpen] = useState(true);
   const [searchTerm, setSearchTerm] = useState("");
   const [showAddModal, setShowAddModal] = useState(false);
   const [showEditModal, setShowEditModal] = useState(false);
   const [selectedUser, setSelectedUser] = useState(null);
   const [showPassword, setShowPassword] = useState({});
+  
   useEffect(() => {
     const fetchUsers = async () => {
       try {
@@ -59,6 +52,7 @@ const UserManagement = () => {
 
     fetchUsers();
   }, []);
+  
   const updateUserStatus = async (userId, role, active) => {
     try {
       const response = await axiosClient.put(`/users/updateStatus/${userId}`, {
@@ -234,360 +228,255 @@ const UserManagement = () => {
   );
 
   return (
-    <div className={`${darkMode ? "dark" : ""} min-h-screen bg-gray-900`}>
-      <div className="flex bg-gray-100 dark:bg-gray-900 text-gray-800 dark:text-white">
-        {/* Sidebar */}
+    <AdminLayout 
+      darkMode={darkMode} 
+      setDarkMode={setDarkMode}
+      title="User Management - Quản lý người dùng"
+    >
+      {/* Stats Cards */}
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-6">
         <motion.div
-          initial={false}
-          animate={{ width: sidebarOpen ? "auto" : "0" }}
-          className={`${
-            sidebarOpen ? "w-64" : "w-0"
-          } bg-white dark:bg-gray-800 h-screen fixed transition-all duration-300 z-10`}
+          whileHover={{ scale: 1.02 }}
+          className="bg-white dark:bg-gray-800 p-6 rounded-xl shadow-lg"
         >
-          <div className="p-4">
-            <nav>
-              <div className="flex items-center mb-8">
-                <img
-                  src="https://images.unsplash.com/photo-1563986768494-4dee2763ff3f"
-                  alt="Logo"
-                  className="h-8 w-8 rounded"
-                />
-                <span className="ml-2 text-xl font-bold">AdminDash</span>
-              </div>
-              <ul className="space-y-2">
-                <li>
-                  <a
-                    href="/admin/dashboard"
-                    className="flex items-center p-3 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg"
-                  >
-                    <MdDashboard className="mr-3" /> Dashboard
-                  </a>
-                </li>
-                <li>
-                  <a
-                    href="/admin/CourseAnalytics"
-                    className="flex items-center p-3 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg"
-                  >
-                    <MdAnalytics className="mr-3" /> Analytics
-                  </a>
-                </li>
-                <li>
-                  <a
-                    href="/admin/UserManagement"
-                    className="flex items-center p-3 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg"
-                  >
-                    <MdPeople className="mr-3" /> User Management
-                  </a>
-                </li>
-                <li className="bg-blue-500 text-white rounded-lg">
-                  <a
-                    href="/admin/ComplaintManagement"
-                    className="flex items-center p-3"
-                  >
-                    <MdReport className="mr-3" /> Reports
-                  </a>
-                </li>
-                <li className="flex items-center p-3 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg">
-                  <a
-                    href="/admin/course-approval"
-                    className="flex items-center p-3"
-                  >
-                    <MdReport className="mr-3" /> Seller Request
-                  </a>
-                </li>
-                <li>
-                  <a
-                    href="#"
-                    className="flex items-center p-3 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg"
-                  >
-                    <FiSettings className="mr-3" /> Settings
-                  </a>
-                </li>
-              </ul>
-            </nav>
+          <div className="flex items-center justify-between">
+            <div>
+              <p className="text-gray-500 dark:text-gray-400 text-sm">
+                Tổng người dùng
+              </p>
+              <h3 className="text-2xl font-bold mt-2">{users.length}</h3>
+            </div>
+            <div className="text-blue-500 text-3xl">
+              <FiUser />
+            </div>
           </div>
         </motion.div>
 
-        {/* Main Content */}
-        <div
-          className={`flex-1 ${
-            sidebarOpen ? "ml-64" : "ml-0"
-          } transition-all duration-300`}
+        <motion.div
+          whileHover={{ scale: 1.02 }}
+          className="bg-white dark:bg-gray-800 p-6 rounded-xl shadow-lg"
         >
-          {/* Header */}
-          <header className="bg-white dark:bg-gray-800 shadow-md">
-            <div className="flex items-center justify-between p-4">
-              <button
-                onClick={() => setSidebarOpen(!sidebarOpen)}
-                className="p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700"
-              >
-                <FiMenu size={24} />
-              </button>
-              <div className="flex items-center space-x-4">
-                <div className="relative">
-                  <input
-                    type="text"
-                    placeholder="Tìm kiếm người dùng..."
-                    value={searchTerm}
-                    onChange={(e) => setSearchTerm(e.target.value)}
-                    className="bg-gray-100 dark:bg-gray-700 rounded-lg pl-10 pr-4 py-2 w-64"
-                  />
-                  <FiSearch className="absolute left-3 top-2.5 text-gray-400" />
-                </div>
-                <button
-                  onClick={() => setDarkMode(!darkMode)}
-                  className="p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700"
-                >
-                  {darkMode ? <BsSun size={20} /> : <BsMoon size={20} />}
-                </button>
-                <button className="p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 relative">
-                  <FiBell size={24} />
-                  <span className="absolute top-0 right-0 bg-red-500 text-white text-xs rounded-full h-5 w-5 flex items-center justify-center">
-                    3
-                  </span>
-                </button>
-                <div className="flex items-center space-x-2">
-                  <img
-                    src="https://images.unsplash.com/photo-1472099645785-5658abf4ff4e"
-                    alt="Profile"
-                    className="h-8 w-8 rounded-full"
-                  />
-                  <span className="font-medium">John Doe</span>
-                </div>
-              </div>
+          <div className="flex items-center justify-between">
+            <div>
+              <p className="text-gray-500 dark:text-gray-400 text-sm">
+                Đang hoạt động
+              </p>
+              <h3 className="text-2xl font-bold mt-2">
+                {users.filter((u) => u.active === 1).length}
+              </h3>
             </div>
-          </header>
-
-          {/* User Management Content */}
-          <main className="p-6">
-            {/* Stats Cards */}
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-6">
-              <motion.div
-                whileHover={{ scale: 1.02 }}
-                className="bg-white dark:bg-gray-800 p-6 rounded-xl shadow-lg"
-              >
-                <div className="flex items-center justify-between">
-                  <div>
-                    <p className="text-gray-500 dark:text-gray-400 text-sm">
-                      Tổng người dùng
-                    </p>
-                    <h3 className="text-2xl font-bold mt-2">{users.length}</h3>
-                  </div>
-                  <div className="text-blue-500 text-3xl">
-                    <FiUser />
-                  </div>
-                </div>
-              </motion.div>
-
-              <motion.div
-                whileHover={{ scale: 1.02 }}
-                className="bg-white dark:bg-gray-800 p-6 rounded-xl shadow-lg"
-              >
-                <div className="flex items-center justify-between">
-                  <div>
-                    <p className="text-gray-500 dark:text-gray-400 text-sm">
-                      Đang hoạt động
-                    </p>
-                    <h3 className="text-2xl font-bold mt-2">
-                      {users.filter((u) => u.active === 1).length}
-                    </h3>
-                  </div>
-                  <div className="text-green-500 text-3xl">
-                    <FiUserCheck />
-                  </div>
-                </div>
-              </motion.div>
-
-              <motion.div
-                whileHover={{ scale: 1.02 }}
-                className="bg-white dark:bg-gray-800 p-6 rounded-xl shadow-lg"
-              >
-                <div className="flex items-center justify-between">
-                  <div>
-                    <p className="text-gray-500 dark:text-gray-400 text-sm">
-                      Không hoạt động
-                    </p>
-                    <h3 className="text-2xl font-bold mt-2">
-                      {users.filter((u) => u.active === 0).length}
-                    </h3>
-                  </div>
-                  <div className="text-red-500 text-3xl">
-                    <FiUserX />
-                  </div>
-                </div>
-              </motion.div>
-
-              <motion.div
-                whileHover={{ scale: 1.02 }}
-                className="bg-white dark:bg-gray-800 p-6 rounded-xl shadow-lg"
-              >
-                <div className="flex items-center justify-between">
-                  <div>
-                    <p className="text-gray-500 dark:text-gray-400 text-sm">
-                      Người dùng mới (tháng)
-                    </p>
-                    <h3 className="text-2xl font-bold mt-2">12</h3>
-                    <p className="text-green-500 text-sm mt-2">+15.3%</p>
-                  </div>
-                  <div className="text-purple-500 text-3xl">
-                    <FiPlus />
-                  </div>
-                </div>
-              </motion.div>
+            <div className="text-green-500 text-3xl">
+              <FiUserCheck />
             </div>
+          </div>
+        </motion.div>
 
-            {/* User Table */}
-            <div className="bg-white dark:bg-gray-800 rounded-xl shadow-lg">
-              <div className="p-6 border-b border-gray-200 dark:border-gray-700">
-                <div className="flex justify-between items-center">
-                  <h2 className="text-xl font-bold">Danh sách người dùng</h2>
-                  <button
-                    onClick={() => setShowAddModal(true)}
-                    className="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-lg flex items-center space-x-2"
-                  >
-                    <FiPlus />
-                    <span>Thêm người dùng</span>
-                  </button>
-                </div>
-              </div>
-
-              <div className="overflow-x-auto">
-                <table className="w-full">
-                  <thead className="bg-gray-50 dark:bg-gray-700">
-                    <tr>
-                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
-                        ID
-                      </th>
-                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
-                        Họ tên
-                      </th>
-                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
-                        Email
-                      </th>
-                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
-                        Username
-                      </th>
-                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
-                        Điện thoại
-                      </th>
-                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
-                        Mật khẩu
-                      </th>
-                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
-                        Trạng thái
-                      </th>
-                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
-                        Role
-                      </th>
-                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
-                        Hành động
-                      </th>
-                    </tr>
-                  </thead>
-                  <tbody className="bg-white dark:bg-gray-800 divide-y divide-gray-200 dark:divide-gray-700">
-                    {filteredUsers.map((user) => (
-                      <tr
-                        key={user.id}
-                        className="hover:bg-gray-50 dark:hover:bg-gray-700"
-                      >
-                        <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
-                          {user.id}
-                        </td>
-                        <td className="px-6 py-4 whitespace-nowrap">
-                          <div className="flex items-center">
-                            <div className="flex-shrink-0 h-10 w-10">
-                              <div className="h-10 w-10 rounded-full bg-gray-300 dark:bg-gray-600 flex items-center justify-center">
-                                <FiUser className="text-gray-500 dark:text-gray-400" />
-                              </div>
-                            </div>
-                            <div className="ml-4">
-                              <div className="text-sm font-medium">
-                                {user.fullname}
-                              </div>
-                            </div>
-                          </div>
-                        </td>
-                        <td className="px-6 py-4 whitespace-nowrap">
-                          <div className="flex items-center text-sm text-gray-900 dark:text-gray-100">
-                            <FiMail className="mr-2 text-gray-400" />
-                            {user.email}
-                          </div>
-                        </td>
-                        <td className="px-6 py-4 whitespace-nowrap text-sm">
-                          {user.username}
-                        </td>
-                        <td className="px-6 py-4 whitespace-nowrap">
-                          <div className="flex items-center text-sm">
-                            <FiPhone className="mr-2 text-gray-400" />
-                            {user.phone}
-                          </div>
-                        </td>
-                        <td className="px-6 py-4 whitespace-nowrap">
-                          <div className="flex items-center space-x-2">
-                            <span className="text-sm font-mono">
-                              {showPassword[user.id]
-                                ? user.password
-                                : "••••••••••••"}
-                            </span>
-                            <button
-                              onClick={() => togglePasswordVisibility(user.id)}
-                              className="text-gray-400 hover:text-gray-600"
-                            >
-                              {showPassword[user.id] ? (
-                                <FiEyeOff size={16} />
-                              ) : (
-                                <FiEye size={16} />
-                              )}
-                            </button>
-                          </div>
-                        </td>
-                        <td className="px-6 py-4 whitespace-nowrap">
-                          <button
-                            onClick={() => toggleUserStatus(user.id)}
-                            className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
-                              user.active === 1
-                                ? "bg-green-100 text-green-800 dark:bg-green-800 dark:text-green-100"
-                                : "bg-red-100 text-red-800 dark:bg-red-800 dark:text-red-100"
-                            }`}
-                          >
-                            {user.active === 1
-                              ? "Hoạt động"
-                              : "Không hoạt động"}
-                          </button>
-                        </td>
-                        <td className="px-6 py-4 whitespace-nowrap text-sm">
-                          {user.role}
-                        </td>
-                        <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
-                          <div className="flex space-x-2">
-                            <button
-                              onClick={() => handleEditUser(user)}
-                              className="text-blue-600 hover:text-blue-900 dark:text-blue-400 dark:hover:text-blue-300"
-                            >
-                              <FiEdit3 size={16} />
-                            </button>
-                            <button
-                              onClick={() => handleDeleteUser(user.id)}
-                              className="text-red-600 hover:text-red-900 dark:text-red-400 dark:hover:text-red-300"
-                            >
-                              <FiTrash2 size={16} />
-                            </button>
-                          </div>
-                        </td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
-              </div>
+        <motion.div
+          whileHover={{ scale: 1.02 }}
+          className="bg-white dark:bg-gray-800 p-6 rounded-xl shadow-lg"
+        >
+          <div className="flex items-center justify-between">
+            <div>
+              <p className="text-gray-500 dark:text-gray-400 text-sm">
+                Không hoạt động
+              </p>
+              <h3 className="text-2xl font-bold mt-2">
+                {users.filter((u) => u.active === 0).length}
+              </h3>
             </div>
-          </main>
+            <div className="text-red-500 text-3xl">
+              <FiUserX />
+            </div>
+          </div>
+        </motion.div>
+
+        <motion.div
+          whileHover={{ scale: 1.02 }}
+          className="bg-white dark:bg-gray-800 p-6 rounded-xl shadow-lg"
+        >
+          <div className="flex items-center justify-between">
+            <div>
+              <p className="text-gray-500 dark:text-gray-400 text-sm">
+                Người dùng mới (tháng)
+              </p>
+              <h3 className="text-2xl font-bold mt-2">12</h3>
+              <p className="text-green-500 text-sm mt-2">+15.3%</p>
+            </div>
+            <div className="text-purple-500 text-3xl">
+              <FiPlus />
+            </div>
+          </div>
+        </motion.div>
+      </div>
+
+      {/* User Table */}
+      <div className="bg-white dark:bg-gray-800 rounded-xl shadow-lg">
+        <div className="p-6 border-b border-gray-200 dark:border-gray-700">
+          <div className="flex justify-between items-center">
+            <h2 className="text-xl font-bold">Danh sách người dùng</h2>
+            <button
+              onClick={() => setShowAddModal(true)}
+              className="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-lg flex items-center space-x-2"
+            >
+              <FiPlus />
+              <span>Thêm người dùng</span>
+            </button>
+          </div>
         </div>
+
+        <div className="overflow-x-auto">
+          <table className="w-full">
+            <thead className="bg-gray-50 dark:bg-gray-700">
+              <tr>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
+                  ID
+                </th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
+                  Họ tên
+                </th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
+                  Email
+                </th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
+                  Username
+                </th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
+                  Điện thoại
+                </th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
+                  Mật khẩu
+                </th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
+                  Trạng thái
+                </th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
+                  Role
+                </th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
+                  Hành động
+                </th>
+              </tr>
+            </thead>
+            <tbody className="bg-white dark:bg-gray-800 divide-y divide-gray-200 dark:divide-gray-700">
+              {filteredUsers.map((user) => (
+                <tr
+                  key={user.id}
+                  className="hover:bg-gray-50 dark:hover:bg-gray-700"
+                >
+                  <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
+                    {user.id}
+                  </td>
+                  <td className="px-6 py-4 whitespace-nowrap">
+                    <div className="flex items-center">
+                      <div className="flex-shrink-0 h-10 w-10">
+                        <div className="h-10 w-10 rounded-full bg-gray-300 dark:bg-gray-600 flex items-center justify-center">
+                          <FiUser className="text-gray-500 dark:text-gray-400" />
+                        </div>
+                      </div>
+                      <div className="ml-4">
+                        <div className="text-sm font-medium text-gray-900 dark:text-white">
+                          {user.fullname}
+                        </div>
+                        {user.gender && (
+                          <div className="text-sm text-gray-500 dark:text-gray-400">
+                            {user.gender}
+                          </div>
+                        )}
+                      </div>
+                    </div>
+                  </td>
+                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-white">
+                    {user.email}
+                  </td>
+                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-white">
+                    {user.username}
+                  </td>
+                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-white">
+                    {user.phone}
+                  </td>
+                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-white">
+                    <div className="flex items-center space-x-2">
+                      <span className="font-mono">
+                        {showPassword[user.id]
+                          ? user.password
+                          : "••••••••"}
+                      </span>
+                      <button
+                        onClick={() => togglePasswordVisibility(user.id)}
+                        className="text-gray-400 hover:text-gray-600 dark:hover:text-gray-300"
+                      >
+                        {showPassword[user.id] ? (
+                          <FiEyeOff size={16} />
+                        ) : (
+                          <FiEye size={16} />
+                        )}
+                      </button>
+                    </div>
+                  </td>
+                  <td className="px-6 py-4 whitespace-nowrap">
+                    <span
+                      className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full cursor-pointer ${
+                        user.active === 1
+                          ? "bg-green-100 text-green-800 dark:bg-green-800 dark:text-green-200"
+                          : "bg-red-100 text-red-800 dark:bg-red-800 dark:text-red-200"
+                      }`}
+                      onClick={() => toggleUserStatus(user.id)}
+                    >
+                      {user.active === 1 ? "Hoạt động" : "Không hoạt động"}
+                    </span>
+                  </td>
+                  <td className="px-6 py-4 whitespace-nowrap">
+                    <span
+                      className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${
+                        user.role === "ADMIN"
+                          ? "bg-purple-100 text-purple-800 dark:bg-purple-800 dark:text-purple-200"
+                          : user.role === "SELLER"
+                          ? "bg-blue-100 text-blue-800 dark:bg-blue-800 dark:text-blue-200"
+                          : "bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-200"
+                      }`}
+                    >
+                      {user.role}
+                    </span>
+                  </td>
+                  <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
+                    <div className="flex space-x-2">
+                      <button
+                        onClick={() => handleEditUser(user)}
+                        className="text-indigo-600 hover:text-indigo-900 dark:text-indigo-400 dark:hover:text-indigo-300"
+                      >
+                        <FiEdit3 size={16} />
+                      </button>
+                      <button
+                        onClick={() => handleDeleteUser(user.id)}
+                        className="text-red-600 hover:text-red-900 dark:text-red-400 dark:hover:text-red-300"
+                      >
+                        <FiTrash2 size={16} />
+                      </button>
+                    </div>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+
+        {filteredUsers.length === 0 && (
+          <div className="text-center py-12">
+            <FiUser className="mx-auto h-12 w-12 text-gray-400" />
+            <h3 className="mt-2 text-sm font-medium text-gray-900 dark:text-white">
+              Không có người dùng nào
+            </h3>
+            <p className="mt-1 text-sm text-gray-500 dark:text-gray-400">
+              Chưa có người dùng nào phù hợp với tìm kiếm.
+            </p>
+          </div>
+        )}
       </div>
 
       {/* Modals */}
       {showAddModal && <UserModal />}
-      {showEditModal && <UserModal isEdit={true} />}
-    </div>
+      {showEditModal && <UserModal isEdit />}
+    </AdminLayout>
   );
 };
 

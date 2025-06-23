@@ -44,7 +44,7 @@ CREATE TABLE IF NOT EXISTS `course` (
   KEY `FK_course_users` (`sellerid`),
   CONSTRAINT `FK_course_category` FOREIGN KEY (`categoryid`) REFERENCES `category` (`CategoryID`) ON DELETE NO ACTION ON UPDATE NO ACTION,
   CONSTRAINT `FK_course_users` FOREIGN KEY (`sellerid`) REFERENCES `users` (`id`) ON DELETE NO ACTION ON UPDATE NO ACTION
-) ENGINE=InnoDB AUTO_INCREMENT=21 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=26 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 -- Dumping data for table tmdt.course: ~20 rows (approximately)
 INSERT IGNORE INTO `course` (`courseid`, `categoryid`, `description`, `name`, `price`, `rating`, `sellerid`, `status`) VALUES
@@ -67,7 +67,12 @@ INSERT IGNORE INTO `course` (`courseid`, `categoryid`, `description`, `name`, `p
 	(17, 1, 'Advanced IELTS Writing Task 1 & 2 strategies and techniques for band 8+ score.', 'IELTS Writing Excellence', 179.99, 4.8, 5, b'1'),
 	(18, 2, 'Essential business English for presentations, meetings, and professional communication.', 'Business English Fundamentals', 139.99, 4.7, 5, b'1'),
 	(19, 4, 'Improve fluency and confidence in everyday English conversations with native speakers.', 'English Conversation Mastery', 99.99, 4.6, 5, b'1'),
-	(20, 5, 'Complete English grammar course from basic to advanced level with practical exercises.', 'English Grammar Complete Guide', 119.99, 4.5, 5, b'1');
+	(20, 5, 'Complete English grammar course from basic to advanced level with practical exercises.', 'English Grammar Complete Guide', 119.99, 4.5, 5, b'1'),
+	(21, 1, 'New IELTS preparation course focusing on recent exam format changes and updated strategies.', 'IELTS 2024 Update Course', 189.99, 0.0, 2, b'0'),
+	(22, 2, 'Advanced business English for international corporations and global communication.', 'Global Business English', 159.99, 0.0, 3, b'0'),
+	(23, 5, 'Comprehensive grammar course with AI-powered practice exercises and real-time feedback.', 'Smart Grammar with AI', 149.99, 0.0, 5, b'0'),
+	(24, 4, 'Interactive conversation practice with virtual reality scenarios and role-playing.', 'VR English Conversation', 199.99, 0.0, 1, b'0'),
+	(25, 6, 'Complete English course designed for software developers and IT professionals.', 'English for Programmers', 169.99, 0.0, 2, b'0');
 
 -- Dumping structure for table tmdt.coursedetail
 CREATE TABLE IF NOT EXISTS `coursedetail` (
@@ -82,7 +87,7 @@ CREATE TABLE IF NOT EXISTS `coursedetail` (
   PRIMARY KEY (`id`),
   KEY `FK_coursedetail_course` (`course_id`) USING BTREE,
   CONSTRAINT `FKthsgs79olf7laaprmy6qqydb4` FOREIGN KEY (`course_id`) REFERENCES `course` (`courseid`)
-) ENGINE=InnoDB AUTO_INCREMENT=25 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=35 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 -- Dumping data for table tmdt.coursedetail: ~24 rows (approximately)
 INSERT IGNORE INTO `coursedetail` (`id`, `duration`, `episode_number`, `is_preview`, `link`, `course_id`, `courseid`, `name`) VALUES
@@ -109,7 +114,17 @@ INSERT IGNORE INTO `coursedetail` (`id`, `duration`, `episode_number`, `is_previ
 	(21, 16, 2, b'0', 'https://www.youtube.com/embed/47bRgqpHCv4', 19, NULL, 'Small Talk Mastery'),
 	(22, 20, 3, b'0', 'https://www.youtube.com/embed/wQKKj_qeOBQ', 19, NULL, 'Advanced Discussions'),
 	(23, 14, 1, b'1', 'https://www.youtube.com/embed/EGp5GFMwdKE', 20, NULL, 'Grammar Fundamentals'),
-	(24, 18, 2, b'0', 'https://www.youtube.com/embed/CfCdxSrNJxs', 20, NULL, 'Advanced Grammar Rules');
+	(24, 18, 2, b'0', 'https://www.youtube.com/embed/CfCdxSrNJxs', 20, NULL, 'Advanced Grammar Rules'),
+	(25, 20, 1, b'1', 'https://www.youtube.com/embed/hTvJoYnpeRQ', 21, NULL, 'IELTS 2024 Changes Overview'),
+	(26, 15, 2, b'0', 'https://www.youtube.com/embed/-GR52szEdAg', 21, NULL, 'New Speaking Strategies'),
+	(27, 18, 1, b'1', 'https://www.youtube.com/embed/HZQb34t9BzE', 22, NULL, 'Global Business Communication'),
+	(28, 22, 2, b'0', 'https://www.youtube.com/embed/bJzb-RuUcMU', 22, NULL, 'International Meeting Etiquette'),
+	(29, 16, 1, b'1', 'https://www.youtube.com/embed/ZVznzY7EjuY', 23, NULL, 'AI Grammar Introduction'),
+	(30, 20, 2, b'0', 'https://www.youtube.com/embed/QH2-TGUlwu4', 23, NULL, 'Interactive Grammar Exercises'),
+	(31, 25, 1, b'1', 'https://www.youtube.com/embed/hS2x1zl4rn0', 24, NULL, 'VR Environment Setup'),
+	(32, 30, 2, b'0', 'https://www.youtube.com/embed/NhFE63cvl_s', 24, NULL, 'Virtual Role-Playing'),
+	(33, 18, 1, b'1', 'https://www.youtube.com/embed/YrwaFbSLSYI', 25, NULL, 'Programming English Basics'),
+	(34, 22, 2, b'0', 'https://www.youtube.com/embed/lGrI5u6s6kM', 25, NULL, 'Technical Documentation Writing');
 
 -- Dumping structure for table tmdt.course_ratings
 CREATE TABLE IF NOT EXISTS `course_ratings` (
@@ -174,6 +189,7 @@ CREATE TABLE IF NOT EXISTS `orders` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
   `id_course` int(11) NOT NULL,
   `id_user` int(11) NOT NULL,
+  `date_order` date DEFAULT NULL,
   PRIMARY KEY (`id`),
   KEY `FKmbmh1nnks3isuyeuw7grhix56` (`id_course`),
   KEY `FKtb6jdc061vu6ydv1445lrigtb` (`id_user`),
@@ -182,18 +198,18 @@ CREATE TABLE IF NOT EXISTS `orders` (
 ) ENGINE=InnoDB AUTO_INCREMENT=12 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 -- Dumping data for table tmdt.orders: ~11 rows (approximately)
-INSERT IGNORE INTO `orders` (`id`, `id_course`, `id_user`) VALUES
-	(1, 1, 4),
-	(2, 2, 4),
-	(3, 3, 4),
-	(4, 4, 4),
-	(5, 16, 6),
-	(6, 17, 6),
-	(7, 18, 7),
-	(8, 19, 7),
-	(9, 20, 6),
-	(10, 16, 7),
-	(11, 18, 6);
+INSERT IGNORE INTO `orders` (`id`, `id_course`, `id_user`, `date_order`) VALUES
+	(1, 1, 4, '2024-11-15'),
+	(2, 2, 4, '2024-11-16'),
+	(3, 3, 4, '2024-11-17'),
+	(4, 4, 4, '2024-11-18'),
+	(5, 16, 6, '2024-12-01'),
+	(6, 17, 6, '2024-12-02'),
+	(7, 18, 7, '2024-12-03'),
+	(8, 19, 7, '2024-12-04'),
+	(9, 20, 6, '2024-12-05'),
+	(10, 16, 7, '2024-12-06'),
+	(11, 18, 6, '2024-12-07');
 
 -- Dumping structure for table tmdt.report
 CREATE TABLE IF NOT EXISTS `report` (

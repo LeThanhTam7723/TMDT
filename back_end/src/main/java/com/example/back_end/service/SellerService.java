@@ -2,11 +2,15 @@ package com.example.back_end.service;
 
 import com.example.back_end.dto.CourseSummaryDTO;
 import com.example.back_end.dto.request.CourseCreateRequest;
+import com.example.back_end.dto.request.CourseDetailCreateRequest;
+import com.example.back_end.dto.request.CourseDetailUpdateRequest;
 import com.example.back_end.dto.request.CourseUpdateRequest;
 import com.example.back_end.dto.response.SellerRevenueResponseDTO;
 import com.example.back_end.dto.response.SellerStatsResponseDTO;
 import com.example.back_end.entity.Course;
+import com.example.back_end.entity.CourseDetail;
 import com.example.back_end.entity.Order;
+import com.example.back_end.repositories.CourseDetailRepository;
 import com.example.back_end.repositories.CourseRepository;
 import com.example.back_end.repositories.OrderRepository;
 import lombok.RequiredArgsConstructor;
@@ -24,6 +28,7 @@ import java.util.stream.Collectors;
 public class SellerService {
     
     private final CourseRepository courseRepository;
+    private final CourseDetailRepository courseDetailRepository;
     private final OrderRepository orderRepository;
 
     public Course createCourse(Integer sellerId, CourseCreateRequest request) {
@@ -99,6 +104,7 @@ public class SellerService {
                     .rating(course.getRating())
                     .episodeCount(totalEpisodes)
                     .duration(totalDuration)
+                    .status(course.getStatus()) // Thêm trạng thái duyệt
                     .build();
         }).collect(Collectors.toList());
     }
@@ -196,5 +202,105 @@ public class SellerService {
                 .monthlyRevenue(monthlyRevenue)
                 .monthlyData(monthlyData)
                 .build();
+    }
+    
+    // ===== COURSE DETAILS MANAGEMENT =====
+    
+    public CourseDetail createCourseDetail(Integer sellerId, Integer courseId, CourseDetailCreateRequest request) {
+        // Verify course exists and belongs to seller
+        Course course = courseRepository.findById(courseId)
+                .orElseThrow(() -> new RuntimeException("Course not found"));
+        
+        if (!course.getSellerId().equals(sellerId)) {
+            throw new RuntimeException("Unauthorized: You can only manage your own courses");
+        }
+        
+        // Auto-generate episode number if not provided
+        Integer episodeNumber = request.getEpisodeNumber();
+        if (episodeNumber == null) {
+            // Get next episode number
+            Long maxEpisode = courseDetailRepository.countByCourseId(courseId);
+            episodeNumber = maxEpisode.intValue() + 1;
+        }
+        
+        // Check if episode number already exists
+        if (courseDetailRepository.existsByCourse_IdAndEpisodeNumber(courseId, episodeNumber)) {
+            throw new RuntimeException("Episode number " + episodeNumber + " already exists for this course");
+        }
+        
+        CourseDetail courseDetail = CourseDetail.builder()
+                .course(course)
+                .name(request.getName())
+                .episodeNumber(episodeNumber)
+                .link(request.getLink())
+                .duration(request.getDuration())
+                .isPreview(request.getIsPreview() != null ? request.getIsPreview() : false)
+                .build();
+        
+        return courseDetailRepository.save(courseDetail);
+    }
+    
+    public CourseDetail updateCourseDetail(Integer sellerId, Integer courseId, Integer detailId, CourseDetailUpdateRequest request) {
+        // Verify course exists and belongs to seller
+        Course course = courseRepository.findById(courseId)
+                .orElseThrow(() -> new RuntimeException("Course not found"));
+        
+        if (!course.getSellerId().equals(sellerId)) {
+            throw new RuntimeException("Unauthorized: You can only manage your own courses");
+        }
+        
+        CourseDetail courseDetail = courseDetailRepository.findById(detailId)
+                .orElseThrow(() -> new RuntimeException("Course detail not found"));
+        
+        if (!courseDetail.getCourseId().equals(courseId)) {
+            throw new RuntimeException("Course detail does not belong to this course");
+        }
+        
+        // Check episode number conflict if changing
+        if (request.getEpisodeNumber() != null && 
+            !request.getEpisodeNumber().equals(courseDetail.getEpisodeNumber()) &&
+            courseDetailRepository.existsByCourse_IdAndEpisodeNumber(courseId, request.getEpisodeNumber())) {
+            throw new RuntimeException("Episode number " + request.getEpisodeNumber() + " already exists for this course");
+        }
+        
+        // Update fields
+        if (request.getName() != null) courseDetail.setName(request.getName());
+        if (request.getEpisodeNumber() != null) courseDetail.setEpisodeNumber(request.getEpisodeNumber());
+        if (request.getLink() != null) courseDetail.setLink(request.getLink());
+        if (request.getDuration() != null) courseDetail.setDuration(request.getDuration());
+        if (request.getIsPreview() != null) courseDetail.setIsPreview(request.getIsPreview());
+        
+        return courseDetailRepository.save(courseDetail);
+    }
+    
+    public void deleteCourseDetail(Integer sellerId, Integer courseId, Integer detailId) {
+        // Verify course exists and belongs to seller
+        Course course = courseRepository.findById(courseId)
+                .orElseThrow(() -> new RuntimeException("Course not found"));
+        
+        if (!course.getSellerId().equals(sellerId)) {
+            throw new RuntimeException("Unauthorized: You can only manage your own courses");
+        }
+        
+        CourseDetail courseDetail = courseDetailRepository.findById(detailId)
+                .orElseThrow(() -> new RuntimeException("Course detail not found"));
+        
+        if (!courseDetail.getCourseId().equals(courseId)) {
+            throw new RuntimeException("Course detail does not belong to this course");
+        }
+        
+        courseDetailRepository.delete(courseDetail);
+    }
+    
+    public List<CourseDetail> getCourseDetails(Integer sellerId, Integer courseId) {
+        // Verify course exists and belongs to seller
+        Course course = courseRepository.findById(courseId)
+                .orElseThrow(() -> new RuntimeException("Course not found"));
+        
+        if (!course.getSellerId().equals(sellerId)) {
+            throw new RuntimeException("Unauthorized: You can only manage your own courses");
+        }
+        
+        return courseDetailRepository.findByCourse_IdOrderByEpisodeNumberAsc(courseId);
     }
 } 

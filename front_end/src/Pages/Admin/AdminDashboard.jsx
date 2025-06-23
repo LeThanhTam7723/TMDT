@@ -1,14 +1,5 @@
 import React, { useState } from "react";
-import { motion } from "framer-motion";
-import { FiSettings } from "react-icons/fi";
-import {
-  MdDashboard,
-  MdAnalytics,
-  MdPeople,
-  MdReport,
-  MdTrendingUp,
-  MdSchool,
-} from "react-icons/md";
+import AdminLayout from "../../component/AdminLayout";
 import {
   BarChart,
   Bar,
@@ -23,19 +14,9 @@ import {
   Cell,
 } from "recharts";
 import {
-  Bell,
   Users,
   BookOpen,
   DollarSign,
-  LogOut,
-  Menu,
-  Search,
-  Sun,
-  Moon,
-  BarChart3,
-  MessageSquare,
-  ShoppingCart,
-  Star,
 } from "lucide-react";
 
 // Sample data for the charts
@@ -110,171 +91,14 @@ const recentRegistrations = [
 ];
 
 const AdminDashboard = () => {
-  const [activeMenuItem, setActiveMenuItem] = useState("statistics");
-  const [sidebarOpen, setSidebarOpen] = useState(true);
   const [darkMode, setDarkMode] = useState(false);
-  const [searchTerm, setSearchTerm] = useState("");
-
-  const menuItems = [
-    {
-      id: "statistics",
-      title: "Dashboard",
-      icon: BarChart3,
-      href: "/admin/dashboard",
-    },
-    {
-      id: "courses",
-      title: "Analytics",
-      icon: BookOpen,
-      href: "/admin/CourseAnalytics",
-    },
-    {
-      id: "users",
-      title: "User Management",
-      icon: Users,
-      href: "/admin/UserManagement",
-    },
-    {
-      id: "complaints",
-      title: "Quản lí phản hồi khiếu nại",
-      icon: MessageSquare,
-      href: "/admin/ComplaintManagement",
-    },
-    {
-      id: "settings",
-      title: "Settings",
-      icon: FiSettings,
-      href: "/admin/settings",
-    },
-  ];
 
   return (
-    <div className={`${darkMode ? "dark" : ""} min-h-screen bg-gray-900`}>
-      <div className="flex bg-gray-100 dark:bg-gray-900 text-gray-800 dark:text-white">
-        {/* Sidebar */}
-        <motion.div
-          initial={false}
-          animate={{ width: sidebarOpen ? "auto" : "0" }}
-          className={`${
-            sidebarOpen ? "w-64" : "w-0"
-          } bg-white dark:bg-gray-800 h-screen fixed transition-all duration-300 z-10`}
-        >
-          <div className="p-4">
-            <nav>
-              <div className="flex items-center mb-8">
-                <img
-                  src="https://images.unsplash.com/photo-1563986768494-4dee2763ff3f"
-                  alt="Logo"
-                  className="h-8 w-8 rounded"
-                />
-                <span className="ml-2 text-xl font-bold">AdminDash</span>
-              </div>
-              <ul className="space-y-2">
-                <li>
-                  <a
-                    href="/admin/dashboard"
-                    className="flex items-center p-3 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg"
-                  >
-                    <MdDashboard className="mr-3" /> Dashboard
-                  </a>
-                </li>
-                <li>
-                  <a
-                    href="/admin/CourseAnalytics"
-                    className="flex items-center p-3 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg"
-                  >
-                    <MdAnalytics className="mr-3" /> Analytics
-                  </a>
-                </li>
-                <li>
-                  <a
-                    href="/admin/UserManagement"
-                    className="flex items-center p-3 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg"
-                  >
-                    <MdPeople className="mr-3" /> User Management
-                  </a>
-                </li>
-                <li className="bg-blue-500 text-white rounded-lg">
-                  <a
-                    href="/admin/ComplaintManagement"
-                    className="flex items-center p-3"
-                  >
-                    <MdReport className="mr-3" /> Reports
-                  </a>
-                </li>
-                <li className="flex items-center p-3 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg">
-                  <a
-                    href="/admin/course-approval"
-                    className="flex items-center p-3"
-                  >
-                    <MdReport className="mr-3" /> Seller Request
-                  </a>
-                </li>
-                <li>
-                  <a
-                    href="#"
-                    className="flex items-center p-3 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg"
-                  >
-                    <FiSettings className="mr-3" /> Settings
-                  </a>
-                </li>
-              </ul>
-            </nav>
-          </div>
-        </motion.div>
-
-        {/* Main Content */}
-        <div
-          className={`flex-1 ${
-            sidebarOpen ? "ml-64" : "ml-0"
-          } transition-all duration-300`}
-        >
-          {/* Header */}
-          <header className="bg-white dark:bg-gray-800 shadow-md">
-            <div className="flex items-center justify-between p-4">
-              <button
-                onClick={() => setSidebarOpen(!sidebarOpen)}
-                className="p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
-              >
-                <Menu size={24} />
-              </button>
-              <div className="flex items-center space-x-4">
-                <div className="relative">
-                  <input
-                    type="text"
-                    placeholder="Tìm kiếm..."
-                    value={searchTerm}
-                    onChange={(e) => setSearchTerm(e.target.value)}
-                    className="bg-gray-100 dark:bg-gray-700 rounded-lg pl-10 pr-4 py-2 w-64 focus:outline-none focus:ring-2 focus:ring-blue-500"
-                  />
-                  <Search className="absolute left-3 top-2.5 text-gray-400 w-4 h-4" />
-                </div>
-                <button
-                  onClick={() => setDarkMode(!darkMode)}
-                  className="p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
-                >
-                  {darkMode ? <Sun size={20} /> : <Moon size={20} />}
-                </button>
-                <button className="p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 relative transition-colors">
-                  <Bell size={24} />
-                  <span className="absolute top-0 right-0 bg-red-500 text-white text-xs rounded-full h-5 w-5 flex items-center justify-center">
-                    3
-                  </span>
-                </button>
-                <div className="flex items-center space-x-2">
-                  <img
-                    src="https://images.unsplash.com/photo-1472099645785-5658abf4ff4e"
-                    alt="Profile"
-                    className="h-8 w-8 rounded-full"
-                  />
-                  <span className="font-medium">Admin</span>
-                </div>
-              </div>
-            </div>
-          </header>
-
-          {/* Dashboard Content */}
-          <div className="p-6">
+    <AdminLayout 
+      darkMode={darkMode} 
+      setDarkMode={setDarkMode}
+      title="Dashboard - Tổng quan hệ thống"
+    >
             {/* Stats Cards */}
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
               <StatCard
@@ -431,11 +255,8 @@ const AdminDashboard = () => {
                 </table>
               </div>
             </div>
-          </div>
-        </div>
-      </div>
-    </div>
-  );
+      </AdminLayout>
+    );
 };
 
 // Helper components

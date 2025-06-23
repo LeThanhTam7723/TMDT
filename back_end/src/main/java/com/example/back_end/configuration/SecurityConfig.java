@@ -34,6 +34,7 @@ public class SecurityConfig {
     private final String[] SELLER_MANAGEMENT_ENDPOINTS = {"/seller/{sellerId}/courses/managed", "/seller/{sellerId}/stats", "/seller/{sellerId}/revenue"};
     private final String[] PUBLIC_ENDPOINTS_DELETE = {"/favorites/remove"};
     private final String[] SELLER_CRUD_ENDPOINTS = {"/seller/{sellerId}/courses/{courseId}"};
+    private final String[] ADMIN_ENDPOINTS = {"/admin/**"};
     @Value("${jwt.signer-key}")
     protected String SIGNER_KEY;
     @Autowired
@@ -66,6 +67,7 @@ public class SecurityConfig {
                         .requestMatchers(HttpMethod.POST, PUBLIC_ENDPOINTS_LOGIN).authenticated()
                         .requestMatchers(HttpMethod.DELETE, PUBLIC_ENDPOINTS_DELETE).authenticated()
                         .requestMatchers(SELLER_MANAGEMENT_ENDPOINTS).authenticated()
+                        .requestMatchers(ADMIN_ENDPOINTS).authenticated()
                         .anyRequest().authenticated()
                 )
                 .oauth2ResourceServer(oauth2 -> oauth2.jwt(jwtConfigurer -> jwtConfigurer.decoder(jwtDecoder())))
