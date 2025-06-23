@@ -24,6 +24,7 @@ public class CourseListResponseDTO {
     private String categoryName;
     private boolean isPurchased;
     private LocalDate purchaseDate;
+    private boolean isFullyUnlocked; // Thêm trường để kiểm tra xem khóa học đã được mở khóa hoàn toàn sau 3 ngày chưa
 
     private LocalDate datePurchased;
 

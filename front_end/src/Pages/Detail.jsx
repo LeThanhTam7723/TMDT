@@ -76,6 +76,7 @@ const Detail = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [isPurchased, setIsPurchased] = useState(false); // New state for purchase status
+  const [isFullyUnlocked, setIsFullyUnlocked] = useState(false); // State for unlock status after 3 days
 
   const relatedCourses = [
     {
@@ -410,7 +411,9 @@ const Detail = () => {
 
           // Check if user has purchased the course and log the result
           const purchased = courseData.purchased;
+          const fullyUnlocked = courseData.isFullyUnlocked || false;
           setIsPurchased(purchased);
+          setIsFullyUnlocked(fullyUnlocked);
 
           // Console log purchase status
           if (purchased) {
@@ -434,11 +437,14 @@ const Detail = () => {
             });
           }
 
-          // Fetch course details separately
+          // Fetch course details separately with userId
           try {
-            const detailsResponse = await axiosClient.get(
-              `/courses/details/${id}`
-            );
+            const userId = session?.id;
+            const detailsApiUrl = userId 
+              ? `/courses/details/${id}?userId=${userId}`
+              : `/courses/details/${id}`;
+            
+            const detailsResponse = await axiosClient.get(detailsApiUrl);
             if (detailsResponse.data && detailsResponse.data.code === 200) {
               setCourseDetails(detailsResponse.data.result);
             }
@@ -597,15 +603,21 @@ const Detail = () => {
           {/* Price Section */}
           <div className="mb-6 flex flex-col sm:flex-row gap-3">
             {isPurchased ? (
-              // ✅ Nếu đã mua → chỉ hiển thị nút "Continue Learning"
+              // ✅ Nếu đã mua → hiển thị thông tin về trạng thái mở khóa
               <>
                 <button
                   onClick={handleWatchCourse}
                   className="bg-green-600 hover:bg-green-700 text-white px-6 py-3 rounded-lg font-semibold transition-colors flex items-center gap-2"
                 >
                   <Play className="w-5 h-5" />
-                  Continue Learning
+                  {isFullyUnlocked ? 'Continue Learning' : 'Watch Available Content'}
                 </button>
+                {!isFullyUnlocked && (
+                  <div className="text-sm text-orange-600 bg-orange-50 px-3 py-2 rounded-lg border border-orange-200 flex items-center gap-2">
+                    <Clock className="w-4 h-4" />
+                    Full course unlocks 3 days after purchase
+                  </div>
+                )}
                 {/* Favorite Button */}
                 <button
                   onClick={() => {
@@ -981,12 +993,26 @@ const Detail = () => {
                         Free Preview
                       </span>
                     )}
-                    {/* Show purchased indicator for all episodes if course is purchased */}
-                    {isPurchased && (
+                    {/* Show status based on new logic */}
+                    {episode.hasAccess !== undefined ? (
+                      episode.hasAccess ? (
+                        <span className="ml-2 bg-blue-100 text-blue-800 text-xs px-2 py-1 rounded-full">
+                          Available
+                        </span>
+                      ) : episode.isPurchased ? (
+                        <span className="ml-2 bg-orange-100 text-orange-800 text-xs px-2 py-1 rounded-full">
+                          Unlocks after 3 days
+                        </span>
+                      ) : (
+                        <span className="ml-2 bg-gray-100 text-gray-800 text-xs px-2 py-1 rounded-full">
+                          Purchase required
+                        </span>
+                      )
+                    ) : isPurchased ? (
                       <span className="ml-2 bg-blue-100 text-blue-800 text-xs px-2 py-1 rounded-full">
                         Available
                       </span>
-                    )}
+                    ) : null}
                   </div>
                   <div className="flex items-center text-gray-500 text-sm">
                     <Clock className="w-4 h-4 mr-1" />

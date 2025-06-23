@@ -16,6 +16,7 @@ const CourseVideo = () => {
     url: '',
   });
   const [isPurchased, setIsPurchased] = useState(false);
+  const [isFullyUnlocked, setIsFullyUnlocked] = useState(false);
 
   // Get courseId from URL params and context
   const { id: courseId } = useParams();
@@ -66,9 +67,15 @@ const CourseVideo = () => {
 
   // Handle video selection
   const handleVideoSelect = (episode, index) => {
-    // Check if user has access to this episode
-    if (!isPurchased && !episode.isPreview) {
-      alert('Bạn cần mua khóa học để xem episode này. Chỉ có thể xem các episode miễn phí.');
+    // Check if user has access to this episode using new logic
+    const hasAccess = episode.hasAccess !== undefined ? episode.hasAccess : (episode.isPreview || (isPurchased && isFullyUnlocked));
+    
+    if (!hasAccess) {
+      if (!isPurchased) {
+        alert('Bạn cần mua khóa học để xem episode này. Chỉ có thể xem các episode miễn phí.');
+      } else if (!isFullyUnlocked) {
+        alert('Episode này sẽ được mở khóa sau 3 ngày kể từ ngày mua khóa học. Hiện tại bạn chỉ có thể xem các episode preview.');
+      }
       return;
     }
 
@@ -114,10 +121,15 @@ const CourseVideo = () => {
         };
         setCourse(mockCourse);
         
-        // Fetch course details using axios client
+        // Fetch course details using axios client with userId
         console.log('Fetching course details for courseId:', courseId);
         
-        const response = await axiosClient.get(`/courses/details/${courseId}`);
+        const userId = session?.id;
+        const apiUrl = userId 
+          ? `/courses/details/${courseId}?userId=${userId}`
+          : `/courses/details/${courseId}`;
+        
+        const response = await axiosClient.get(apiUrl);
         console.log('API Response:', response.data);
         
         if (response.data && response.data.code === 200 && response.data.result && Array.isArray(response.data.result)) {
@@ -125,13 +137,29 @@ const CourseVideo = () => {
           setCourseDetails(details);
           console.log('Course details set:', details);
           
-          // Set first video as default selected video
+          // Update purchase and unlock status from the first episode (all episodes have the same status)
+          if (details.length > 0 && details[0].isPurchased !== undefined) {
+            setIsPurchased(details[0].isPurchased);
+            setIsFullyUnlocked(details[0].isFullyUnlocked || false);
+            console.log('Purchase status:', details[0].isPurchased, 'Fully unlocked:', details[0].isFullyUnlocked);
+          }
+          
+          // Set first accessible video as default selected video
+          let firstAccessibleIndex = 0;
+          for (let i = 0; i < details.length; i++) {
+            const hasAccess = details[i].hasAccess !== undefined ? details[i].hasAccess : (details[i].isPreview || (details[i].isPurchased && details[i].isFullyUnlocked));
+            if (hasAccess) {
+              firstAccessibleIndex = i;
+              break;
+            }
+          }
+          
           if (details.length > 0) {
             setSelectedVideo({
-              title: `Episode ${details[0].episodeNumber}`,
-              url: details[0].link,
+              title: `Episode ${details[firstAccessibleIndex].episodeNumber}`,
+              url: details[firstAccessibleIndex].link,
             });
-            setSelectedVideoIndex(0);
+            setSelectedVideoIndex(firstAccessibleIndex);
           }
         } else {
           throw new Error(`Invalid response format: ${JSON.stringify(response.data)}`);
@@ -263,7 +291,9 @@ const CourseVideo = () => {
             <div>
               <h1 className="text-xl font-medium">{course.name?.toUpperCase() || 'COURSE'}</h1>
               <span className="text-sm opacity-75">
-                {isPurchased ? '✅ Đã mua' : '🔒 Chỉ xem preview'} • Course ID: {courseId}
+                {isPurchased 
+                  ? (isFullyUnlocked ? '✅ Đã mua - Toàn bộ khóa học' : '🔓 Đã mua - Chờ mở khóa sau 3 ngày') 
+                  : '🔒 Chỉ xem preview'} • Course ID: {courseId}
               </span>
             </div>
           </div>
@@ -389,7 +419,7 @@ const CourseVideo = () => {
 
         <div className="overflow-y-auto h-full">
           {courseDetails.map((episode, index) => {
-            const hasAccess = isPurchased || episode.isPreview;
+            const hasAccess = episode.hasAccess !== undefined ? episode.hasAccess : (episode.isPreview || (isPurchased && isFullyUnlocked));
             const isSelected = selectedVideoIndex === index;
             
             return (
@@ -424,13 +454,18 @@ const CourseVideo = () => {
                         Episode {episode.episodeNumber}
                         {!hasAccess && (
                           <span className="ml-2 text-xs text-red-600 font-medium">
-                            Cần mua khóa học
+                            {!isPurchased ? 'Cần mua khóa học' : 'Chờ mở khóa sau 3 ngày'}
                           </span>
                         )}
                       </div>
                       {episode.isPreview && (
                         <span className="text-xs text-green-600 font-medium">
                           Free Preview
+                        </span>
+                      )}
+                      {isPurchased && !isFullyUnlocked && !episode.isPreview && (
+                        <span className="text-xs text-orange-600 font-medium">
+                          Mở khóa sau 3 ngày
                         </span>
                       )}
                     </div>

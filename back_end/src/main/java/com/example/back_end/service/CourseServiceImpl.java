@@ -70,6 +70,19 @@ public class CourseServiceImpl {
         Optional<LocalDate> purchaseDate = orderRepository.findPurchaseDateByUserIdAndCourseId(userId, courseId);
         return purchaseDate.orElse(null);
     }
+    
+    // Kiểm tra xem khóa học đã được mở khóa hoàn toàn sau 3 ngày chưa
+    public boolean isCourseFullyUnlocked(Integer userId, Integer courseId) {
+        LocalDate purchaseDate = getCoursePurchaseDate(userId, courseId);
+        if (purchaseDate == null) {
+            return false; // Chưa mua thì không thể mở khóa
+        }
+        
+        LocalDate currentDate = LocalDate.now();
+        long daysSincePurchase = java.time.temporal.ChronoUnit.DAYS.between(purchaseDate, currentDate);
+        
+        return daysSincePurchase >= 3; // Mở khóa sau 3 ngày
+    }
 
     public CourseListResponseDTO getCourseById(Integer id) {
         Course course = courseRepository.findById(id).orElse(null);
