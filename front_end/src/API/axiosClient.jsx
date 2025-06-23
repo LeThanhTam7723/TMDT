@@ -22,7 +22,7 @@ axiosClient.interceptors.request.use(
     
     // Define public URL patterns that start with these paths
     const publicUrlPatterns = [
-      "/courses",           // All course APIs are public for browsing
+      "/courses",           // All course APIs are public for browsing (but NOT admin courses)
       "/favorites/idUser/", // Get user favorites is public
       "/auth/",
       "/verifyRegister/",
@@ -41,11 +41,16 @@ axiosClient.interceptors.request.use(
     
     console.log("🔍 Checking URL:", config.url, "| Base:", baseUrl, "| Normalized:", normalizedUrl);
     
-    const shouldSkipAuth = publicEndpoints.includes(baseUrl) ||
+    // Check if it's an admin endpoint first (admin endpoints should never skip auth)
+    const isAdminEndpoint = baseUrl.startsWith('/admin') || normalizedUrl.startsWith('/admin');
+    console.log("🔒 Is Admin Endpoint:", isAdminEndpoint);
+    
+    const shouldSkipAuth = !isAdminEndpoint && (
+                          publicEndpoints.includes(baseUrl) ||
                           publicEndpoints.includes(normalizedUrl) ||
                           publicUrlPatterns.some(pattern => baseUrl.startsWith(pattern)) ||
                           publicUrlPatterns.some(pattern => normalizedUrl.startsWith(pattern)) ||
-                          publicSellerEndpoints.some(pattern => pattern.test(baseUrl));
+                          publicSellerEndpoints.some(pattern => pattern.test(baseUrl)));
 
     if (shouldSkipAuth) {
       console.log("🔓 Skipping auth for:", config.url);

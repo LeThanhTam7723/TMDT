@@ -1,12 +1,9 @@
 import React, { useState, useEffect } from "react";
 // eslint-disable-next-line no-unused-vars
 import { motion, AnimatePresence } from "framer-motion";
+import AdminLayout from "../../component/AdminLayout";
 import {
-  FiMenu,
-  FiBell,
-  FiSearch,
   FiUser,
-  FiSettings,
   FiEye,
   FiTrash2,
   FiSend,
@@ -15,13 +12,8 @@ import {
   FiMail,
 } from "react-icons/fi";
 import {
-  MdDashboard,
-  MdAnalytics,
-  MdPeople,
-  MdReport,
   MdFeedback,
 } from "react-icons/md";
-import { BsSun, BsMoon } from "react-icons/bs";
 import axiosClient from "../../API/axiosClient";
 
 const api = {
@@ -41,7 +33,6 @@ const api = {
 
 const ComplaintManagement = () => {
   const [darkMode, setDarkMode] = useState(false);
-  const [sidebarOpen, setSidebarOpen] = useState(true);
   const [selectedComplaint, setSelectedComplaint] = useState(null);
   const [showModal, setShowModal] = useState(false);
   const [response, setResponse] = useState("");
@@ -200,131 +191,31 @@ const ComplaintManagement = () => {
   }
 
   return (
-    <div className={`${darkMode ? "dark" : ""} min-h-screen bg-gray-900`}>
-      <div className="flex bg-gray-100 dark:bg-gray-900 text-gray-800 dark:text-white">
-        {/* Sidebar */}
-        <motion.div
-          initial={false}
-          animate={{ width: sidebarOpen ? "auto" : "0" }}
-          className={`${
-            sidebarOpen ? "w-64" : "w-0"
-          } bg-white dark:bg-gray-800 h-screen fixed transition-all duration-300 z-10`}
+    <AdminLayout 
+      darkMode={darkMode} 
+      setDarkMode={setDarkMode}
+      title="Complaint Management - Quản lý khiếu nại"
+    >
+      {/* Search and Refresh Controls */}
+      <div className="mb-6 flex items-center gap-4">
+        <div className="relative flex-1 max-w-md">
+          <input
+            type="text"
+            placeholder="Tìm kiếm khiếu nại..."
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+            className="w-full pl-10 pr-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500"
+          />
+          <FiUser className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" />
+        </div>
+        <button
+          onClick={handleRefresh}
+          className="px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors"
+          title="Làm mới dữ liệu"
         >
-          <div className="p-4">
-            <nav>
-              <div className="flex items-center mb-8">
-                <img
-                  src="https://images.unsplash.com/photo-1563986768494-4dee2763ff3f"
-                  alt="Logo"
-                  className="h-8 w-8 rounded"
-                />
-                <span className="ml-2 text-xl font-bold">AdminDash</span>
-              </div>
-              <ul className="space-y-2">
-                <li>
-                  <a
-                    href="/admin/dashboard"
-                    className="flex items-center p-3 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg"
-                  >
-                    <MdDashboard className="mr-3" /> Dashboard
-                  </a>
-                </li>
-                <li>
-                  <a
-                    href="/admin/CourseAnalytics"
-                    className="flex items-center p-3 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg"
-                  >
-                    <MdAnalytics className="mr-3" /> Analytics
-                  </a>
-                </li>
-                <li>
-                  <a
-                    href="/admin/UserManagement"
-                    className="flex items-center p-3 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg"
-                  >
-                    <MdPeople className="mr-3" /> User Management
-                  </a>
-                </li>
-                <li className="bg-blue-500 text-white rounded-lg">
-                  <a
-                    href="/admin/ComplaintManagement"
-                    className="flex items-center p-3"
-                  >
-                    <MdReport className="mr-3" /> Reports
-                  </a>
-                </li>
-                <li>
-                  <a
-                    href="#"
-                    className="flex items-center p-3 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg"
-                  >
-                    <FiSettings className="mr-3" /> Settings
-                  </a>
-                </li>
-              </ul>
-            </nav>
-          </div>
-        </motion.div>
-
-        {/* Main Content */}
-        <div
-          className={`flex-1 ${
-            sidebarOpen ? "ml-64" : "ml-0"
-          } transition-all duration-300`}
-        >
-          {/* Header */}
-          <header className="bg-white dark:bg-gray-800 shadow-md">
-            <div className="flex items-center justify-between p-4">
-              <button
-                onClick={() => setSidebarOpen(!sidebarOpen)}
-                className="p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700"
-              >
-                <FiMenu size={24} />
-              </button>
-              <div className="flex items-center space-x-4">
-                <div className="relative">
-                  <input
-                    type="text"
-                    placeholder="Tìm kiếm khiếu nại..."
-                    value={searchTerm}
-                    onChange={(e) => setSearchTerm(e.target.value)}
-                    className="bg-gray-100 dark:bg-gray-700 rounded-lg pl-10 pr-4 py-2 w-64"
-                  />
-                  <FiSearch className="absolute left-3 top-2.5 text-gray-400" />
-                </div>
-                <button
-                  onClick={handleRefresh}
-                  className="p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700"
-                  title="Làm mới dữ liệu"
-                >
-                  🔄
-                </button>
-                <button
-                  onClick={() => setDarkMode(!darkMode)}
-                  className="p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700"
-                >
-                  {darkMode ? <BsSun size={20} /> : <BsMoon size={20} />}
-                </button>
-                <button className="p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 relative">
-                  <FiBell size={24} />
-                  <span className="absolute top-0 right-0 bg-red-500 text-white text-xs rounded-full h-5 w-5 flex items-center justify-center">
-                    {complaints.length}
-                  </span>
-                </button>
-                <div className="flex items-center space-x-2">
-                  <img
-                    src="https://images.unsplash.com/photo-1472099645785-5658abf4ff4e"
-                    alt="Profile"
-                    className="h-8 w-8 rounded-full"
-                  />
-                  <span className="font-medium">Admin</span>
-                </div>
-              </div>
-            </div>
-          </header>
-
-          {/* Dashboard Content */}
-          <main className="p-6">
+          🔄 Làm mới
+        </button>
+      </div>
             <div className="mb-6">
               <h1 className="text-3xl font-bold mb-2">Quản Lý Khiếu Nại</h1>
               <p className="text-gray-600 dark:text-gray-300">
@@ -527,150 +418,147 @@ const ComplaintManagement = () => {
                 </div>
               )}
             </div>
-          </main>
-        </div>
 
-        {/* Modal chi tiết khiếu nại */}
-        <AnimatePresence>
-          {showModal && selectedComplaint && (
+      {/* Modal chi tiết khiếu nại */}
+      <AnimatePresence>
+        {showModal && selectedComplaint && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4"
+          >
             <motion.div
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              exit={{ opacity: 0 }}
-              className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4"
+              initial={{ scale: 0.9, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              exit={{ scale: 0.9, opacity: 0 }}
+              className="bg-white dark:bg-gray-800 rounded-xl shadow-2xl max-w-4xl w-full max-h-[90vh] overflow-hidden"
             >
-              <motion.div
-                initial={{ scale: 0.9, opacity: 0 }}
-                animate={{ scale: 1, opacity: 1 }}
-                exit={{ scale: 0.9, opacity: 0 }}
-                className="bg-white dark:bg-gray-800 rounded-xl shadow-2xl max-w-4xl w-full max-h-[90vh] overflow-hidden"
-              >
-                <div className="flex items-center justify-between p-6 border-b border-gray-200 dark:border-gray-700">
-                  <h2 className="text-2xl font-bold">Chi Tiết Khiếu Nại</h2>
-                  <button
-                    onClick={() => setShowModal(false)}
-                    className="p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700"
-                  >
-                    <FiX size={24} />
-                  </button>
-                </div>
+              <div className="flex items-center justify-between p-6 border-b border-gray-200 dark:border-gray-700">
+                <h2 className="text-2xl font-bold">Chi Tiết Khiếu Nại</h2>
+                <button
+                  onClick={() => setShowModal(false)}
+                  className="p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700"
+                >
+                  <FiX size={24} />
+                </button>
+              </div>
 
-                <div className="p-6 overflow-y-auto max-h-[calc(90vh-200px)]">
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
-                    <div className="space-y-4">
-                      <div>
-                        <label className="text-sm font-medium text-gray-500 dark:text-gray-400">
-                          Mã khiếu nại
-                        </label>
-                        <p className="text-lg font-semibold">
-                          #{selectedComplaint.id}
-                        </p>
-                      </div>
-                      <div>
-                        <label className="text-sm font-medium text-gray-500 dark:text-gray-400">
-                          Người gửi
-                        </label>
-                        <p className="text-lg">{selectedComplaint.userName}</p>
-                        <p className="text-sm text-gray-500">
-                          {selectedComplaint.userEmail}
-                        </p>
-                      </div>
-                      <div>
-                        <label className="text-sm font-medium text-gray-500 dark:text-gray-400">
-                          Khóa học
-                        </label>
-                        <p className="text-lg">
-                          {selectedComplaint.courseTitle}
-                        </p>
-                      </div>
+              <div className="p-6 overflow-y-auto max-h-[calc(90vh-200px)]">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+                  <div className="space-y-4">
+                    <div>
+                      <label className="text-sm font-medium text-gray-500 dark:text-gray-400">
+                        Mã khiếu nại
+                      </label>
+                      <p className="text-lg font-semibold">
+                        #{selectedComplaint.id}
+                      </p>
                     </div>
-
-                    <div className="space-y-4">
-                      <div>
-                        <label className="text-sm font-medium text-gray-500 dark:text-gray-400">
-                          Ngày gửi
-                        </label>
-                        <p className="text-lg">
-                          {formatDate(selectedComplaint.date)}
-                        </p>
-                      </div>
-                      <div>
-                        <label className="text-sm font-medium text-gray-500 dark:text-gray-400">
-                          Loại khiếu nại
-                        </label>
-                        <p className="text-lg">{selectedComplaint.category}</p>
-                      </div>
-                      <div>
-                        <label className="text-sm font-medium text-gray-500 dark:text-gray-400">
-                          Mức độ ưu tiên
-                        </label>
-                        <span
-                          className={`inline-block px-3 py-1 text-sm font-medium rounded-full capitalize ${getPriorityColor(
-                            selectedComplaint.priority
-                          )}`}
-                        >
-                          {selectedComplaint.priority}
-                        </span>
-                      </div>
+                    <div>
+                      <label className="text-sm font-medium text-gray-500 dark:text-gray-400">
+                        Người gửi
+                      </label>
+                      <p className="text-lg">{selectedComplaint.userName}</p>
+                      <p className="text-sm text-gray-500">
+                        {selectedComplaint.userEmail}
+                      </p>
                     </div>
-                  </div>
-
-                  <div className="mb-6">
-                    <label className="text-sm font-medium text-gray-500 dark:text-gray-400">
-                      Tiêu đề
-                    </label>
-                    <p className="text-xl font-semibold mt-1">
-                      {selectedComplaint.subject}
-                    </p>
-                  </div>
-
-                  <div className="mb-6">
-                    <label className="text-sm font-medium text-gray-500 dark:text-gray-400">
-                      Nội dung chi tiết
-                    </label>
-                    <div className="mt-2 p-4 bg-gray-50 dark:bg-gray-700 rounded-lg">
-                      <p className="whitespace-pre-wrap">
-                        {selectedComplaint.detail}
+                    <div>
+                      <label className="text-sm font-medium text-gray-500 dark:text-gray-400">
+                        Khóa học
+                      </label>
+                      <p className="text-lg">
+                        {selectedComplaint.courseTitle}
                       </p>
                     </div>
                   </div>
 
-                  <div>
-                    <label className="text-sm font-medium text-gray-500 dark:text-gray-400">
-                      Phản hồi cho người dùng
-                    </label>
-                    <textarea
-                      value={response}
-                      onChange={(e) => setResponse(e.target.value)}
-                      placeholder="Nhập phản hồi của bạn cho người dùng..."
-                      className="mt-2 w-full p-4 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                      rows={6}
-                    />
+                  <div className="space-y-4">
+                    <div>
+                      <label className="text-sm font-medium text-gray-500 dark:text-gray-400">
+                        Ngày gửi
+                      </label>
+                      <p className="text-lg">
+                        {formatDate(selectedComplaint.date)}
+                      </p>
+                    </div>
+                    <div>
+                      <label className="text-sm font-medium text-gray-500 dark:text-gray-400">
+                        Loại khiếu nại
+                      </label>
+                      <p className="text-lg">{selectedComplaint.category}</p>
+                    </div>
+                    <div>
+                      <label className="text-sm font-medium text-gray-500 dark:text-gray-400">
+                        Mức độ ưu tiên
+                      </label>
+                      <span
+                        className={`inline-block px-3 py-1 text-sm font-medium rounded-full capitalize ${getPriorityColor(
+                          selectedComplaint.priority
+                        )}`}
+                      >
+                        {selectedComplaint.priority}
+                      </span>
+                    </div>
                   </div>
                 </div>
 
-                <div className="flex items-center justify-end space-x-4 p-6 border-t border-gray-200 dark:border-gray-700">
-                  <button
-                    onClick={() => setShowModal(false)}
-                    className="px-6 py-2 border border-gray-300 dark:border-gray-600 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700"
-                  >
-                    Hủy
-                  </button>
-                  <button
-                    onClick={handleSendResponse}
-                    disabled={!response.trim()}
-                    className="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed flex items-center space-x-2"
-                  >
-                    <FiSend size={16} />
-                    <span>Gửi phản hồi & Đóng khiếu nại</span>
-                  </button>
+                <div className="mb-6">
+                  <label className="text-sm font-medium text-gray-500 dark:text-gray-400">
+                    Tiêu đề
+                  </label>
+                  <p className="text-xl font-semibold mt-1">
+                    {selectedComplaint.subject}
+                  </p>
                 </div>
-              </motion.div>
+
+                <div className="mb-6">
+                  <label className="text-sm font-medium text-gray-500 dark:text-gray-400">
+                    Nội dung chi tiết
+                  </label>
+                  <div className="mt-2 p-4 bg-gray-50 dark:bg-gray-700 rounded-lg">
+                    <p className="whitespace-pre-wrap">
+                      {selectedComplaint.detail}
+                    </p>
+                  </div>
+                </div>
+
+                <div>
+                  <label className="text-sm font-medium text-gray-500 dark:text-gray-400">
+                    Phản hồi cho người dùng
+                  </label>
+                  <textarea
+                    value={response}
+                    onChange={(e) => setResponse(e.target.value)}
+                    placeholder="Nhập phản hồi của bạn cho người dùng..."
+                    className="mt-2 w-full p-4 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    rows={6}
+                  />
+                </div>
+              </div>
+
+              <div className="flex items-center justify-end space-x-4 p-6 border-t border-gray-200 dark:border-gray-700">
+                <button
+                  onClick={() => setShowModal(false)}
+                  className="px-6 py-2 border border-gray-300 dark:border-gray-600 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700"
+                >
+                  Hủy
+                </button>
+                <button
+                  onClick={handleSendResponse}
+                  disabled={!response.trim()}
+                  className="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed flex items-center space-x-2"
+                >
+                  <FiSend size={16} />
+                  <span>Gửi phản hồi & Đóng khiếu nại</span>
+                </button>
+              </div>
             </motion.div>
-          )}
-        </AnimatePresence>
-      </div>
-    </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+    </AdminLayout>
   );
 };
 

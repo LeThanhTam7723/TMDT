@@ -13,23 +13,14 @@ import {
   BarElement,
 } from "chart.js";
 import { motion } from "framer-motion";
+import AdminLayout from "../../component/AdminLayout";
 import {
-  FiMenu,
-  FiBell,
-  FiSearch,
-  FiUser,
-  FiSettings,
   FiDownload,
 } from "react-icons/fi";
 import {
-  MdDashboard,
-  MdAnalytics,
-  MdPeople,
-  MdReport,
   MdTrendingUp,
   MdSchool,
 } from "react-icons/md";
-import { BsSun, BsMoon } from "react-icons/bs";
 
 ChartJS.register(
   CategoryScale,
@@ -76,7 +67,6 @@ const DashboardCard = ({ title, value, icon, percentage, trend = "up" }) => {
 
 const CourseAnalytics = () => {
   const [darkMode, setDarkMode] = useState(false);
-  const [sidebarOpen, setSidebarOpen] = useState(true);
   const [selectedSeller, setSelectedSeller] = useState("all");
   const [selectedCategory, setSelectedCategory] = useState("all");
   const [dateRange, setDateRange] = useState("6months");
@@ -314,377 +304,333 @@ const CourseAnalytics = () => {
   };
 
   return (
-    <div className={`${darkMode ? "dark" : ""} min-h-screen`}>
-      <div className="flex bg-gray-50 dark:bg-gray-900 text-gray-800 dark:text-white">
-        {/* Sidebar */}
-        <motion.div
-          initial={false}
-          animate={{ width: sidebarOpen ? "auto" : "0" }}
-          className={`${
-            sidebarOpen ? "w-64" : "w-0"
-          } bg-white dark:bg-gray-800 h-screen fixed transition-all duration-300 z-10`}
-        >
-          <div className="p-4">
-            <nav>
-              <div className="flex items-center mb-8">
-                <img
-                  src="https://images.unsplash.com/photo-1563986768494-4dee2763ff3f"
-                  alt="Logo"
-                  className="h-8 w-8 rounded"
-                />
-                <span className="ml-2 text-xl font-bold">AdminDash</span>
-              </div>
-              <ul className="space-y-2">
-                <li>
-                  <a
-                    href="/admin/dashboard"
-                    className="flex items-center p-3 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg"
-                  >
-                    <MdDashboard className="mr-3" /> Dashboard
-                  </a>
-                </li>
-                <li>
-                  <a
-                    href="/admin/CourseAnalytics"
-                    className="flex items-center p-3 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg"
-                  >
-                    <MdAnalytics className="mr-3" /> Analytics
-                  </a>
-                </li>
-                <li>
-                  <a
-                    href="/admin/UserManagement"
-                    className="flex items-center p-3 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg"
-                  >
-                    <MdPeople className="mr-3" /> User Management
-                  </a>
-                </li>
-                <li className="bg-blue-500 text-white rounded-lg">
-                  <a
-                    href="/admin/ComplaintManagement"
-                    className="flex items-center p-3"
-                  >
-                    <MdReport className="mr-3" /> Reports
-                  </a>
-                </li>
-                <li className="flex items-center p-3 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg">
-                  <a
-                    href="/admin/course-approval"
-                    className="flex items-center p-3"
-                  >
-                    <MdReport className="mr-3" /> Seller Request
-                  </a>
-                </li>
-                <li>
-                  <a
-                    href="#"
-                    className="flex items-center p-3 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg"
-                  >
-                    <FiSettings className="mr-3" /> Settings
-                  </a>
-                </li>
-              </ul>
-            </nav>
-          </div>
-        </motion.div>
-
-        {/* Main Content */}
-        <div
-          className={`flex-1 ${
-            sidebarOpen ? "ml-64" : "ml-0"
-          } transition-all duration-300`}
-        >
-          {/* Header */}
-          <header className="bg-white dark:bg-gray-800 shadow-sm border-b border-gray-200 dark:border-gray-700">
-            <div className="flex items-center justify-between p-4">
-              <div className="flex items-center space-x-4">
-                <button
-                  onClick={() => setSidebarOpen(!sidebarOpen)}
-                  className="p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700"
-                >
-                  <FiMenu size={24} />
-                </button>
-                <h1 className="text-2xl font-bold">Course Sales Analytics</h1>
-              </div>
-              <div className="flex items-center space-x-4">
-                <button
-                  onClick={() => setDarkMode(!darkMode)}
-                  className="p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700"
-                >
-                  {darkMode ? <BsSun size={20} /> : <BsMoon size={20} />}
-                </button>
-                <div className="flex items-center space-x-2">
-                  <img
-                    src="https://images.unsplash.com/photo-1472099645785-5658abf4ff4e"
-                    alt="Profile"
-                    className="h-8 w-8 rounded-full"
-                  />
-                  <span className="font-medium">Admin User</span>
-                </div>
-              </div>
-            </div>
-          </header>
-
-          {/* Filters */}
-          <div className="p-6 bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700">
-            <div className="flex flex-wrap items-center gap-4">
-              <div>
-                <label className="block text-sm font-medium mb-1">Seller</label>
-                <select
-                  value={selectedSeller}
-                  onChange={(e) => setSelectedSeller(e.target.value)}
-                  className="border border-gray-300 dark:border-gray-600 rounded-lg px-3 py-2 bg-white dark:bg-gray-700"
-                >
-                  <option value="all">All Sellers</option>
-                  {Object.entries(sellers).map(([id, name]) => (
-                    <option key={id} value={id}>
-                      {name}
-                    </option>
-                  ))}
-                </select>
-              </div>
-              <div>
-                <label className="block text-sm font-medium mb-1">
-                  Category
-                </label>
-                <select
-                  value={selectedCategory}
-                  onChange={(e) => setSelectedCategory(e.target.value)}
-                  className="border border-gray-300 dark:border-gray-600 rounded-lg px-3 py-2 bg-white dark:bg-gray-700"
-                >
-                  <option value="all">All Categories</option>
-                  {Object.entries(categories).map(([id, name]) => (
-                    <option key={id} value={id}>
-                      {name}
-                    </option>
-                  ))}
-                </select>
-              </div>
-              <div>
-                <label className="block text-sm font-medium mb-1">Period</label>
-                <select
-                  value={dateRange}
-                  onChange={(e) => setDateRange(e.target.value)}
-                  className="border border-gray-300 dark:border-gray-600 rounded-lg px-3 py-2 bg-white dark:bg-gray-700"
-                >
-                  <option value="6months">Last 6 Months</option>
-                  <option value="1year">Last Year</option>
-                  <option value="all">All Time</option>
-                </select>
-              </div>
-              <button
-                onClick={exportData}
-                className="flex items-center gap-2 bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-lg transition-colors"
-              >
-                <FiDownload size={16} />
-                Export CSV
-              </button>
-            </div>
-          </div>
-
-          {/* Dashboard Content */}
-          <main className="p-6">
-            {/* Key Metrics */}
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-              <DashboardCard
-                title="Total Revenue"
-                value={`$${totalRevenue.toLocaleString()}`}
-                percentage="15.3"
-                icon={<MdTrendingUp />}
-              />
-              <DashboardCard
-                title="Total Sales"
-                value={totalSales.toLocaleString()}
-                percentage="8.7"
-                icon={<MdSchool />}
-              />
-              <DashboardCard
-                title="Average Rating"
-                value={avgRating.toFixed(1)}
-                percentage="2.1"
-                icon={<FiUser />}
-              />
-              <DashboardCard
-                title="Active Courses"
-                value={activeCourses}
-                percentage="5.4"
-                icon={<MdDashboard />}
-              />
-            </div>
-
-            {/* Charts Row 1 */}
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
-              <motion.div
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                className="bg-white dark:bg-gray-800 p-6 rounded-xl shadow-lg border border-gray-200 dark:border-gray-700"
-              >
-                <div className="flex justify-between items-center mb-4">
-                  <h3 className="text-xl font-bold">Revenue Trend</h3>
-                  <span className="text-sm text-gray-500 dark:text-gray-400">
-                    Last 6 months
-                  </span>
-                </div>
-                <Line
-                  data={revenueData}
-                  options={{
-                    responsive: true,
-                    plugins: { legend: { display: false } },
-                    scales: { y: { beginAtZero: true } },
-                  }}
-                />
-              </motion.div>
-
-              <motion.div
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: 0.1 }}
-                className="bg-white dark:bg-gray-800 p-6 rounded-xl shadow-lg border border-gray-200 dark:border-gray-700"
-              >
-                <div className="flex justify-between items-center mb-4">
-                  <h3 className="text-xl font-bold">Revenue by Category</h3>
-                  <span className="text-sm text-gray-500 dark:text-gray-400">
-                    Distribution
-                  </span>
-                </div>
-                <Pie
-                  data={categoryData}
-                  options={{
-                    responsive: true,
-                    plugins: { legend: { position: "bottom" } },
-                  }}
-                />
-              </motion.div>
-            </div>
-
-            {/* Charts Row 2 */}
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
-              <motion.div
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: 0.2 }}
-                className="bg-white dark:bg-gray-800 p-6 rounded-xl shadow-lg border border-gray-200 dark:border-gray-700"
-              >
-                <div className="flex justify-between items-center mb-4">
-                  <h3 className="text-xl font-bold">Seller Performance</h3>
-                  <span className="text-sm text-gray-500 dark:text-gray-400">
-                    Revenue comparison
-                  </span>
-                </div>
-                <Bar
-                  data={sellerData}
-                  options={{
-                    responsive: true,
-                    plugins: { legend: { display: false } },
-                    scales: { y: { beginAtZero: true } },
-                  }}
-                />
-              </motion.div>
-
-              <motion.div
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: 0.3 }}
-                className="bg-white dark:bg-gray-800 p-6 rounded-xl shadow-lg border border-gray-200 dark:border-gray-700"
-              >
-                <div className="flex justify-between items-center mb-4">
-                  <h3 className="text-xl font-bold">
-                    Course Sales Performance
-                  </h3>
-                  <span className="text-sm text-gray-500 dark:text-gray-400">
-                    Units sold
-                  </span>
-                </div>
-                <Bar
-                  data={performanceData}
-                  options={{
-                    responsive: true,
-                    plugins: { legend: { display: false } },
-                    scales: {
-                      y: { beginAtZero: true },
-                      x: { display: false },
-                    },
-                  }}
-                />
-              </motion.div>
-            </div>
-
-            {/* Detailed Table */}
-            <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.4 }}
-              className="bg-white dark:bg-gray-800 rounded-xl shadow-lg border border-gray-200 dark:border-gray-700 overflow-hidden"
+    <AdminLayout 
+      darkMode={darkMode} 
+      setDarkMode={setDarkMode}
+      title="Course Analytics - Phân tích khóa học"
+    >
+      {/* Filters */}
+      <div className="p-6 bg-white dark:bg-gray-800 rounded-xl shadow-lg mb-6">
+        <div className="flex flex-wrap items-center gap-4">
+          <div>
+            <label className="block text-sm font-medium mb-1">Seller</label>
+            <select
+              value={selectedSeller}
+              onChange={(e) => setSelectedSeller(e.target.value)}
+              className="border border-gray-300 dark:border-gray-600 rounded-lg px-3 py-2 bg-white dark:bg-gray-700"
             >
-              <div className="p-6 border-b border-gray-200 dark:border-gray-700">
-                <h3 className="text-xl font-bold">Course Details</h3>
-              </div>
-              <div className="overflow-x-auto">
-                <table className="w-full">
-                  <thead className="bg-gray-50 dark:bg-gray-700">
-                    <tr>
-                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase">
-                        Course
-                      </th>
-                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase">
-                        Category
-                      </th>
-                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase">
-                        Seller
-                      </th>
-                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase">
-                        Price
-                      </th>
-                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase">
-                        Rating
-                      </th>
-                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase">
-                        Sales
-                      </th>
-                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase">
-                        Revenue
-                      </th>
-                    </tr>
-                  </thead>
-                  <tbody className="divide-y divide-gray-200 dark:divide-gray-700">
-                    {filteredData.map((course) => (
-                      <tr
-                        key={course.courseid}
-                        className="hover:bg-gray-50 dark:hover:bg-gray-700"
-                      >
-                        <td className="px-6 py-4 text-sm font-medium">
-                          {course.name}
-                        </td>
-                        <td className="px-6 py-4 text-sm text-gray-500 dark:text-gray-400">
-                          {categories[course.categoryid]}
-                        </td>
-                        <td className="px-6 py-4 text-sm text-gray-500 dark:text-gray-400">
-                          {sellers[course.sellerid]}
-                        </td>
-                        <td className="px-6 py-4 text-sm font-medium">
-                          ${course.price}
-                        </td>
-                        <td className="px-6 py-4 text-sm">
-                          <span className="flex items-center">
-                            ⭐ {course.rating}
-                          </span>
-                        </td>
-                        <td className="px-6 py-4 text-sm font-medium">
-                          {course.sales}
-                        </td>
-                        <td className="px-6 py-4 text-sm font-bold text-green-600">
-                          ${course.revenue.toLocaleString()}
-                        </td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
-              </div>
-            </motion.div>
-          </main>
+              <option value="all">All Sellers</option>
+              {Object.entries(sellers).map(([id, name]) => (
+                <option key={id} value={id}>
+                  {name}
+                </option>
+              ))}
+            </select>
+          </div>
+          <div>
+            <label className="block text-sm font-medium mb-1">
+              Category
+            </label>
+            <select
+              value={selectedCategory}
+              onChange={(e) => setSelectedCategory(e.target.value)}
+              className="border border-gray-300 dark:border-gray-600 rounded-lg px-3 py-2 bg-white dark:bg-gray-700"
+            >
+              <option value="all">All Categories</option>
+              {Object.entries(categories).map(([id, name]) => (
+                <option key={id} value={id}>
+                  {name}
+                </option>
+              ))}
+            </select>
+          </div>
+          <div>
+            <label className="block text-sm font-medium mb-1">Period</label>
+            <select
+              value={dateRange}
+              onChange={(e) => setDateRange(e.target.value)}
+              className="border border-gray-300 dark:border-gray-600 rounded-lg px-3 py-2 bg-white dark:bg-gray-700"
+            >
+              <option value="6months">Last 6 Months</option>
+              <option value="1year">Last Year</option>
+              <option value="all">All Time</option>
+            </select>
+          </div>
+          <button
+            onClick={exportData}
+            className="flex items-center gap-2 bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-lg transition-colors"
+          >
+            <FiDownload size={16} />
+            Export CSV
+          </button>
         </div>
       </div>
-    </div>
+
+      {/* Key Metrics */}
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+        <DashboardCard
+          title="Total Revenue"
+          value={`$${totalRevenue.toLocaleString()}`}
+          percentage="15.3"
+          icon={<MdTrendingUp />}
+        />
+        <DashboardCard
+          title="Total Sales"
+          value={totalSales.toLocaleString()}
+          percentage="8.7"
+          icon={<MdSchool />}
+        />
+        <DashboardCard
+          title="Active Courses"
+          value={activeCourses}
+          percentage="12.1"
+          icon={<MdSchool />}
+        />
+        <DashboardCard
+          title="Avg Rating"
+          value={avgRating.toFixed(1)}
+          percentage="2.4"
+          icon={<MdTrendingUp />}
+        />
+      </div>
+
+      {/* Charts Grid */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
+        {/* Revenue Trend */}
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          className="bg-white dark:bg-gray-800 p-6 rounded-xl shadow-lg"
+        >
+          <h3 className="text-lg font-semibold mb-4 text-gray-800 dark:text-white">
+            Revenue Trend
+          </h3>
+          <Line
+            data={revenueData}
+            options={{
+              responsive: true,
+              plugins: {
+                legend: {
+                  position: "top",
+                },
+              },
+              scales: {
+                y: {
+                  beginAtZero: true,
+                  grid: {
+                    color: darkMode ? "#374151" : "#f3f4f6",
+                  },
+                  ticks: {
+                    color: darkMode ? "#9ca3af" : "#6b7280",
+                  },
+                },
+                x: {
+                  grid: {
+                    color: darkMode ? "#374151" : "#f3f4f6",
+                  },
+                  ticks: {
+                    color: darkMode ? "#9ca3af" : "#6b7280",
+                  },
+                },
+              },
+            }}
+          />
+        </motion.div>
+
+        {/* Category Distribution */}
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.1 }}
+          className="bg-white dark:bg-gray-800 p-6 rounded-xl shadow-lg"
+        >
+          <h3 className="text-lg font-semibold mb-4 text-gray-800 dark:text-white">
+            Revenue by Category
+          </h3>
+          <Pie
+            data={categoryData}
+            options={{
+              responsive: true,
+              plugins: {
+                legend: {
+                  position: "bottom",
+                  labels: {
+                    color: darkMode ? "#9ca3af" : "#6b7280",
+                  },
+                },
+              },
+            }}
+          />
+        </motion.div>
+
+        {/* Seller Performance */}
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.2 }}
+          className="bg-white dark:bg-gray-800 p-6 rounded-xl shadow-lg"
+        >
+          <h3 className="text-lg font-semibold mb-4 text-gray-800 dark:text-white">
+            Top Sellers Performance
+          </h3>
+          <Bar
+            data={sellerData}
+            options={{
+              responsive: true,
+              plugins: {
+                legend: {
+                  display: false,
+                },
+              },
+              scales: {
+                y: {
+                  beginAtZero: true,
+                  grid: {
+                    color: darkMode ? "#374151" : "#f3f4f6",
+                  },
+                  ticks: {
+                    color: darkMode ? "#9ca3af" : "#6b7280",
+                  },
+                },
+                x: {
+                  grid: {
+                    color: darkMode ? "#374151" : "#f3f4f6",
+                  },
+                  ticks: {
+                    color: darkMode ? "#9ca3af" : "#6b7280",
+                  },
+                },
+              },
+            }}
+          />
+        </motion.div>
+
+        {/* Course Performance */}
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.3 }}
+          className="bg-white dark:bg-gray-800 p-6 rounded-xl shadow-lg"
+        >
+          <h3 className="text-lg font-semibold mb-4 text-gray-800 dark:text-white">
+            Course Sales Performance
+          </h3>
+          <Bar
+            data={performanceData}
+            options={{
+              responsive: true,
+              plugins: {
+                legend: {
+                  display: false,
+                },
+              },
+              scales: {
+                y: {
+                  beginAtZero: true,
+                  grid: {
+                    color: darkMode ? "#374151" : "#f3f4f6",
+                  },
+                  ticks: {
+                    color: darkMode ? "#9ca3af" : "#6b7280",
+                  },
+                },
+                x: {
+                  grid: {
+                    color: darkMode ? "#374151" : "#f3f4f6",
+                  },
+                  ticks: {
+                    color: darkMode ? "#9ca3af" : "#6b7280",
+                    maxRotation: 45,
+                  },
+                },
+              },
+            }}
+          />
+        </motion.div>
+      </div>
+
+      {/* Course Details Table */}
+      <motion.div
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ delay: 0.4 }}
+        className="bg-white dark:bg-gray-800 rounded-xl shadow-lg overflow-hidden"
+      >
+        <div className="p-6 border-b border-gray-200 dark:border-gray-700">
+          <h3 className="text-lg font-semibold text-gray-800 dark:text-white">
+            Course Performance Details
+          </h3>
+        </div>
+        <div className="overflow-x-auto">
+          <table className="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
+            <thead className="bg-gray-50 dark:bg-gray-700">
+              <tr>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
+                  Course
+                </th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
+                  Category
+                </th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
+                  Seller
+                </th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
+                  Price
+                </th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
+                  Rating
+                </th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
+                  Sales
+                </th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
+                  Revenue
+                </th>
+              </tr>
+            </thead>
+            <tbody className="bg-white dark:bg-gray-800 divide-y divide-gray-200 dark:divide-gray-700">
+              {filteredData.map((course) => (
+                <tr
+                  key={course.courseid}
+                  className="hover:bg-gray-50 dark:hover:bg-gray-700"
+                >
+                  <td className="px-6 py-4 whitespace-nowrap">
+                    <div className="text-sm font-medium text-gray-900 dark:text-white">
+                      {course.name}
+                    </div>
+                  </td>
+                  <td className="px-6 py-4 whitespace-nowrap">
+                    <span className="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-blue-100 text-blue-800 dark:bg-blue-800 dark:text-blue-200">
+                      {categories[course.categoryid]}
+                    </span>
+                  </td>
+                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-white">
+                    {sellers[course.sellerid]}
+                  </td>
+                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-white">
+                    ${course.price}
+                  </td>
+                  <td className="px-6 py-4 whitespace-nowrap">
+                    <div className="flex items-center">
+                      <span className="text-sm text-gray-900 dark:text-white">
+                        {course.rating}
+                      </span>
+                      <span className="ml-1 text-yellow-400">★</span>
+                    </div>
+                  </td>
+                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-white">
+                    {course.sales.toLocaleString()}
+                  </td>
+                  <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-green-600">
+                    ${course.revenue.toLocaleString()}
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      </motion.div>
+    </AdminLayout>
   );
 };
 

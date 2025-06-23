@@ -104,6 +104,7 @@ public class SellerService {
                     .rating(course.getRating())
                     .episodeCount(totalEpisodes)
                     .duration(totalDuration)
+                    .status(course.getStatus()) // Thêm trạng thái duyệt
                     .build();
         }).collect(Collectors.toList());
     }
