@@ -1,5 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import axiosClient from '../API/axiosClient';
+import { useNavigate } from 'react-router-dom';
+
 import { 
   Calendar, 
   CheckCircle, 
@@ -21,6 +23,8 @@ const UserOrderHistory = () => {
   const [error, setError] = useState(null);
   const [searchTerm, setSearchTerm] = useState('');
   const [statusFilter, setStatusFilter] = useState('all');
+  const navigate = useNavigate();
+
 
   // Fetch data from API using axios
   useEffect(() => {
@@ -152,6 +156,7 @@ const UserOrderHistory = () => {
   };
 
   const handleStartLearning = (courseId) => {
+    navigate(`/detail/${courseId}`)
     console.log('Start learning course:', courseId);
     // Navigate to course learning page
     // window.location.href = `/course/${courseId}/learn`;

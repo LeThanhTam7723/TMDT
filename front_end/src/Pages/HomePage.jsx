@@ -43,6 +43,13 @@ const HomePage = () => {
     }
   ];
   useEffect(() => {
+    const script = document.createElement("script");
+    script.src =
+      "https://www.gstatic.com/dialogflow-console/fast/messenger/bootstrap.js?v=1";
+    script.async = true;
+    document.body.appendChild(script);
+  }, []);
+  useEffect(() => {
     const fetchAllCourses = async () => {
       try {
         const response = await axiosClient.get('/courses');
@@ -175,7 +182,7 @@ const HomePage = () => {
       <section className="container mx-auto px-4 py-12">
   <div className="flex justify-between items-center mb-8">
     <h2 className="text-3xl font-bold">Recommend for you</h2>
-    <a href="#" className="text-blue-400 hover:text-blue-300 transition">View all</a>
+    <a href="/shop" className="text-blue-400 hover:text-blue-300 transition">View all</a>
   </div>
   <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
     {products.slice(0, 4).map((product) => (
@@ -320,8 +327,14 @@ const HomePage = () => {
         </div>
       </section>
 
-   
+    <df-messenger
+        chat-title="HandmadeShop"
+        agent-id="19855501-d748-463c-969e-ee1ff94c19c6"
+        language-code="vi"
+      ></df-messenger>
     </div>
+     
+    
   );
 };
 
