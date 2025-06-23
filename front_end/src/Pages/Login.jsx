@@ -370,6 +370,7 @@ const Login = () => {
                   <button
                     type="button"
                     className="w-full inline-flex justify-center py-2 px-4 border border-gray-300 rounded-md shadow-sm bg-white text-sm font-medium text-gray-500 hover:bg-gray-50"
+                    onClick={()=> {window.location.href='https://accounts.google.com/o/oauth2/auth?scope=profile%20email&redirect_uri=http://localhost:8081/loginByGoogle&response_type=code&client_id=383862284423-7n769c739crto335iam2jg9hk2hqiiu0.apps.googleusercontent.com&prompt=select_account'}}
                   >
                     <FcGoogle className="h-5 w-5" />
                     <span className="ml-2">Google</span>
