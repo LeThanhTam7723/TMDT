@@ -12,6 +12,7 @@ import SellerDashboard from "../Pages/SellerDashboard";
 import SellerCourses from "../Pages/SellerCourses";
 import SellerRevenue from "../Pages/SellerRevenue";
 import SellerAnalytics from "../Pages/SellerAnalytics";
+import SellerStudents from "../Pages/SellerStudents";
 import CourseForm from "../Pages/CourseForm";
 import Favorite from "../Pages/Favorite";
 import Checkout from "../Pages/Checkout";
@@ -89,6 +90,14 @@ const AppRoutes = () => {
           element={
             <ProtectedRoute allowedRoles={["SELLER", "ADMIN"]}>
               <SellerAnalytics />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/seller/students"
+          element={
+            <ProtectedRoute allowedRoles={["SELLER", "ADMIN"]}>
+              <SellerStudents />
             </ProtectedRoute>
           }
         />

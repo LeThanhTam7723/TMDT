@@ -100,7 +100,7 @@ const SellerDashboard = () => {
   const context = useContext(ProductContext);
   const session = context?.session;
   const navigate = useNavigate();
-  
+
   // Get sellerId from session
   const sellerId = session?.currentUser?.id || session?.user?.id || 5;
 
@@ -109,16 +109,16 @@ const SellerDashboard = () => {
     return (
       <div className="flex items-center justify-center min-h-screen">
         <div className="text-center">
-          <div className="text-red-600 text-lg font-semibold mb-2">
-            Lỗi hệ thống
-          </div>
-          <p className="text-gray-600 mb-4">Không thể kết nối với context. Vui lòng tải lại trang.</p>
-          <button
-            onClick={() => window.location.reload()}
-            className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700"
-          >
-            Tải lại
-          </button>
+        <div className="text-red-600 text-lg font-semibold mb-2">
+          Lỗi hệ thống
+        </div>
+        <p className="text-gray-600 mb-4">Không thể kết nối với context. Vui lòng tải lại trang.</p>
+        <button
+          onClick={() => window.location.reload()}
+          className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700"
+        >
+          Tải lại
+        </button>
         </div>
       </div>
     );
@@ -155,12 +155,12 @@ const SellerDashboard = () => {
           });
         }
         
-        if (coursesResponse.code === 200) {
+          if (coursesResponse.code === 200) {
           // Transform and take only recent 3 courses
           const transformedCourses = coursesResponse.result.slice(0, 3).map(course => ({
-            id: course.id,
-            name: course.name,
-            price: course.price,
+              id: course.id,
+              name: course.name,
+              price: course.price,
             students: Math.floor(Math.random() * 100) + 20,
             rating: course.rating || (Math.random() * 2 + 3).toFixed(1),
             status: course.status ? "Active" : "Pending",
@@ -204,20 +204,24 @@ const SellerDashboard = () => {
     navigate('/seller/revenue');
   };
 
+  const handleManageStudents = () => {
+    navigate('/seller/students');
+  };
+
   if (loading) {
     return (
       <SellerLayout darkMode={darkMode} setDarkMode={setDarkMode} title="Dashboard - Đang tải...">
-        <div className="flex items-center justify-center py-20">
-          <div className="text-center">
-            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
+      <div className="flex items-center justify-center py-20">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
             <p className="text-gray-600 dark:text-gray-400">Đang tải dữ liệu...</p>
-          </div>
         </div>
+      </div>
       </SellerLayout>
     );
   }
 
-  return (
+    return (
     <SellerLayout 
       darkMode={darkMode} 
       setDarkMode={setDarkMode}
@@ -253,7 +257,7 @@ const SellerDashboard = () => {
           trend="Tăng 0.2 điểm"
           trendUp={true}
         />
-      </div>
+              </div>
 
       {/* Charts Section */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
@@ -261,13 +265,13 @@ const SellerDashboard = () => {
         <div className="bg-white dark:bg-gray-800 p-6 rounded-lg shadow">
           <div className="flex items-center justify-between mb-4">
             <h2 className="text-lg font-semibold dark:text-white">Doanh thu 6 tháng</h2>
-            <button 
+                <button
               onClick={handleViewRevenue}
               className="text-blue-600 hover:text-blue-700 text-sm font-medium"
             >
               Xem chi tiết →
-            </button>
-          </div>
+                    </button>
+                  </div>
           <ResponsiveContainer width="100%" height={300}>
             <BarChart data={monthlyRevenueData}>
               <CartesianGrid strokeDasharray="3 3" />
@@ -290,19 +294,19 @@ const SellerDashboard = () => {
               />
             </BarChart>
           </ResponsiveContainer>
-        </div>
+            </div>
 
         {/* Course Popularity Chart */}
         <div className="bg-white dark:bg-gray-800 p-6 rounded-lg shadow">
-          <div className="flex items-center justify-between mb-4">
+              <div className="flex items-center justify-between mb-4">
             <h2 className="text-lg font-semibold dark:text-white">Khóa học phổ biến</h2>
-            <button 
+                  <button
               onClick={handleManageCourses}
               className="text-blue-600 hover:text-blue-700 text-sm font-medium"
-            >
+                  >
               Quản lý →
-            </button>
-          </div>
+                  </button>
+                  </div>
           <div className="flex">
             <ResponsiveContainer width="60%" height={300}>
               <PieChart>
@@ -334,15 +338,15 @@ const SellerDashboard = () => {
                   <div className="text-xs text-gray-500 ml-1">
                     {course.value}%
                   </div>
-                </div>
-              ))}
-            </div>
+              </div>
+                  ))}
+        </div>
           </div>
         </div>
-      </div>
+              </div>
 
       {/* Quick Actions */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
         <ActionCard
           title="Tạo khóa học mới"
           description="Thêm khóa học mới vào danh sách của bạn"
@@ -358,13 +362,20 @@ const SellerDashboard = () => {
           color="green"
         />
         <ActionCard
+          title="Quản lý học viên"
+          description="Xem danh sách và theo dõi tiến độ học viên"
+          icon={<Users className="w-6 h-6" />}
+          onClick={handleManageStudents}
+          color="orange"
+        />
+        <ActionCard
           title="Xem doanh thu"
           description="Theo dõi thu nhập và thống kê chi tiết"
           icon={<TrendingUp className="w-6 h-6" />}
           onClick={handleViewRevenue}
           color="purple"
         />
-      </div>
+                </div>
 
       {/* Recent Orders Table */}
       <div className="bg-white dark:bg-gray-800 p-6 rounded-lg shadow">
@@ -372,29 +383,29 @@ const SellerDashboard = () => {
           <h2 className="text-lg font-semibold dark:text-white">Đơn hàng gần đây</h2>
           <span className="text-sm text-gray-500 dark:text-gray-400">
             {recentOrders.length} đơn hàng
-          </span>
-        </div>
+                    </span>
+                  </div>
         <div className="overflow-x-auto">
           <table className="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
             <thead className="bg-gray-50 dark:bg-gray-700">
               <tr>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
                   Học viên
-                </th>
+              </th>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
-                  Khóa học
-                </th>
+                Khóa học
+              </th>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
-                  Số tiền
-                </th>
+                Số tiền
+              </th>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
                   Ngày mua
                 </th>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
-                  Trạng thái
-                </th>
-              </tr>
-            </thead>
+                Trạng thái
+              </th>
+            </tr>
+          </thead>
             <tbody className="bg-white dark:bg-gray-800 divide-y divide-gray-200 dark:divide-gray-700">
               {recentOrders.map((order) => (
                 <tr
@@ -403,25 +414,25 @@ const SellerDashboard = () => {
                 >
                   <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900 dark:text-white">
                     {order.student}
-                  </td>
+                </td>
                   <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-300">
                     {order.course}
-                  </td>
+                </td>
                   <td className="px-6 py-4 whitespace-nowrap text-sm text-green-600 font-semibold">
                     ${order.amount}
-                  </td>
+                </td>
                   <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-300">
                     {order.date}
-                  </td>
+                </td>
                   <td className="px-6 py-4 whitespace-nowrap text-sm">
                     <StatusBadge status={order.status} />
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
       </div>
+    </div>
 
       {/* Recent Courses Quick View */}
       <div className="mt-6 bg-white dark:bg-gray-800 p-6 rounded-lg shadow">
@@ -455,7 +466,7 @@ const StatCard = ({ icon, title, value, trend, trendUp }) => {
         <div className="flex items-center">
           <div className="mr-4 bg-gray-100 dark:bg-gray-700 rounded-full p-3">
             {icon}
-          </div>
+        </div>
           <div>
             <h3 className="text-gray-500 dark:text-gray-400 text-sm">{title}</h3>
             <p className="text-2xl font-bold dark:text-white">{value}</p>
@@ -468,7 +479,7 @@ const StatCard = ({ icon, title, value, trend, trendUp }) => {
               </p>
             )}
           </div>
-        </div>
+          </div>
       </div>
     </motion.div>
   );
@@ -478,6 +489,7 @@ const ActionCard = ({ title, description, icon, onClick, color = "blue" }) => {
   const colorClasses = {
     blue: "border-blue-200 hover:border-blue-300 hover:bg-blue-50 dark:hover:bg-blue-900/20",
     green: "border-green-200 hover:border-green-300 hover:bg-green-50 dark:hover:bg-green-900/20",
+    orange: "border-orange-200 hover:border-orange-300 hover:bg-orange-50 dark:hover:bg-orange-900/20",
     purple: "border-purple-200 hover:border-purple-300 hover:bg-purple-50 dark:hover:bg-purple-900/20",
   };
 
@@ -491,12 +503,13 @@ const ActionCard = ({ title, description, icon, onClick, color = "blue" }) => {
         <div className={`mr-3 p-2 rounded-full ${
           color === 'blue' ? 'bg-blue-100 text-blue-600' :
           color === 'green' ? 'bg-green-100 text-green-600' :
+          color === 'orange' ? 'bg-orange-100 text-orange-600' :
           'bg-purple-100 text-purple-600'
         }`}>
           {icon}
-        </div>
-        <h3 className="font-semibold dark:text-white">{title}</h3>
       </div>
+        <h3 className="font-semibold dark:text-white">{title}</h3>
+    </div>
       <p className="text-sm text-gray-600 dark:text-gray-400">{description}</p>
     </motion.div>
   );
@@ -548,7 +561,7 @@ const CourseCard = ({ course }) => {
         <span className="flex items-center">
           <Users className="w-3 h-3 mr-1" />
           {course.students}
-        </span>
+                  </span>
         <span className="flex items-center">
           <Star className="w-3 h-3 mr-1 text-yellow-500" />
           {course.rating}
@@ -558,4 +571,4 @@ const CourseCard = ({ course }) => {
   );
 };
 
-export default SellerDashboard; 
+export default SellerDashboard;

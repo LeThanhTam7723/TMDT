@@ -7,9 +7,11 @@ import com.example.back_end.dto.request.CourseDetailUpdateRequest;
 import com.example.back_end.dto.request.CourseUpdateRequest;
 import com.example.back_end.dto.response.SellerRevenueResponseDTO;
 import com.example.back_end.dto.response.SellerStatsResponseDTO;
+import com.example.back_end.dto.response.StudentEnrollmentResponseDTO;
 import com.example.back_end.entity.Course;
 import com.example.back_end.entity.CourseDetail;
 import com.example.back_end.entity.Order;
+import com.example.back_end.entity.User;
 import com.example.back_end.repositories.CourseDetailRepository;
 import com.example.back_end.repositories.CourseRepository;
 import com.example.back_end.repositories.OrderRepository;
@@ -18,6 +20,7 @@ import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
+import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -202,6 +205,51 @@ public class SellerService {
                 .monthlyRevenue(monthlyRevenue)
                 .monthlyData(monthlyData)
                 .build();
+    }
+
+    public List<StudentEnrollmentResponseDTO> getSellerStudents(Integer sellerId) {
+        List<Order> orders = orderRepository.findBySellerIdThroughCourses(sellerId);
+        
+        return orders.stream().map(order -> {
+            User student = order.getIdUser();
+            Course course = order.getIdCourse();
+            LocalDate enrollmentDate = order.getDateOrder();
+            
+            // Calculate days since enrollment
+            int daysSinceEnrollment = enrollmentDate != null 
+                ? (int) ChronoUnit.DAYS.between(enrollmentDate, LocalDate.now())
+                : 0;
+            
+            // Check if fully unlocked (3+ days)
+            boolean isFullyUnlocked = daysSinceEnrollment >= 3;
+            
+            // Determine enrollment status
+            String enrollmentStatus;
+            if (daysSinceEnrollment < 3) {
+                enrollmentStatus = "active"; // Still in preview period
+            } else if (daysSinceEnrollment > 90) {
+                enrollmentStatus = "completed"; // Consider completed after 90 days
+            } else {
+                enrollmentStatus = "active"; // Actively learning
+            }
+            
+            return StudentEnrollmentResponseDTO.builder()
+                    .id(order.getId())
+                    .userId(student.getId())
+                    .studentName(student.getFullname() != null ? student.getFullname() : "Unknown")
+                    .studentEmail(student.getEmail())
+                    .studentAvatar(student.getAvatar())
+                    .studentPhone(student.getPhone())
+                    .studentGender(student.getGender())
+                    .courseId(course.getId())
+                    .courseName(course.getName())
+                    .coursePrice(course.getPrice())
+                    .enrollmentDate(enrollmentDate)
+                    .enrollmentStatus(enrollmentStatus)
+                    .daysSinceEnrollment(daysSinceEnrollment)
+                    .isFullyUnlocked(isFullyUnlocked)
+                    .build();
+        }).collect(Collectors.toList());
     }
     
     // ===== COURSE DETAILS MANAGEMENT =====

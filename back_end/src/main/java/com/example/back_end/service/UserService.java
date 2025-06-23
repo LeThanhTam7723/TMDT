@@ -224,6 +224,9 @@ public class UserService {
                             .email(email)
                             .fullname(name)
                             .avatar(picture)
+                            .password("")
+                            .phone("")
+                            .username(email)
                             .roles(Set.of(userRole))
                             .active(true)
                             .build();

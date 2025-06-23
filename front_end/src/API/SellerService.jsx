@@ -71,6 +71,17 @@ const SellerService = {
     }
   },
 
+  // Lấy danh sách học viên đã đăng ký
+  getSellerStudents: async (sellerId) => {
+    try {
+      const response = await axiosClient.get(`/seller/${sellerId}/students`);
+      return response.data;
+    } catch (error) {
+      console.error('Error fetching seller students:', error);
+      throw error;
+    }
+  },
+
   // ===== EXISTING APIS (from backend) =====
   
   // Lấy thông tin seller theo courseId (existing)

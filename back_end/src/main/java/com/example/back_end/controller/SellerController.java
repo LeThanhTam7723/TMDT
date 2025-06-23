@@ -9,6 +9,7 @@ import com.example.back_end.dto.request.CourseUpdateRequest;
 import com.example.back_end.dto.response.ApiResponse;
 import com.example.back_end.dto.response.SellerRevenueResponseDTO;
 import com.example.back_end.dto.response.SellerStatsResponseDTO;
+import com.example.back_end.dto.response.StudentEnrollmentResponseDTO;
 import com.example.back_end.entity.Course;
 import com.example.back_end.entity.CourseDetail;
 import com.example.back_end.entity.User;
@@ -268,6 +269,26 @@ public class SellerController {
             return ResponseEntity.badRequest().body(ApiResponse.<SellerRevenueResponseDTO>builder()
                     .code(400)
                     .message("Error fetching revenue: " + e.getMessage())
+                    .build());
+        }
+    }
+
+    @GetMapping("/{sellerId}/students")
+    @PreAuthorize("hasAuthority('SCOPE_SELLER') or hasAuthority('SCOPE_ADMIN')")
+    public ResponseEntity<ApiResponse<List<StudentEnrollmentResponseDTO>>> getSellerStudents(
+            @PathVariable Integer sellerId) {
+        try {
+            List<StudentEnrollmentResponseDTO> students = sellerService.getSellerStudents(sellerId);
+            return ResponseEntity.ok(ApiResponse.<List<StudentEnrollmentResponseDTO>>builder()
+                    .code(200)
+                    .message("Success")
+                    .result(students)
+                    .build());
+        } catch (Exception e) {
+            log.error("Error fetching seller students: ", e);
+            return ResponseEntity.badRequest().body(ApiResponse.<List<StudentEnrollmentResponseDTO>>builder()
+                    .code(400)
+                    .message("Error fetching students: " + e.getMessage())
                     .build());
         }
     }
