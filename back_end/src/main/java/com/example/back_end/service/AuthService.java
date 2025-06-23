@@ -111,20 +111,35 @@ public class AuthService {
     }
 
     public SignedJWT verifyToken(String token) throws JOSEException, ParseException {
+        System.out.println("🔍 Verifying token: " + token.substring(0, Math.min(50, token.length())) + "...");
+        
         JWSVerifier verifier = new MACVerifier(SIGNER_KEY.getBytes());
         SignedJWT signedJWT = SignedJWT.parse(token);
         Date expiryTime = signedJWT.getJWTClaimsSet().getExpirationTime();
         var verified = signedJWT.verify(verifier);
+        
+        System.out.println("🔍 Token verified: " + verified);
+        System.out.println("🔍 Token expiry: " + expiryTime);
+        System.out.println("🔍 Current time: " + new Date());
+        System.out.println("🔍 Token not expired: " + expiryTime.after(new Date()));
+        
         if(!(verified && expiryTime.after(new Date()))){
+            System.out.println("❌ Token verification failed - expired or invalid signature");
             log.info("Het han");
             throw new AppException(ErrorCode.UNAUTHENTICATED);
-
         }
-        if(invalidatedTokenRepository
-                .existsById(signedJWT.getJWTClaimsSet().getJWTID())){
+        
+        String jwtId = signedJWT.getJWTClaimsSet().getJWTID();
+        boolean isInvalidated = invalidatedTokenRepository.existsById(jwtId);
+        System.out.println("🔍 Token invalidated: " + isInvalidated);
+        
+        if(isInvalidated){
+            System.out.println("❌ Token has been invalidated (logged out)");
             log.info("da dang xuat");
             throw new AppException(ErrorCode.UNAUTHENTICATED);
         }
+        
+        System.out.println("✅ Token verification successful");
         return signedJWT;
     }
 

@@ -1,41 +1,50 @@
-import React, { useState, useEffect } from 'react';
-import { useNavigate, useParams } from 'react-router-dom';
+import React, { useState, useEffect, useContext } from 'react';
+import { useNavigate, useParams, useLocation } from 'react-router-dom';
 import { FiUpload, FiX, FiSave, FiArrowLeft } from 'react-icons/fi';
-import axiosClient from '../API/axiosClient';
 import { motion } from 'framer-motion';
+import SellerService from '../API/SellerService';
+import { ProductContext } from '../context/ProductContext';
+import Swal from 'sweetalert2';
 
 const CourseForm = () => {
   const { id } = useParams();
   const navigate = useNavigate();
+  const location = useLocation();
+  const { session } = useContext(ProductContext);
   const [loading, setLoading] = useState(false);
   const [formData, setFormData] = useState({
     name: '',
     description: '',
     price: '',
-    category: '',
+    categoryId: '',
     image: '',
     totalHour: '',
     lessons: '',
     age: '',
-    status: 'draft'
+    level: 'Intermediate'
   });
 
-  useEffect(() => {
-    if (id) {
-      fetchCourse();
-    }
-  }, [id]);
+  // Get sellerId from location state or context
+  const sellerId = location.state?.sellerId || session?.user?.id || 1;
+  const isEditMode = !!id;
 
-  const fetchCourse = async () => {
-    try {
-      const response = await axiosClient.get(`/courses/${id}`);
-      if (response.data && response.data.code === 200) {
-        setFormData(response.data.result);
-      }
-    } catch (error) {
-      console.error('Error fetching course:', error);
+  useEffect(() => {
+    if (isEditMode && location.state?.course) {
+      // Use course data from navigation state
+      const course = location.state.course;
+      setFormData({
+        name: course.name || '',
+        description: course.description || '',
+        price: course.price || '',
+        categoryId: course.categoryId || '',
+        image: course.image || '',
+        totalHour: course.totalHour || '',
+        lessons: course.lessons || '',
+        age: course.age || '18+ year old',
+        level: course.level || 'Intermediate'
+      });
     }
-  };
+  }, [isEditMode, location.state]);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -62,15 +71,45 @@ const CourseForm = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     setLoading(true);
+    
     try {
-      if (id) {
-        await axiosClient.put(`/courses/${id}`, formData);
+      // Prepare data for API
+      const courseData = {
+        name: formData.name,
+        description: formData.description,
+        price: parseFloat(formData.price),
+        categoryId: parseInt(formData.categoryId),
+        level: formData.level,
+        image: formData.image,
+        totalHour: parseInt(formData.totalHour),
+        lessons: parseInt(formData.lessons),
+        age: formData.age
+      };
+
+      let response;
+      if (isEditMode) {
+        response = await SellerService.updateCourse(sellerId, id, courseData);
       } else {
-        await axiosClient.post('/courses', formData);
+        response = await SellerService.createCourse(sellerId, courseData);
       }
-      navigate('/seller/dashboard');
+
+      if (response.code === 200) {
+        await Swal.fire({
+          title: 'Thành công!',
+          text: `Khóa học đã được ${isEditMode ? 'cập nhật' : 'tạo'} thành công.`,
+          icon: 'success',
+          confirmButtonText: 'OK'
+        });
+        navigate('/seller/dashboard');
+      }
     } catch (error) {
       console.error('Error saving course:', error);
+      await Swal.fire({
+        title: 'Lỗi!',
+        text: `Có lỗi xảy ra khi ${isEditMode ? 'cập nhật' : 'tạo'} khóa học.`,
+        icon: 'error',
+        confirmButtonText: 'OK'
+      });
     } finally {
       setLoading(false);
     }
@@ -103,7 +142,7 @@ const CourseForm = () => {
               <FiArrowLeft size={24} className="text-gray-600" />
             </button>
             <h1 className="text-3xl font-bold text-gray-800">
-              {id ? 'Edit Course' : 'Create New Course'}
+              {isEditMode ? 'Chỉnh sửa khóa học' : 'Tạo khóa học mới'}
             </h1>
           </div>
 
@@ -211,19 +250,19 @@ const CourseForm = () => {
                   Category
                 </label>
                 <select
-                  name="category"
-                  value={formData.category}
+                  name="categoryId"
+                  value={formData.categoryId}
                   onChange={handleChange}
                   required
                   className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200"
                 >
                   <option value="">Select a category</option>
-                  <option value="General English">General English</option>
-                  <option value="IELTS">IELTS</option>
-                  <option value="Business English">Business English</option>
-                  <option value="Kids English">Kids English</option>
-                  <option value="Conversation">Conversation</option>
-                  <option value="Grammar">Grammar</option>
+                  <option value="1">IELTS</option>
+                  <option value="2">Business English</option>
+                  <option value="3">Kids English</option>
+                  <option value="4">Conversation</option>
+                  <option value="5">Grammar</option>
+                  <option value="6">General English</option>
                 </select>
               </div>
             </div>
@@ -262,38 +301,39 @@ const CourseForm = () => {
               </div>
               <div className="space-y-2">
                 <label className="block text-sm font-medium text-gray-700">
-                  Age Group
+                  Level
                 </label>
                 <select
-                  name="age"
-                  value={formData.age}
+                  name="level"
+                  value={formData.level}
                   onChange={handleChange}
                   required
                   className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200"
                 >
-                  <option value="">Select age group</option>
-                  <option value="4-12 year old">4-12 year old</option>
-                  <option value="13-18 year old">13-18 year old</option>
-                  <option value="18+ year old">18+ year old</option>
+                  <option value="Beginner">Beginner</option>
+                  <option value="Intermediate">Intermediate</option>
+                  <option value="Upper Intermediate">Upper Intermediate</option>
+                  <option value="Advanced">Advanced</option>
                 </select>
               </div>
             </div>
 
-            {/* Status */}
+            {/* Age Group */}
             <div className="space-y-2">
               <label className="block text-sm font-medium text-gray-700">
-                Status
+                Age Group
               </label>
               <select
-                name="status"
-                value={formData.status}
+                name="age"
+                value={formData.age}
                 onChange={handleChange}
                 required
                 className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200"
               >
-                <option value="draft">Draft</option>
-                <option value="active">Active</option>
-                <option value="inactive">Inactive</option>
+                <option value="">Select age group</option>
+                <option value="4-12 year old">4-12 year old</option>
+                <option value="13-18 year old">13-18 year old</option>
+                <option value="18+ year old">18+ year old</option>
               </select>
             </div>
 
@@ -304,7 +344,7 @@ const CourseForm = () => {
                 onClick={() => navigate('/seller/dashboard')}
                 className="px-6 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50 transition-colors duration-200"
               >
-                Cancel
+                Hủy
               </button>
               <button
                 type="submit"
@@ -312,7 +352,7 @@ const CourseForm = () => {
                 className="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50 transition-colors duration-200 flex items-center"
               >
                 <FiSave className="mr-2" />
-                {loading ? 'Saving...' : id ? 'Update Course' : 'Create Course'}
+                {loading ? 'Đang lưu...' : isEditMode ? 'Cập nhật khóa học' : 'Tạo khóa học'}
               </button>
             </div>
           </motion.form>

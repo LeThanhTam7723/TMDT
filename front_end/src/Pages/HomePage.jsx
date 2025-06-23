@@ -26,55 +26,20 @@ const HomePage = () => {
     {
       title: "Master English with Native Speakers",
       description: "Learn from experienced native speakers and improve your English skills. Special offer: 25% off!",
-      image: "https://img.freepik.com/free-photo/dark-gradient-background-with-copy-space_53876-99548.jpg",
+      image: "https://keithspeakingacademy.com/wp-content/uploads/2024/10/Understand-native-English-speaker.jpg",
       bgGradient: "from-purple-900 to-indigo-800"
     },
     {
       title: "Professional IELTS Training",
       description: "Achieve your target IELTS score with our comprehensive course. Expert guidance and practice materials!",
-      image: "https://img.freepik.com/free-photo/dark-gradient-background-with-copy-space_53876-99548.jpg",
+      image: "https://learnovateonecenter.com/wp-content/uploads/2024/05/IELTS-Training-Learnovate-1024x538.jpg",
       bgGradient: "from-blue-900 to-blue-700"
     },
     {
       title: "Business English Excellence",
       description: "Enhance your professional communication skills. Perfect for career advancement!",
-      image: "https://img.freepik.com/free-photo/dark-gradient-background-with-copy-space_53876-99548.jpg",
+      image: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQzCZMkcrlHCrHhrS-M9Umn2XwnnIBWAzmkoA&s",
       bgGradient: "from-indigo-900 to-violet-800"
-    }
-  ];
-
-  const courses = [
-    {
-      id: 1,
-      name: "English Grammar Mastery",
-      teacher: "Sarah Wilson",
-      price: "đ299,000",
-      rating: 5,
-      image: "https://images.unsplash.com/photo-1546410531-bb4caa6b424d?ixlib=rb-4.0.3"
-    },
-    {
-      id: 2,
-      name: "Business English Communication",
-      teacher: "Michael Anderson",
-      price: "đ399,000",
-      rating: 5,
-      image: "https://images.unsplash.com/photo-1517245386807-bb43f82c33c4?ixlib=rb-4.0.3"
-    },
-    {
-      id: 3,
-      name: "IELTS Preparation Course",
-      teacher: "Emma Thompson",
-      price: "đ499,000",
-      rating: 4,
-      image: "https://images.unsplash.com/photo-1434030216411-0b793f4b4173?ixlib=rb-4.0.3"
-    },
-    {
-      id: 4,
-      name: "English Speaking Practice",
-      teacher: "David Brown",
-      price: "đ599,000",
-      rating: 5,
-      image: "https://images.unsplash.com/photo-1522202176988-66273c2fd55f?ixlib=rb-4.0.3"
     }
   ];
   useEffect(() => {
@@ -120,8 +85,8 @@ const HomePage = () => {
     setTimeout(() => setIsAnimating(false), 500);
   };
 
-  const handleProductClick = () => {
-    navigate(`/detail`);
+  const handleProductClick = (courseId) => {
+    navigate(`/detail/${courseId}`);
   };
 
   const renderStars = (rating) => {
@@ -224,36 +189,40 @@ const HomePage = () => {
           <a href="#" className="text-blue-400 hover:text-blue-300 transition">View all</a>
         </div>
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-          {courses.map((course) => (
+          {products.slice(0, 4).map((product) => (
             <div 
-              key={course.id} 
-              className="bg-gradient-to-b from-gray-800 to-gray-900 rounded-xl overflow-hidden shadow-lg hover:shadow-2xl transition-all duration-300 border border-gray-700"
+              key={product.id} 
+              className="bg-gradient-to-b from-gray-800 to-gray-900 rounded-xl overflow-hidden shadow-lg hover:shadow-2xl transition-all duration-300 border border-gray-700 cursor-pointer"
+              onClick={() => handleProductClick(product.id)}
             >
               <div className="relative">
                 <img
-                  src={course.image}
-                  alt={course.name}
+                  src={product.image || `https://images.unsplash.com/photo-1546410531-bb4caa6b424d?ixlib=rb-4.0.3`}
+                  alt={product.name}
                   className="w-full h-48 object-cover"
                 />
                 <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black to-transparent h-20"></div>
               </div>
               <div className="p-5">
-                <h3 className="font-semibold text-lg mb-2 text-white">{course.name}</h3>
+                <h3 className="font-semibold text-lg mb-2 text-white">{product.name}</h3>
                 <p className="text-gray-300 mb-2 flex items-center">
                   <span className="inline-block w-2 h-2 rounded-full bg-green-500 mr-2"></span>
-                  {course.teacher}
+                  {product.sellerName || "By Admin"}
                 </p>
                 <div className="flex items-center mb-3">
-                  {renderStars(course.rating)}
-                  <span className="ml-2 text-gray-400 text-sm">({course.rating}.0)</span>
+                  {renderStars(Math.round(product.rating || 4))}
+                  <span className="ml-2 text-gray-400 text-sm">({(product.rating || 4).toFixed(1)})</span>
                 </div>
                 <div className="flex justify-between items-center">
-                  <p className="font-bold text-red-400">{course.price}</p>
+                  <p className="font-bold text-red-400">${product.price}</p>
                   <button 
-                    onClick={() => handleProductClick(course.id)}
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      handleProductClick(product.id);
+                    }}
                     className="bg-gradient-to-r from-blue-600 to-blue-700 text-white px-4 py-2 rounded-lg hover:from-blue-700 hover:to-blue-800 transition-all duration-300 shadow-md"
                   >
-                    Add to Cart
+                    View Details
                   </button>
                 </div>
               </div>
@@ -266,47 +235,58 @@ const HomePage = () => {
       <section className="container mx-auto px-4 py-12">
         <h2 className="text-3xl font-bold mb-8">See others' learning achievements</h2>
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-          {courses.map((course) => (
+          {products.slice(0, 4).map((product, index) => {
+            const testimonials = [
+              "Khóa học này rất chi tiết và dễ hiểu. Giảng viên giảng dạy rất nhiệt tình và có phương pháp. Sau khóa học, tôi tự tin hơn rất nhiều!",
+              "Khóa học giúp tôi tự tin hơn trong giao tiếp. Các tình huống thực tế trong khóa học rất hữu ích cho công việc.",
+              "Khóa học rất chất lượng. Giảng viên chia sẻ nhiều tips hay và các chiến lược hiệu quả. Điểm số của tôi đã cải thiện đáng kể!",
+              "Khóa học giúp tôi tự tin hơn trong việc sử dụng tiếng Anh hàng ngày. Giảng viên luôn tạo không khí học tập vui vẻ và hiệu quả."
+            ];
+            const names = ["Nguyễn Văn An", "Trần Thị Bình", "Lê Hoàng Nam", "Phạm Minh Anh"];
+            
+            return (
             <div 
-              key={course.id} 
-              className="bg-gradient-to-b from-gray-800 to-gray-900 rounded-xl p-6 shadow-lg hover:shadow-2xl transition-all duration-300 border border-gray-700 relative overflow-hidden"
+                key={product.id} 
+                className="bg-gradient-to-b from-gray-800 to-gray-900 rounded-xl p-6 shadow-lg hover:shadow-2xl transition-all duration-300 border border-gray-700 relative overflow-hidden cursor-pointer"
+                onClick={() => handleProductClick(product.id)}
             >
               <div className="absolute top-0 right-0 w-16 h-16 bg-blue-600 transform rotate-45 translate-x-8 -translate-y-8"></div>
               <div className="text-gray-100 mb-8 relative">
                 <span className="text-blue-400 text-4xl absolute -top-4 -left-2">"</span>
                 <p className="pt-4">
-                  {course.name === "English Grammar Mastery" && "Khóa học ngữ pháp rất chi tiết và dễ hiểu. Cô Sarah giảng dạy rất nhiệt tình và có phương pháp. Sau khóa học, tôi tự tin hơn rất nhiều về ngữ pháp tiếng Anh!"}
-                  {course.name === "Business English Communication" && "Business English Communication giúp tôi tự tin hơn trong giao tiếp với đối tác nước ngoài. Các tình huống thực tế trong khóa học rất hữu ích cho công việc."}
-                  {course.name === "IELTS Preparation Course" && "Khóa học IELTS rất chất lượng. Cô Emma chia sẻ nhiều tips hay và các chiến lược làm bài hiệu quả. Điểm IELTS của tôi đã tăng từ 6.0 lên 7.0 sau khóa học!"}
-                  {course.name === "English Speaking Practice" && "English Speaking Practice giúp tôi tự tin nói tiếng Anh hàng ngày dễ dàng. Thầy David luôn tạo không khí học tập vui vẻ và hiệu quả."}
+                    {testimonials[index % testimonials.length]}
                 </p>
               </div>
               <div className="flex items-center relative z-10">
                 <div className="w-12 h-12 rounded-full overflow-hidden mr-4 border-2 border-blue-400">
                   <img
-                    src={`https://i.pravatar.cc/150?img=${course.id}`}
+                      src={`https://i.pravatar.cc/150?img=${index + 1}`}
                     alt="Avatar"
                     className="w-full h-full object-cover"
                   />
                 </div>
                 <div>
                   <p className="font-semibold text-white">
-                    {course.name === "English Grammar Mastery" && "Nguyễn Văn An"}
-                    {course.name === "Business English Communication" && "Trần Thị Bình"}
-                    {course.name === "IELTS Preparation Course" && "Lê Hoàng Nam"}
-                    {course.name === "English Speaking Practice" && "Phạm Minh Anh"}
+                      {names[index % names.length]}
                   </p>
-                  <p className="text-gray-400 text-sm">{course.name} • 2024</p>
+                    <p className="text-gray-400 text-sm">{product.name} • 2024</p>
+                  </div>
                 </div>
-              </div>
-              <button className="text-blue-400 text-sm mt-4 hover:text-blue-300 transition-colors flex items-center">
+                <button 
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    handleProductClick(product.id);
+                  }}
+                  className="text-blue-400 text-sm mt-4 hover:text-blue-300 transition-colors flex items-center"
+                >
                 View courses 
                 <svg className="w-4 h-4 ml-1" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
                   <path d="M9 18L15 12L9 6" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
                 </svg>
               </button>
             </div>
-          ))}
+            );
+          })}
         </div>
       </section>
       

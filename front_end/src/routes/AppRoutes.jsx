@@ -2,7 +2,8 @@ import React, { Suspense } from "react";
 import { Routes, Route } from "react-router-dom";
 import Home from "../Pages/HomePage";
 import Store from "../Pages/Store";
-import Cart from "../Pages/Cart";
+
+
 import CheckoutPage from "../Pages/Payment";
 import AuthPage from "../Pages/Authentication";
 import Detail from "../Pages/Detail";
@@ -16,6 +17,8 @@ import Login from "../Pages/Login";
 import Register from "../Pages/Register";
 import ChatInterface from "../Pages/Chat";
 import SellerDetail from "../Pages/SellerDetail";
+import OrderHistory from "../Pages/Admin/OrderHistory";
+import UserHistory from "../Pages/History";
 
 import Analytics from "../Pages/Admin/AdminDashboard";
 import UserManagement from "../Pages/Admin/UserManagement";
@@ -31,17 +34,24 @@ const AppRoutes = () => {
         {/* Public Routes */}
         <Route path="/" element={<Home />} />
         <Route path="/shop" element={<Store />} />
+
         <Route path="/favorites" element={<Favorite />} />
-        <Route path="/cart" element={<Cart />} />
+        
         <Route path="/payment" element={<CheckoutPage />} />
         <Route path="/auth/*" element={<AuthPage />} />
         <Route path="/detail/:id" element={<Detail />} />
         <Route path="/user-info" element={<UserInfo />} />
         <Route path="/course-video/:id" element={<CourseVideo />} />
         <Route path="/checkout" element={<Checkout />} />
+        <Route path="/checkout/:id" element={<Checkout />} />
         <Route path="/login" element={<Login />} />
         <Route path="/register" element={<Register />} />
+        <Route path="/chat" element={<ChatInterface />} />
+         <Route path="/history" element={<OrderHistory />} />
+         <Route path="/UserHistory" element={<UserHistory />} />
+
         <Route path="/chat/:id" element={<ChatInterface />} />
+
         <Route path="/seller/:id" element={<SellerDetail />} />
 
         {/* Seller Routes - Only SELLER and ADMIN can access */}

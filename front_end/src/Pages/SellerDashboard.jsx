@@ -1,6 +1,6 @@
 // Enhanced SellerCourseManagement.js with Approval Workflow
-import React, { useState } from "react";
-import { Link } from "react-router-dom";
+import React, { useState, useEffect, useContext } from "react";
+import { Link, useNavigate } from "react-router-dom";
 import { FaBook, FaChartLine, FaWallet, FaUndo } from "react-icons/fa";
 import {
   FiSearch,
@@ -16,6 +16,10 @@ import {
   FiX,
 } from "react-icons/fi";
 import { motion, AnimatePresence } from "framer-motion";
+import SellerService from "../API/SellerService";
+import { ProductContext } from "../context/ProductContext";
+
+import Swal from 'sweetalert2';
 
 const sampleCourses = [
   {
@@ -149,6 +153,7 @@ const SellerDashboard = () => {
 
   return (
     <div className="flex min-h-screen bg-gray-100">
+      
       {/* Sidebar */}
       <div className="w-64 bg-white shadow-lg">
         <div className="p-4">
@@ -183,9 +188,69 @@ const CoursesTab = () => {
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedLevel, setSelectedLevel] = useState("");
   const [selectedStatus, setSelectedStatus] = useState("");
-  const [courses, setCourses] = useState(sampleCourses);
+  const [courses, setCourses] = useState([]);
   const [showModal, setShowModal] = useState(false);
   const [selectedCourse, setSelectedCourse] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+  const { session } = useContext(ProductContext);
+  const navigate = useNavigate();
+
+  // Get sellerId from session - user mlnhquxc has ID = 5
+  const sellerId = session?.currentUser?.id || session?.user?.id || 5;
+
+  // Load courses from API
+  useEffect(() => {
+    const fetchCourses = async () => {
+      // Don't fetch if no session or no token
+      if (!session || !session.token) {
+        console.warn('⚠️ No session or token available, skipping API call');
+        setLoading(false);
+        return;
+      }
+
+      try {
+        setLoading(true);
+        console.log('🔍 Fetching courses for sellerId:', sellerId);
+        console.log('🔍 Current session:', session);
+        console.log('🔍 Session token:', session?.token);
+        const response = await SellerService.getSellerCourses(sellerId);
+        if (response.code === 200) {
+          // Transform backend data to match frontend structure
+          const transformedCourses = response.result.map(course => ({
+            id: course.id,
+            name: course.name,
+            price: course.price,
+            description: course.description,
+            rating: course.rating || 0,
+            episodeCount: course.episodeCount || 0,
+            duration: course.duration || 0,
+            // Add default values for missing fields
+            image: "https://images.unsplash.com/photo-1513258496099-48168024aec0?auto=format&fit=crop&w=600&q=80",
+            category: "General English",
+            level: "Intermediate", 
+            status: course.status ? "Active" : "Pending Review",
+            approvalStatus: course.status ? "approved" : "pending",
+            totalHour: Math.floor((course.duration || 0) / 60),
+            lessons: course.episodeCount || 0,
+            students: Math.floor(Math.random() * 500) + 50, // Mock data
+            createdAt: new Date().toISOString().split('T')[0],
+            lastModified: new Date().toISOString().split('T')[0]
+          }));
+          setCourses(transformedCourses);
+        }
+      } catch (error) {
+        console.error('Error fetching courses:', error);
+        setError('Không thể tải danh sách khóa học');
+        // Use sample data as fallback
+        setCourses(sampleCourses);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchCourses();
+  }, [sellerId, session]);
 
   const filteredCourses = courses.filter((course) => {
     const matchesSearch =
@@ -224,38 +289,49 @@ const CoursesTab = () => {
   };
 
   const handleDeleteCourse = async (courseId) => {
-    if (window.confirm("Bạn có chắc chắn muốn xóa khóa học này?")) {
+    const result = await Swal.fire({
+      title: 'Xác nhận xóa',
+      text: 'Bạn có chắc chắn muốn xóa khóa học này?',
+      icon: 'warning',
+      showCancelButton: true,
+      confirmButtonColor: '#d33',
+      cancelButtonColor: '#3085d6',
+      confirmButtonText: 'Xóa',
+      cancelButtonText: 'Hủy'
+    });
+
+    if (result.isConfirmed) {
       try {
-        // API call to request course deletion
-        // await requestCourseDeletion(courseId)
-
-        // Update course status to pending deletion
-        setCourses((prev) =>
-          prev.map((course) =>
-            course.id === courseId
-              ? {
-                  ...course,
-                  status: "Pending Deletion",
-                  approvalStatus: "pending",
-                  pendingType: "delete",
-                }
-              : course
-          )
-        );
-
-        alert("Yêu cầu xóa khóa học đã được gửi đến admin để phê duyệt!");
+        const response = await SellerService.deleteCourse(sellerId, courseId);
+        if (response.code === 200) {
+          // Remove course from local state
+          setCourses(prev => prev.filter(course => course.id !== courseId));
+          
+          Swal.fire(
+            'Đã xóa!',
+            'Khóa học đã được xóa thành công.',
+            'success'
+          );
+        }
       } catch (error) {
-        console.error("Error requesting course deletion:", error);
-        alert("Có lỗi xảy ra khi gửi yêu cầu xóa khóa học.");
+        console.error("Error deleting course:", error);
+        Swal.fire(
+          'Lỗi!',
+          'Có lỗi xảy ra khi xóa khóa học.',
+          'error'
+        );
       }
     }
   };
 
   const handleEditCourse = (course) => {
-    // For demonstration, we'll simulate sending an edit request
-    alert(
-      `Chỉnh sửa khóa học "${course.name}" sẽ được gửi đến admin để phê duyệt sau khi bạn lưu thay đổi.`
-    );
+    // Navigate to edit form
+    navigate(`/seller/course/edit/${course.id}`, { 
+      state: { 
+        course,
+        sellerId 
+      }
+    });
   };
 
   const handleViewCourse = (course) => {
@@ -280,6 +356,36 @@ const CoursesTab = () => {
     alert("Khóa học đã được gửi lại để phê duyệt!");
   };
 
+  // Loading state
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center py-20">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
+          <p className="text-gray-600">Đang tải danh sách khóa học...</p>
+        </div>
+      </div>
+    );
+  }
+
+  // Error state
+  if (error) {
+    return (
+      <div className="text-center py-20">
+        <div className="text-red-600 text-lg font-semibold mb-2">
+          Có lỗi xảy ra
+        </div>
+        <p className="text-gray-600 mb-4">{error}</p>
+        <button
+          onClick={() => window.location.reload()}
+          className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700"
+        >
+          Thử lại
+        </button>
+      </div>
+    );
+  }
+
   return (
     <div>
       <div className="flex justify-between items-center mb-6">
@@ -291,6 +397,7 @@ const CoursesTab = () => {
         </div>
         <Link
           to="/seller/course/new"
+          state={{ sellerId }}
           className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 flex items-center gap-2 transition-colors"
         >
           <FaBook />
@@ -591,64 +698,107 @@ const CoursesTab = () => {
   );
 };
 
-// Keep the existing Revenue, Withdraw, and Refund tabs unchanged
+// Revenue Tab with real API integration
 const RevenueTab = () => {
-  const revenueData = [
-    { month: "T1", value: 1200 },
-    { month: "T2", value: 1800 },
-    { month: "T3", value: 900 },
-    { month: "T4", value: 2200 },
-    { month: "T5", value: 1700 },
-    { month: "T6", value: 2500 },
-  ];
-  const transactions = [
-    {
-      id: "TX001",
-      date: "2024-06-01",
-      course: "IELTS Intensive",
-      amount: 79.99,
-      status: "Thành công",
-    },
-    {
-      id: "TX002",
-      date: "2024-05-28",
-      course: "Business English Pro",
-      amount: 89.99,
-      status: "Thành công",
-    },
-    {
-      id: "TX003",
-      date: "2024-05-20",
-      course: "English for Kids",
-      amount: 59.99,
-      status: "Thành công",
-    },
-    {
-      id: "TX004",
-      date: "2024-05-15",
-      course: "IELTS Intensive",
-      amount: 79.99,
-      status: "Thành công",
-    },
-  ];
+  const [revenueData, setRevenueData] = useState([]);
+  const [sellerStats, setSellerStats] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+  const { session } = useContext(ProductContext);
+  
+  // Get sellerId from session - user mlnhquxc has ID = 5
+  const sellerId = session?.currentUser?.id || session?.user?.id || 5;
+
+  useEffect(() => {
+    const fetchRevenueData = async () => {
+      try {
+        setLoading(true);
+        
+        // Fetch revenue and stats simultaneously
+        const [revenueResponse, statsResponse] = await Promise.all([
+          SellerService.getSellerRevenue(sellerId),
+          SellerService.getSellerStats(sellerId)
+        ]);
+        
+        if (revenueResponse.code === 200) {
+          // Transform monthly data for chart
+          const chartData = revenueResponse.result.monthlyData.map(item => ({
+            month: item.month.substring(5), // Get MM from YYYY-MM
+            value: item.revenue
+          }));
+          setRevenueData(chartData);
+        }
+        
+        if (statsResponse.code === 200) {
+          setSellerStats(statsResponse.result);
+        }
+      } catch (error) {
+        console.error('Error fetching revenue data:', error);
+        setError('Không thể tải dữ liệu doanh thu');
+        
+        // Fallback data
+        setRevenueData([
+          { month: "01", value: 1200 },
+          { month: "02", value: 1800 },
+          { month: "03", value: 900 },
+          { month: "04", value: 2200 },
+          { month: "05", value: 1700 },
+          { month: "06", value: 2500 },
+        ]);
+        setSellerStats({
+          totalRevenue: 12000,
+          totalOrders: 150,
+          totalStudents: 89,
+          averageRating: 4.7
+        });
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchRevenueData();
+  }, [sellerId]);
+
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center py-20">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
+          <p className="text-gray-600">Đang tải dữ liệu doanh thu...</p>
+        </div>
+      </div>
+    );
+  }
 
   const maxValue = Math.max(...revenueData.map((d) => d.value));
 
   return (
     <div>
       <h1 className="text-2xl font-bold text-gray-800 mb-6">Doanh thu</h1>
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
-        <div className="bg-white rounded-lg shadow p-6">
-          <h3 className="text-gray-500 text-sm">Doanh thu hôm nay</h3>
-          <p className="text-2xl font-bold text-gray-800">$79.99</p>
-        </div>
-        <div className="bg-white rounded-lg shadow p-6">
-          <h3 className="text-gray-500 text-sm">Doanh thu tháng này</h3>
-          <p className="text-2xl font-bold text-gray-800">$2,500.00</p>
-        </div>
+      <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-6">
         <div className="bg-white rounded-lg shadow p-6">
           <h3 className="text-gray-500 text-sm">Tổng doanh thu</h3>
-          <p className="text-2xl font-bold text-gray-800">$7,699.00</p>
+          <p className="text-2xl font-bold text-gray-800">
+            ${sellerStats?.totalRevenue?.toLocaleString() || '0'}
+          </p>
+        </div>
+        <div className="bg-white rounded-lg shadow p-6">
+          <h3 className="text-gray-500 text-sm">Tổng đơn hàng</h3>
+          <p className="text-2xl font-bold text-gray-800">
+            {sellerStats?.totalOrders || 0}
+          </p>
+        </div>
+        <div className="bg-white rounded-lg shadow p-6">
+          <h3 className="text-gray-500 text-sm">Tổng học viên</h3>
+          <p className="text-2xl font-bold text-gray-800">
+            {sellerStats?.totalStudents || 0}
+          </p>
+        </div>
+        <div className="bg-white rounded-lg shadow p-6">
+          <h3 className="text-gray-500 text-sm">Đánh giá trung bình</h3>
+          <p className="text-2xl font-bold text-gray-800">
+            {sellerStats?.averageRating?.toFixed(1) || '0.0'}★
+          </p>
         </div>
       </div>
       <div className="bg-white rounded-lg shadow p-6 mb-8">
@@ -693,7 +843,11 @@ const RevenueTab = () => {
             </tr>
           </thead>
           <tbody className="bg-white divide-y divide-gray-200">
-            {transactions.map((tx) => (
+            {/* Mock transactions for now - In real app, fetch from API */}
+            {[
+              { id: "TX001", date: "2024-06-01", course: "Course Example", amount: 79.99, status: "Thành công" },
+              { id: "TX002", date: "2024-05-28", course: "Another Course", amount: 89.99, status: "Thành công" },
+            ].map((tx) => (
               <tr key={tx.id}>
                 <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-700">
                   {tx.id}
@@ -714,6 +868,13 @@ const RevenueTab = () => {
                 </td>
               </tr>
             ))}
+            {sellerStats?.totalOrders === 0 && (
+              <tr>
+                <td colSpan="5" className="px-6 py-4 text-center text-gray-500">
+                  Chưa có giao dịch nào
+                </td>
+              </tr>
+            )}
           </tbody>
         </table>
       </div>

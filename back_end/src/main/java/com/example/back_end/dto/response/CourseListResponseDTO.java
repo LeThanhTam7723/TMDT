@@ -5,6 +5,8 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.time.LocalDate;
+
 @Data
 @Builder
 @NoArgsConstructor
@@ -20,4 +22,7 @@ public class CourseListResponseDTO {
     private Boolean status;
     private String sellerName;
     private String categoryName;
+    private boolean isPurchased;
+    private LocalDate purchaseDate;
+
 } 

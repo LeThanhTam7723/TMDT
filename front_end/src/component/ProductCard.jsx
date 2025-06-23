@@ -1,7 +1,7 @@
 import React, { useState } from "react";
-import { FiShoppingCart, FiHeart } from "react-icons/fi";
+import { FiHeart } from "react-icons/fi";
 import { useNavigate } from "react-router-dom";
-import favoriteService from '../API/favoriteService';
+import { useProduct } from '../context/ProductContext';
 
 // Dummy star renderer
 const renderStars = (rating) => {
@@ -19,29 +19,34 @@ const renderStars = (rating) => {
   }
   return <div className="flex">{stars}</div>;
 };
+const defaultImages = [
+  "https://study4.com/media/courses/CourseSeries/files/2023/10/11/ielts_band_0_7.webp",
+  "https://m.media-amazon.com/images/I/51yBYmDJPNL._SL500_.jpg",
+  "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSzaxe4xnXoGduxVSFzSGrNYLjK4vKfmtr4fg&s",
+  "https://www.lingobest.com/free-online-english-course/wp-content/uploads/2021/03/Blog-Banners-Bruna-S-15-1.jpg",
+];
 
 const ProductCard = ({ product }) => {
-  const [isFavorited, setIsFavorited] = useState(false);
   const navigate = useNavigate();
+  const { isInFavorites, toggleFavorite: contextToggleFavorite, session } = useProduct();
 
   const handleClick = () => {
     navigate(`/detail/${product.id}`);
   };
 
-  const toggleFavorite = (e) => {
+  const handleToggleFavorite = async (e) => {
     e.preventDefault();
     e.stopPropagation();
-    setIsFavorited(!isFavorited);
+    
+    if (!session?.currentUser) {
+      alert('Please login to add favorites');
+      return;
+    }
+    
+    await contextToggleFavorite(product.id);
   };
 
-  const addToCart = (e) => {
-    e.stopPropagation();
-    console.log("Added to cart:", product.name);
-  };
-
-  const addToFavorite = () => {
-    // Add to favorite logic
-  };
+  const isFavorited = isInFavorites(product.id);
 
   return (
     <div
@@ -49,11 +54,13 @@ const ProductCard = ({ product }) => {
       onClick={handleClick}
     >
       <div className="relative">
-        <img
-          src={product.image || `/api/placeholder/400/300`}
-          alt={product.name}
-          className="w-full h-48 object-cover"
-        />
+       <img
+  src={
+    product.image || defaultImages[product.id % 4]
+  }
+  alt={product.name}
+  className="w-full h-48 object-cover"
+/>
         <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black to-transparent h-20"></div>
         {product.discount > 0 && (
           <div className="absolute top-2 right-2 bg-red-500 text-white px-2 py-1 rounded text-xs">
@@ -81,14 +88,7 @@ const ProductCard = ({ product }) => {
             )}
           </p>
           <div className="flex items-center gap-2">
-            <button
-              onClick={addToCart}
-              className="bg-gradient-to-r from-blue-600 to-blue-700 text-white px-4 py-2 rounded-lg hover:from-blue-700 hover:to-blue-800 transition-all duration-300 shadow-md"
-            >
-              <FiShoppingCart className="inline mr-1" />
-              Add
-            </button>
-            <button onClick={toggleFavorite}>
+            <button onClick={handleToggleFavorite}>
               <FiHeart
                 className={`w-5 h-5 ${isFavorited ? 'text-red-500 fill-current' : 'text-white'}`}
               />

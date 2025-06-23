@@ -1,12 +1,19 @@
 import React, { useState, useEffect } from "react";
-import { FiHeart, FiSearch, FiFilter, FiX, FiClock, FiUsers, FiBook, FiDollarSign, FiShoppingCart } from "react-icons/fi";
+import { FiHeart, FiSearch, FiFilter, FiX, FiClock, FiUsers, FiBook, FiDollarSign } from "react-icons/fi";
 import { motion } from "framer-motion";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useSearchParams } from "react-router-dom";
 import { useProduct } from "../context/ProductContext";
-import favoriteService from '../API/favoriteService';
+import ProductCard from "../component/ProductCard";
 
 const Store = () => {
-  const { products, toggleFavorite, getFavoriteProducts, addToCart } = useProduct();
+  const { 
+    products, 
+    loading, 
+    searchResults, 
+    searchCourses, 
+    searchCoursesAdvanced, 
+    clearSearchResults 
+  } = useProduct();
   const [searchTerm, setSearchTerm] = useState("");
   const [notification, setNotification] = useState({ show: false, message: '', type: '' });
   const [showFilters, setShowFilters] = useState(false);
@@ -17,7 +24,12 @@ const Store = () => {
   const [selectedPrices, setSelectedPrices] = useState([]);
   const [selectedFeatures, setSelectedFeatures] = useState([]);
   const [selectedRatings, setSelectedRatings] = useState([]);
+  const [isSearching, setIsSearching] = useState(false);
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
+  
+  // Get initial search term from URL
+  const initialSearchTerm = searchParams.get('q') || '';
 
   const showNotification = (message, type) => {
     setNotification({ show: true, message, type });
@@ -26,37 +38,7 @@ const Store = () => {
     }, 2000);
   };
 
-  const handleToggleFavorite = (productId, event) => {
-    event.preventDefault();
-    event.stopPropagation();
-    
-    toggleFavorite(productId);
-    const product = products.find(p => p.id === productId);
-    if (product) {
-      const isInFavorite = getFavoriteProducts().some(p => p.id === productId);
-      showNotification(
-        isInFavorite 
-          ? `Removed "${product.name}" from favorites`
-          : `Added "${product.name}" to favorites`,
-        isInFavorite ? 'remove' : 'add'
-      );
-    }
-  };
 
-  const isInFavorite = (productId) => {
-    return getFavoriteProducts().some(p => p.id === productId);
-  };
-
-  const handleAddToCart = (productId, event) => {
-    event.preventDefault();
-    event.stopPropagation();
-    
-    const product = products.find(p => p.id === productId);
-    if (product) {
-      addToCart(product);
-      showNotification(`Added "${product.name}" to cart`, 'add');
-    }
-  };
 
   const toggleCategory = (category) => {
     setSelectedCategories(prev => 
@@ -122,9 +104,97 @@ const Store = () => {
     setSelectedPrices([]);
     setSelectedFeatures([]);
     setSelectedRatings([]);
+    setSearchTerm("");
+    clearSearchResults();
+    setIsSearching(false);
   };
 
-  const filteredProducts = products.filter(product => {
+  // Handle search
+  const handleSearch = async (keyword) => {
+    if (!keyword.trim()) {
+      clearSearchResults();
+      setIsSearching(false);
+      return;
+    }
+    
+    setIsSearching(true);
+    await searchCourses(keyword.trim());
+  };
+
+  // Handle advanced search with filters
+  const handleAdvancedSearch = async () => {
+    const searchParams = {};
+    
+    if (searchTerm.trim()) {
+      searchParams.keyword = searchTerm.trim();
+    }
+    
+    if (selectedCategories.length > 0) {
+      // For now, we'll use the first selected category
+      // In a real app, you might want to handle multiple categories differently
+      const categoryMap = {
+        'IELTS': 1,
+        'Business English': 2,
+        'Kids English': 3,
+        'Conversation': 4,
+        'Grammar': 5,
+        'General English': 6
+      };
+      searchParams.categoryId = categoryMap[selectedCategories[0]];
+    }
+    
+    if (selectedPrices.length > 0) {
+      const priceRange = selectedPrices[0].split('-');
+      searchParams.minPrice = parseFloat(priceRange[0]);
+      searchParams.maxPrice = parseFloat(priceRange[1]);
+    }
+    
+    if (selectedRatings.length > 0) {
+      searchParams.minRating = parseFloat(selectedRatings[0]);
+    }
+    
+    searchParams.status = true; // Only show active courses
+    
+    setIsSearching(true);
+    await searchCoursesAdvanced(searchParams);
+  };
+
+  // Handle initial search term from URL
+  useEffect(() => {
+    if (initialSearchTerm && initialSearchTerm !== searchTerm) {
+      setSearchTerm(initialSearchTerm);
+    }
+  }, [initialSearchTerm]);
+
+  // Debounced search
+  useEffect(() => {
+    const timeoutId = setTimeout(() => {
+      if (searchTerm) {
+        handleSearch(searchTerm);
+      } else {
+        clearSearchResults();
+        setIsSearching(false);
+      }
+    }, 500);
+
+    return () => clearTimeout(timeoutId);
+  }, [searchTerm]);
+
+  // Apply advanced filters when they change
+  useEffect(() => {
+    if (selectedCategories.length > 0 || selectedPrices.length > 0 || selectedRatings.length > 0) {
+      handleAdvancedSearch();
+    } else if (!searchTerm.trim()) {
+      clearSearchResults();
+      setIsSearching(false);
+    }
+  }, [selectedCategories, selectedPrices, selectedRatings]);
+
+  // Use search results if searching, otherwise use all products
+  const displayProducts = isSearching ? searchResults : products;
+  
+  // Apply local filters only if not using API search
+  const filteredProducts = isSearching ? displayProducts : products.filter(product => {
     const matchesSearch = product.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
                          product.description.toLowerCase().includes(searchTerm.toLowerCase());
     const matchesCategory = selectedCategories.length === 0 || selectedCategories.includes(product.category);
@@ -136,7 +206,7 @@ const Store = () => {
       return product.price >= min && product.price <= max;
     });
     const matchesFeatures = selectedFeatures.length === 0 || 
-      selectedFeatures.every(feature => product.features.includes(feature));
+      selectedFeatures.every(feature => product.features && product.features.includes(feature));
     const matchesRating = selectedRatings.length === 0 || 
       selectedRatings.some(rating => product.rating >= Number(rating));
 
@@ -148,7 +218,7 @@ const Store = () => {
   const levels = [...new Set(products.map(p => p.level))];
   const ages = [...new Set(products.map(p => p.age))];
   const durations = [...new Set(products.map(p => p.duration))];
-  const allFeatures = [...new Set(products.flatMap(p => p.features))];
+  const allFeatures = [...new Set(products.flatMap(p => p.features || []))];
   const priceRanges = [
     { label: 'Under $20', value: '0-20' },
     { label: '$20 - $50', value: '20-50' },
@@ -158,7 +228,7 @@ const Store = () => {
   const ratingOptions = ['4.5', '4.0', '3.5', '3.0'];
 
   return (
-    <div className="min-h-screen bg-white">
+    <div className="min-h-screen bg-gradient-to-b from-gray-900 to-black text-white">
       {/* Notification */}
       {notification.show && (
         <motion.div
@@ -176,8 +246,8 @@ const Store = () => {
       <div className="container mx-auto px-4 py-16">
         <div className="flex items-center justify-between mb-8">
           <div className="flex items-center gap-4">
-            <h1 className="text-3xl font-bold text-gray-900">English Courses</h1>
-            <span className="px-3 py-1 bg-blue-100 text-blue-600 rounded-full text-sm font-medium">
+            <h1 className="text-3xl font-bold text-white">English Courses</h1>
+            <span className="px-3 py-1 bg-blue-600 text-white rounded-full text-sm font-medium">
               {filteredProducts.length} {filteredProducts.length === 1 ? 'course' : 'courses'}
             </span>
           </div>
@@ -188,13 +258,13 @@ const Store = () => {
                 placeholder="Search courses..."
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
-                className="w-64 px-4 py-2 rounded-full border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                className="w-64 px-4 py-2 rounded-full border border-gray-600 bg-gray-800 text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
               />
               <FiSearch className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400" />
             </div>
             <button
               onClick={() => setShowFilters(!showFilters)}
-              className="flex items-center gap-2 px-4 py-2 rounded-full border border-gray-300 hover:bg-gray-50 transition"
+              className="flex items-center gap-2 px-4 py-2 rounded-full border border-gray-600 bg-gray-800 text-white hover:bg-gray-700 transition"
             >
               <FiFilter />
               Filters
@@ -208,13 +278,13 @@ const Store = () => {
             initial={{ opacity: 0, height: 0 }}
             animate={{ opacity: 1, height: 'auto' }}
             exit={{ opacity: 0, height: 0 }}
-            className="mb-8 p-4 bg-white rounded-lg shadow border border-gray-200"
+            className="mb-8 p-4 bg-gray-800 rounded-lg shadow border border-gray-700"
           >
             <div className="flex justify-between items-center mb-4">
-              <h3 className="text-lg font-semibold text-gray-900">Filters</h3>
+              <h3 className="text-lg font-semibold text-white">Filters</h3>
               <button
                 onClick={clearFilters}
-                className="text-sm text-gray-500 hover:text-gray-700 flex items-center gap-1"
+                className="text-sm text-gray-400 hover:text-gray-200 flex items-center gap-1"
               >
                 <FiX className="w-4 h-4" />
                 Clear all
@@ -222,7 +292,7 @@ const Store = () => {
             </div>
             <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
               <div>
-                <h4 className="font-medium text-gray-900 mb-3 flex items-center gap-2">
+                <h4 className="font-medium text-white mb-3 flex items-center gap-2">
                   <FiBook className="w-4 h-4" />
                   Course Type
                 </h4>
@@ -235,19 +305,19 @@ const Store = () => {
                         onChange={() => toggleCategory(category)}
                         className="w-4 h-4 text-blue-600 rounded border-gray-300 focus:ring-blue-500"
                       />
-                      <span className="text-sm text-gray-700">{category}</span>
+                      <span className="text-sm text-gray-300">{category}</span>
                     </label>
                   ))}
                 </div>
               </div>
               <div>
-                <h4 className="font-medium text-gray-900 mb-3 flex items-center gap-2">
+                <h4 className="font-medium text-white mb-3 flex items-center gap-2">
                   <FiUsers className="w-4 h-4" />
                   Level & Age
                 </h4>
                 <div className="space-y-4">
                   <div>
-                    <h5 className="text-sm font-medium text-gray-700 mb-2">Level</h5>
+                    <h5 className="text-sm font-medium text-gray-300 mb-2">Level</h5>
                     <div className="space-y-2">
                       {levels.map(level => (
                         <label key={level} className="flex items-center gap-2 cursor-pointer">
@@ -257,13 +327,13 @@ const Store = () => {
                             onChange={() => toggleLevel(level)}
                             className="w-4 h-4 text-blue-600 rounded border-gray-300 focus:ring-blue-500"
                           />
-                          <span className="text-sm text-gray-700">{level}</span>
+                          <span className="text-sm text-gray-300">{level}</span>
                         </label>
                       ))}
                     </div>
                   </div>
                   <div>
-                    <h5 className="text-sm font-medium text-gray-700 mb-2">Age Group</h5>
+                    <h5 className="text-sm font-medium text-gray-300 mb-2">Age Group</h5>
                     <div className="space-y-2">
                       {ages.map(age => (
                         <label key={age} className="flex items-center gap-2 cursor-pointer">
@@ -273,7 +343,7 @@ const Store = () => {
                             onChange={() => toggleAge(age)}
                             className="w-4 h-4 text-blue-600 rounded border-gray-300 focus:ring-blue-500"
                           />
-                          <span className="text-sm text-gray-700">{age}</span>
+                          <span className="text-sm text-gray-300">{age}</span>
                         </label>
                       ))}
                     </div>
@@ -281,13 +351,13 @@ const Store = () => {
                 </div>
               </div>
               <div>
-                <h4 className="font-medium text-gray-900 mb-3 flex items-center gap-2">
+                <h4 className="font-medium text-white mb-3 flex items-center gap-2">
                   <FiClock className="w-4 h-4" />
                   Duration & Price
                 </h4>
                 <div className="space-y-4">
                   <div>
-                    <h5 className="text-sm font-medium text-gray-700 mb-2">Duration</h5>
+                    <h5 className="text-sm font-medium text-gray-300 mb-2">Duration</h5>
                     <div className="space-y-2">
                       {durations.map(duration => (
                         <label key={duration} className="flex items-center gap-2 cursor-pointer">
@@ -297,13 +367,13 @@ const Store = () => {
                             onChange={() => toggleDuration(duration)}
                             className="w-4 h-4 text-blue-600 rounded border-gray-300 focus:ring-blue-500"
                           />
-                          <span className="text-sm text-gray-700">{duration}</span>
+                          <span className="text-sm text-gray-300">{duration}</span>
                         </label>
                       ))}
                     </div>
                   </div>
                   <div>
-                    <h5 className="text-sm font-medium text-gray-700 mb-2">Price Range</h5>
+                    <h5 className="text-sm font-medium text-gray-300 mb-2">Price Range</h5>
                     <div className="space-y-2">
                       {priceRanges.map(range => (
                         <label key={range.value} className="flex items-center gap-2 cursor-pointer">
@@ -313,7 +383,7 @@ const Store = () => {
                             onChange={() => togglePrice(range.value)}
                             className="w-4 h-4 text-blue-600 rounded border-gray-300 focus:ring-blue-500"
                           />
-                          <span className="text-sm text-gray-700">{range.label}</span>
+                          <span className="text-sm text-gray-300">{range.label}</span>
                         </label>
                       ))}
                     </div>
@@ -321,13 +391,13 @@ const Store = () => {
                 </div>
               </div>
               <div>
-                <h4 className="font-medium text-gray-900 mb-3 flex items-center gap-2">
+                <h4 className="font-medium text-white mb-3 flex items-center gap-2">
                   <FiDollarSign className="w-4 h-4" />
                   Features & Rating
                 </h4>
                 <div className="space-y-4">
                   <div>
-                    <h5 className="text-sm font-medium text-gray-700 mb-2">Course Features</h5>
+                    <h5 className="text-sm font-medium text-gray-300 mb-2">Course Features</h5>
                     <div className="space-y-2">
                       {allFeatures.map(feature => (
                         <label key={feature} className="flex items-center gap-2 cursor-pointer">
@@ -337,13 +407,13 @@ const Store = () => {
                             onChange={() => toggleFeature(feature)}
                             className="w-4 h-4 text-blue-600 rounded border-gray-300 focus:ring-blue-500"
                           />
-                          <span className="text-sm text-gray-700">{feature}</span>
+                          <span className="text-sm text-gray-300">{feature}</span>
                         </label>
                       ))}
                     </div>
                   </div>
                   <div>
-                    <h5 className="text-sm font-medium text-gray-700 mb-2">Minimum Rating</h5>
+                    <h5 className="text-sm font-medium text-gray-300 mb-2">Minimum Rating</h5>
                     <div className="space-y-2">
                       {ratingOptions.map(rating => (
                         <label key={rating} className="flex items-center gap-2 cursor-pointer">
@@ -353,7 +423,7 @@ const Store = () => {
                             onChange={() => toggleRating(rating)}
                             className="w-4 h-4 text-blue-600 rounded border-gray-300 focus:ring-blue-500"
                           />
-                          <span className="text-sm text-gray-700">{rating}★ & Up</span>
+                          <span className="text-sm text-gray-300">{rating}★ & Up</span>
                         </label>
                       ))}
                     </div>
@@ -364,79 +434,62 @@ const Store = () => {
           </motion.div>
         )}
 
-        {filteredProducts.length > 0 ? (
-          <div className="grid grid-cols-1 gap-4">
-            {filteredProducts.map((product) => (
-              <div 
-                key={product.id} 
-                className="flex bg-white rounded-lg shadow p-4 items-center gap-4 border border-gray-200"
+        {/* Loading indicator */}
+        {loading && (
+          <div className="flex justify-center items-center py-12">
+            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
+            <span className="ml-3 text-gray-300">
+              {isSearching ? 'Searching courses...' : 'Loading courses...'}
+            </span>
+          </div>
+        )}
+
+        {/* Search status */}
+        {isSearching && !loading && (
+          <div className="mb-4 p-3 bg-blue-900/30 border border-blue-700 rounded-lg">
+            <div className="flex items-center gap-2">
+              <FiSearch className="text-blue-400" />
+              <span className="text-blue-200">
+                {searchTerm ? `Search results for "${searchTerm}"` : 'Advanced search results'}
+              </span>
+              <button
+                onClick={clearFilters}
+                className="ml-auto text-blue-400 hover:text-blue-200 text-sm underline"
               >
-                    <img src={product.image} alt={product.name} className="w-40 h-28 object-cover rounded-lg border" />
-                    <div className="flex-1">
-                      <div className="flex items-center gap-2 mb-1">
-                        <span className="bg-blue-100 text-blue-600 text-xs font-bold px-2 py-1 rounded">{product.rating}★ ({product.ratingCount})</span>
-                        <span className="bg-yellow-100 text-yellow-700 text-xs font-bold px-2 py-1 rounded">{product.age}</span>
-                        <span className="bg-gray-200 text-gray-700 text-xs font-bold px-2 py-1 rounded">{product.category}</span>
-                    <span className="bg-green-100 text-green-700 text-xs font-bold px-2 py-1 rounded">{product.level}</span>
-                      </div>
-                      <h3 className="text-lg font-bold text-gray-900 mb-1">{product.name}</h3>
-                  <div className="flex items-center gap-2 mb-2">
-                    <img src={product.owner.avatar} alt={product.owner.name} className="w-6 h-6 rounded-full" />
-                    <div>
-                      <div className="text-sm font-medium text-gray-900">{product.owner.name}</div>
-                      <div className="text-xs text-gray-500">{product.owner.experience} • {product.owner.students} students</div>
-                    </div>
-                  </div>
-                  <div className="text-sm text-gray-700 mb-1 line-clamp-2">{product.description}</div>
-                  {product.features && product.features.length > 0 && (
-                    <div className="flex flex-wrap gap-2 mb-2">
-                      {product.features.map((feature, index) => (
-                        <span key={index} className="text-xs bg-gray-100 text-gray-600 px-2 py-1 rounded-full">
-                          {feature}
-                        </span>
-                      ))}
-                    </div>
-                  )}
-                  <div className="text-xs text-gray-400">{product.totalHour} total hours | {product.lessons} lessons | {product.duration}</div>
-                </div>
-                <div className="flex flex-col items-end min-w-[80px]">
-                  <div className="text-xl font-bold text-blue-600 mb-2">${product.price.toFixed(2)}</div>
-                  <div className="flex gap-2">
-                    <button 
-                      onClick={(e) => handleToggleFavorite(product.id, e)}
-                      className={`p-2 rounded-full transition-colors ${
-                        isInFavorite(product.id)
-                            ? 'bg-red-100 text-red-500 hover:bg-red-200'
-                            : 'bg-gray-100 text-gray-500 hover:bg-gray-200'
-                      }`}
-                    >
-                      <FiHeart className={`w-5 h-5 ${isInFavorite(product.id) ? 'fill-current' : ''}`} />
-                    </button>
-                    <button 
-                      onClick={(e) => handleAddToCart(product.id, e)}
-                      className="bg-blue-500 text-white px-4 py-2 rounded-full font-semibold hover:bg-blue-600 transition flex items-center gap-2"
-                    >
-                      <FiShoppingCart className="w-4 h-4" />
-                      Add to cart
-                    </button>
-                  </div>
-                    </div>
-                  </div>
+                Clear search
+              </button>
+            </div>
+          </div>
+        )}
+
+        {!loading && filteredProducts.length > 0 ? (
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+            {filteredProducts.map((product) => (
+              <ProductCard key={product.id} product={product} />
                 ))}
           </div>
-        ) : (
-          <div className="text-center py-12 bg-white rounded-lg shadow">
+        ) : !loading ? (
+          <div className="text-center py-12 bg-gray-800/50 rounded-lg shadow border border-gray-700">
             <FiSearch className="w-16 h-16 mx-auto text-gray-400 mb-4" />
-            <h3 className="text-xl font-semibold text-gray-900 mb-2">No courses found</h3>
-            <p className="text-gray-500 mb-4">Try adjusting your filters or search term</p>
-            <button
-              onClick={clearFilters}
-              className="px-4 py-2 bg-blue-500 text-white rounded-full hover:bg-blue-600 transition"
-            >
-              Clear Filters
-            </button>
-        </div>
-        )}
+            <h3 className="text-xl font-semibold text-white mb-2">
+              {isSearching ? 'No courses found' : 'No courses available'}
+            </h3>
+            <p className="text-gray-400 mb-4">
+              {isSearching 
+                ? 'Try adjusting your search term or filters' 
+                : 'Please check back later for new courses'
+              }
+            </p>
+            {isSearching && (
+              <button
+                onClick={clearFilters}
+                className="px-4 py-2 bg-blue-600 text-white rounded-full hover:bg-blue-700 transition"
+              >
+                Clear Search
+              </button>
+            )}
+          </div>
+        ) : null}
       </div>
     </div>
   );
