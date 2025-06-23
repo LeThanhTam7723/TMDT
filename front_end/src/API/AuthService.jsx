@@ -44,6 +44,15 @@ const getUserById = async (userId) => {
   });
 };
 
+const forgot = async (email) => {
+  return await axiosClient.post('/forgotPassword',null, {
+      params: {
+          email: email
+      },
+      timeout: 30000
+  });
+};
+
 export {
   signIn,
   register,
@@ -52,4 +61,5 @@ export {
   verifyRegister,
   introspect,
   getUserById,
+  forgot
 };

@@ -102,6 +102,7 @@ const Login = () => {
       if (name === "email" && validateEmail(newValue)) {
         const response = await checkEmailExists(newValue);
         const emailExists = response.data.result;
+        console.log(emailExists);
         if ((authState === "login" || authState === "forgot") && !emailExists) {
           setErrors((prev) => ({
             ...prev,
@@ -172,6 +173,17 @@ const Login = () => {
     } else {
       if (authState === "forgot") {
         console.log("forgot :", formData);
+        await forgot(formData.email)
+            .then((res) => {
+              const { code, message, result } = res.data;
+              if(code !== 0){
+                console.log(message);
+              }
+              navigate('/auth/resend');
+            })
+            .catch((err) => {
+              console.error("Đã xảy ra lỗi khi gọi API:", err);
+            });
       } else {
         console.log("register :", formData);
         await verifyRegister(formData.email)
